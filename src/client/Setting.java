@@ -212,7 +212,6 @@ public class Setting extends JFrame {
 					//뭐 아이디가 중복된다, 그런거 알려줘야 하나???
 					JOptionPane.showMessageDialog(null, "아이디 중복!!");
 				}			
-				dispose();
 			}
 		});
 		

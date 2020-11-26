@@ -7,7 +7,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 
-//생각해보면 얘를 먼저 해야하는게 아닐까????
+/**
+ * 완료
+ * */
 
 
 public class FindAllFriend extends JFrame {
@@ -31,11 +33,9 @@ public class FindAllFriend extends JFrame {
 	         @Override
 		     public void actionPerformed(ActionEvent e) {
 	        	 searchFriend = find.getText(); // 찾을 친구의 이름을 string으로 저장
-	        	 MyFriendList list = new MyFriendList();
-	        	 
-	        	 
-	        	 
-	        	 
+	        	 dispose();
+
+	        	 AllFriendList list = new AllFriendList(searchFriend);
 	         }
 	    });
 		
@@ -53,19 +53,4 @@ public class FindAllFriend extends JFrame {
 		setLocationRelativeTo(null);
 		setResizable(false);
 	}
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FindAllFriend frame = new FindAllFriend();
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 }

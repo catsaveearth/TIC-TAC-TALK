@@ -9,67 +9,12 @@ import javax.swing.table.DefaultTableModel;
 
 import client.Client;
 
-public class MainScreen extends JFrame implements MouseListener, ActionListener {
+public class MainScreen extends JFrame{
 	JTable jTable;
 	DefaultTableModel model;
 	int flag = 0;
 	private JMenuItem menuItemAdd;
 	int searchingFlag = 0;
-
-	private void removeCurrentRow() {
-		int selectedRow = jTable.getSelectedRow();
-		model.removeRow(selectedRow);
-	}
-
-	public void actionPerformed(ActionEvent event) {
-		JMenuItem menu = (JMenuItem) event.getSource();
-		System.out.println(menu);
-		if (menu.getText().equals("정보")) {
-			FriendInfo friendInfo = new FriendInfo();
-		} else if (menu.getText().equals("1:1 채팅")) {
-			// 온라인일때는 연결되고 온라인아닐때는 1:1채팅 신청 추가하기!!
-			ChattingOne chatting = new ChattingOne();
-		} else if (menu.getText().equals("친구삭제")) {
-			removeCurrentRow();
-		}
-	}
-
-	public void mouseClicked(MouseEvent me) {
-		System.out.println(me);
-		if (me.getButton() == MouseEvent.BUTTON1) {
-			flag++;
-		}
-		if (me.getButton() == MouseEvent.BUTTON3) {
-			flag += 2;
-			if (flag == 3) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem pm_item1 = new JMenuItem("정보");
-				pm_item1.addActionListener(this);
-				System.out.println(this);
-				JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
-				pm_item2.addActionListener(this);
-				JMenuItem pm_item3 = new JMenuItem("친구삭제");
-				pm_item3.addActionListener(this);
-				pm.add(pm_item1);
-				pm.add(pm_item2);
-				pm.add(pm_item3);
-				pm.show(me.getComponent(), me.getX(), me.getY());
-			}
-			flag = 0;
-		}
-	}
-
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	public void mouseExited(MouseEvent e) {
-	}
-
-	public void mousePressed(MouseEvent e) {
-	}
-
-	public void mouseReleased(MouseEvent e) {
-	}
 
 	public MainScreen() {
       JFrame frame = new JFrame();
@@ -101,7 +46,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       top.add(searching);
 
       
-      //searching 뻐튼
+      //searching 뻐튼 -> 끝! 건들지 마세요
       searching.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent event) {
                if (event.getButton() == MouseEvent.BUTTON1) {
@@ -118,7 +63,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
                 	   @Override
                 	   public void actionPerformed(ActionEvent e) {
                 		   //내 친구 찾기
-                		   
+                		   FindMyFriend finder = new FindMyFriend();
                 	   }
                 	   
                    });
@@ -127,8 +72,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
                 	   @Override
                 	   public void actionPerformed(ActionEvent e) {
                 		   //새 친구 찾기
-
-                	   
+                		   FindAllFriend finder = new FindAllFriend();
                 	   }
                    });                   
                 }
@@ -140,7 +84,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       chatting.setIcon(chatChangingIcon);
       top.add(chatting);
       
-      //멀티룸 수정 버튼 액션
+      //멀티룸 초대 버튼 액션
       chatting.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
@@ -153,20 +97,17 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       setting.setBounds(390, 10, 30, 30);
       setting.setIcon(settingChangeIcon);
       
-      //내정보 수정 버튼 액션
+      //내정보 수정 버튼 액션 -> 끝! 건들지 마세요
       setting.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
             PWCheck check = new PWCheck();
-            // 만약 비밀번호가 맞으면 Setting setting = new Setting();
-            // 틀리면 JOptionPane.showMessageDialog(null,  "Wrong!!");
          }
       });
       
       
       //기본 정보 가져오기!=========================================
       String[] binfo = Client.basicinfo();
-
       
       // 내 정보 부분
       JPanel myInfo = new JPanel();
@@ -177,23 +118,12 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       JLabel myInfo2 = new JLabel("   내 정보");
       myInfo2.setFont(new Font("나눔바른펜", Font.PLAIN, 11));
       myInfo2.setPreferredSize(new Dimension(430, 13));
-      JButton add = new JButton();
-      add.setBounds(370, 60, 45, 40);
+
       ImageIcon addIcon = new ImageIcon("image\\add.png");
       Image addImage = addIcon.getImage();
 	  Image addChangingImg = addImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
 	  ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
-	  add.setIcon(addChangeIcon);
 
-	  //친구 추가?
-	  add.addActionListener(new ActionListener() {
-	     @Override
-	     public void actionPerformed(ActionEvent e) {
-           FriendRequest request = new FriendRequest();
-	        // 만약 비밀번호가 맞으면 Setting setting = new Setting();
-	        // 틀리면 JOptionPane.showMessageDialog(null,  "Wrong!!");
-	     }
-	  });
       
       myInfo.setPreferredSize(new Dimension(430, 60));
       myInfo.setBorder(new TitledBorder(new LineBorder(Color.red,2)));
@@ -236,11 +166,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       //친구목록 불러오기!=========================================
       String[][] friendlist = Client.friendList();
+		// String[][name, nickname, last_connection, 상메]
 
 
       String columnNames[] = { "닉네임(이름)", "한줄메시지", "status" };
-      Object rowData[][] = // 친구목록 들어가야 될 자리!
-         { };
+      Object rowData[][] = { }; // 친구목록 들어가야 될 자리!
 
       model = new DefaultTableModel(rowData, columnNames) {
          public boolean isCellEditable(int i, int c) {
@@ -257,13 +187,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
     	  int ck = Integer.parseInt(friendlist[0][0]);
 
           for(String[] fl : friendlist) {
-
-        	  if(idx == 0) {idx++; continue;}
         	  if(idx == ck) break;
+        	  if(idx == 0) {idx++; continue;}
     		  idx++;
-        	  
+    		  
         	  String line = fl[0] + "(" + fl[1] + ")";
-        	  fl[0] = line;
         	  
         	  if(fl[2].compareTo("0") == 0) {
             	  Object inData[] = {line, fl[3], onlineIcon};
@@ -274,6 +202,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 
         		  model.addRow(inData);
         	  }
+        	  
           } 
       }
       //나중에 친구목록 수정도 model을 건드리는 등의 행동으로 하자...
@@ -282,13 +211,14 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       //왜 이거 선택이 안먹지?? 나중에물어보기
       jTable = new JTable(model);
       jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
-      jTable.addMouseListener(this);
+      //jTable.addMouseListener(this);
       jTable.getColumn("닉네임(이름)").setPreferredWidth(100);
       jTable.getColumn("한줄메시지").setPreferredWidth(250);
       jTable.getColumn("status").setPreferredWidth(50);
       JScrollPane jScollPane = new JScrollPane(jTable);
       jScollPane.setPreferredSize(new Dimension(425, 350));
-      
+      jTable.getTableHeader().setReorderingAllowed(false);
+      jTable.getTableHeader().setResizingAllowed(false);
    
       
       
@@ -315,7 +245,6 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       frame.getContentPane().add(searching);
       frame.getContentPane().add(chatting);
       frame.getContentPane().add(setting);
-      frame.getContentPane().add(add);
       frame.getContentPane().add(panel);
       
       frame.setVisible(true);
@@ -326,6 +255,28 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       //모든 구축이 끝나면 socket풀어줌
       Client.freeSocket();
+      
+      
+      String[] buttons = {"수락", "거절"};
+      
+//      while(true) {
+//    	  
+//    	  //친구요청이 있다는 신호
+//    	  if(Client.fslInfoPlusREQTOCLIENT == true) {
+//    		  String[][] FirendRequset = Client.getFriendPlusInfo();
+//    		  
+//    		  /*
+//    	      int result = JOptionPane.showOptionDialog(null, "입력하고싶은 메시지", "알림창 이름", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, 배열넣는부분!!!!!!, "두번째값");
+//    	      if (result == 0) {
+//    	         //첫번째버튼 눌렀을 때
+//    	      } else if (result == 1) {
+//    	         //두번째버튼 눌렀을 때
+//    	      }
+//    		  */
+//    		  
+//    	  }
+//    	  
+//      }
    }
 
 }

@@ -126,7 +126,6 @@ public class MainServer {
 						for(String t : info) {
 							System.out.println(t);
 						}
-//						
 						
 						HashMap<String, String> temp = new HashMap<String, String>();
 						temp.put("SALT", info[2]);
@@ -138,7 +137,7 @@ public class MainServer {
 						temp.put("EMAIL", info[8]);
 						temp.put("BIRTH", info[9]);
 
-						if(info[1].equals("1")) {
+						if(info[1].compareTo("1") == 0) {
 							temp.put("GITHUB", info[10]);
 						}
 						
@@ -185,12 +184,15 @@ public class MainServer {
 				for(int i=1;i<=fnum;i++) {
 					String[] l = f_list[i];
 					String flist = "";
+					int ck = 1;
 
 					for(String t : l) {
-						flist = flist + "`|" + t;
+						if(ck==1) flist = t;
+						else flist = flist + "`|" + t;
+						ck++;
 					}
 					out.println(flist);
-//					System.out.println("=> " + flist);
+					System.out.println("=> " + flist);
 				}
 				out.println("BFEND"); //이제 넘기는거 종료라는 뜻!
 
@@ -232,14 +234,64 @@ public class MainServer {
 							query.deleteFRIEND_PLUS(ID, info[2]);
 						}
 						
-						//친구 상세정보 확인 => FRIEND INFO [FID]
+						//친구 상세정보 확인 => FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 						else if(info[1].compareTo("INFO") == 0) {
-							//친구의 상세 정보를 보내준다. 일단 보내는것만 생각해. 받는건 거기서 알아서 하겠지!
 							HashMap<String, String> map = query.bringINFO(info[2]);
-							out.println("FRIEND INFO`|" + map.get("ID") + "`|" + map.get("LAST_CONNECTION") + "`|" + map.get("PHONE")  + "`|" 
-									+ map.get("EMAIL")  + "`|" + map.get("BIRTH")  + "`|" + map.get("GITHUB")  + "`|" + map.get("STATE_MESSAGE"));
-							//보내는 형식 : FRIEND INFO [FID LAST_CONNECTION phone email birth github state_message]
-							//github과 상메는 없다면 null일 것.
+							out.println("FRIEND`|INFO`|" + map.get("NICKNAME") + "`|" + map.get("NAME") + "`|" + map.get("STATE_MESSAGE")  + "`|" 
+									+ map.get("EMAIL")  + "`|" + map.get("PHONE") + "`|" + map.get("BIRTH")  + "`|" + map.get("GITHUB")  + "`|");
+						}
+						
+						//친구 신청 테이블에 있는지 확인 => FRIEND PCK [FID]
+						else if(info[1].compareTo("PCK") == 0) {
+
+							String ck = query.checkFRIEND_PLUS(ID, info[2]);
+							
+							if(ck.compareTo(ID) != 0) {
+								out.println("FRIEND`|PCK`|F");
+							}
+							else out.println("FRIEND`|PCK`|T");
+						}
+						
+						//친구 테이블에 있는지 확인 => FRIEND FCK [FID]
+						else if(info[1].compareTo("FCK") == 0) {
+
+							String ck = query.checkFRIEND(ID, info[2]);
+
+							if(ck.compareTo(ID) != 0) {
+								out.println("FRIEND`|FCK`|F");
+							}
+							else out.println("FRIEND`|FCK`|T");
+							
+						}
+						
+						//친구요청 상세정보 확인 => FRIEND PLUSINFO [ID]
+						else if(info[1].compareTo("PLUSINFO") == 0) {
+							String[][] idlist = query.bringFRIEND_PLUS(info[2]);
+		
+							int num = 0;
+							String list = null;
+							
+							
+							if(idlist == null) {
+								out.println("FRIEND`|REQ`|" + 0);
+								continue;
+							}
+							
+							for(String[] s : idlist) {
+								if(s[0] == null) break;
+								num++;
+								int ck = 1;
+								
+								for(String k : s) {
+									if(num == 1 && ck == 1) list =  k;
+									else if(ck == 1) list = list + "`|" + k;
+									else list = list + "^" + k;
+									ck++;
+								}
+								System.out.println(list);
+							
+							}
+							out.println("FRIEND`|REQ`|" + num + "`|" + list);
 						}
 					}
 					
@@ -249,28 +301,71 @@ public class MainServer {
 						
 						//내 친구 검색 (my friend) => SEARCH MF [검색어]
 						if(info[1].compareTo("MF") == 0) {
-							String[] idlist = query.searchMYFRIEND(ID, info[2]);
+							String[][] idlist = query.searchMYFRIEND(ID, info[2]);
 							
+							int num = 0;
 							String list = null;
-							for(String s : idlist) {
-								list = list + "`|" + s;
+							
+							
+							if(idlist == null) {
+								out.println("SEARCH`|REQ`|MF`|" + 0);
+								continue;
+							}
+							
+							for(String[] s : idlist) {
+								if(s[0] == null) break;
+								num++;
+								int ck = 1;
+								
+								for(String k : s) {
+									if(num == 1 && ck == 1) list =  k;
+									else if(ck == 1) list = list + "`|" + k;
+									else list = list + "^" + k;
+									ck++;
+								}
+								System.out.println(list);
+
 							}
 							
 							//값을 보내줘야함
-							out.println("SEARCH`|MFRT" + list);
+							out.println("SEARCH`|REQ`|MF`|" + num + "`|" + list);
 						}
 						
 						//외부 친구 검색 (other friend) => SEARCH OF [검색어]
 						else if(info[1].compareTo("OF") == 0) {
-							String[] idlist = query.searchOTHERFRIEND(ID, info[2]);
+							//	// return String[][id, nickname, name, last_connection]
 							
+							String[][] idlist = query.searchOTHERFRIEND(ID, info[2]);
+							int num = 0;
 							String list = null;
-							for(String s : idlist) {
-								list = list + "`|" + s;
+							
+							if(idlist == null) {
+								out.println("SEARCH`|REQ`|OF`|" + 0);
+								continue;
+							}
+
+							
+							for(String[] s : idlist) {
+								if(s[0] == null) break;
+								num++;
+								int ck = 1;
+								
+								for(String k : s) {
+									if(num == 1 && ck == 1) list = "`|" + k;
+									else if(ck == 1) list = list + "`|" + k;
+									else list = list + "^" + k;
+									ck++;
+								}
+								System.out.println(list);
+
 							}
 
 							//값을 보내줘야함
-							out.println("SEARCH`|OFRT" + list);
+							out.println("SEARCH`|REQ`|OF`|" + num + list);
+							
+							System.out.println(num);
+							System.out.println("SEARCH`|REQ`|OF`|" + num + list);
+
 						}
 					}
 
@@ -335,12 +430,12 @@ public class MainServer {
 							}
 							
 							//이거 두개는 걍 업데이트 하자 => GITHUB STATE_MESSAGE
-							if(info[8 + ck].equals(""))
+							if(info[8 + ck].compareTo("") == 0)
 								query.updateGITHUB(ID, null);
 							else
 								query.updateGITHUB(ID, info[8 + ck]);
 							
-							if(info[9 + ck].equals(""))
+							if(info[9 + ck].compareTo("") == 0)
 								query.updateSTATE_MESSAGE(ID, null);
 							else
 								query.updateSTATE_MESSAGE(ID, info[9 + ck]);
@@ -429,6 +524,24 @@ public class MainServer {
 						messageSet.add(m);
 						//이렇게 추가하면 이제 chat thread에서 처리할 것임
 					}
+					
+					
+					//들어온 친구 요청이 있다면, 친구 쿼리를 날려줍니다!
+					//친구요청을 어떻게 확인하냐면, query를 통해 확인합니다~
+					//확인할거 없으면 굳이 다른건 리턴 안해도 됨.
+					
+					if(query.checkPLUS(ID) == 1) {
+						out.println("UPDATE`|FRIREQ");
+					}
+					
+					
+					
+					
+					
+					
+					
+					
+					
 				}
 
 			} catch (IOException e) {

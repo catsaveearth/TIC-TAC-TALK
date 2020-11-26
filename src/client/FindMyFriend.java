@@ -29,27 +29,8 @@ public class FindMyFriend extends JFrame {
 	         @Override
 		     public void actionPerformed(ActionEvent e) {
 	        	 searchFriend = find.getText(); // 찾을 친구의 이름을 string으로 저장
-	        	 MyFriendList list = new MyFriendList();
-	        	 
-	        	 /*int result = 0;
-	        	 // 친구 있을때
-	        	 result = JOptionPane.showConfirmDialog(null, "1:1 채팅을 진행하시겠습니까?");
-	        	 // 1:1채팅으로 바로 갈지
-	        	 // 친구 정보 보는걸로 할지
-	        	 System.out.println(result);
-	        	 if (result == 0) {
-	        		 dispose();
-	        		 MyFriendSelect select = new MyFriendSelect();
-	        	 } else if (result == 1) {
-	        		 dispose();
-	        	 }*/
-	        	 // 일부 글자만 써도 나오게 할건지 전체 풀 네임쳐야 나오게 할건지 의논
-	        	 // 만약 있다면 그 사람의 정보 띄우기? 혹은 친구 신청 창 띄우기?
-	        	 // 없다면 다시 검색
-	        	 // if (없다면) {
-	        	 // 	JOptionPane.showMessageDialog(null,  "Not Exist!!");
-	        	 // 다시 검색하게 할건지 창 종료할건지
-	        	 // }
+	        	 MyFriendList list = new MyFriendList(searchFriend);
+	        	 dispose();
 		     }
 	    });
 		
@@ -68,18 +49,4 @@ public class FindMyFriend extends JFrame {
 		setResizable(false);
 	}
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FindMyFriend frame = new FindMyFriend();
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 }

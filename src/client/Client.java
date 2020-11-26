@@ -176,7 +176,7 @@ public class Client {
 		while (line.compareTo("BFEND") != 0) {
 			String i[] = line.trim().split("\\`\\|");
 
-			for (int k = 0; k < 4; k++) { // 이름, 닉네임, 접속여부
+			for (int k = 0; k < 4; k++) { // 이름, 닉네임, 접속여부, 상메는?
 				info[idx][k] = i[k];
 			}
 			idx++;
@@ -201,8 +201,20 @@ public class Client {
 	static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
 	static boolean settingInfock = false; //settingInfo의 값 업데이트 확인
 	static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+	static boolean fsl[] = {false, false}; //{친구내검색 업데이트, 외부친구검색 업데이트)
+	static String[][] fslInfo = new String[21][4]; //친구검색한 결과리스트 (ID, name, nickname, last_connection)
+	static boolean friendInfock = false; 
+	static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+	static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
+	static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
+	
+	static String[][] fslInfoPlus = new String[21][4]; //요청받은 친구리스트 (ID, name, nickname, last_connection)
+	static boolean fslInfoPlusck = false; //서버-클라 : 친구리스트 업데이트 확인
+	static boolean fslInfoPlusREQTOCLIENT = false; //main에게 getFriendPluseInfo를 부르라느 신호
+	//True로 해놓으면 MainScreen에서 정보를 빼가고 false로 돌려놓을 것.
 
 
+	
 	// 정보수정할때 pw맞는지 확인하는 함수
 	protected static boolean pwcheck(char[] pw) {
 
@@ -252,9 +264,7 @@ public class Client {
 	}
 	
 	//내정보 보내주는 함수
-	protected static String[] settinginfo() {
-		String[] binfo = new String[9];
-		
+	protected static String[] settinginfo() {	
 		//일단 서버에 정보를 요청합니다!
 		out.println("SETTING`|REQ");
 		
@@ -267,6 +277,94 @@ public class Client {
 		return settingInfo;
 	}
 
+	//외부 친구 검색 리스트를 보내주는 함수
+	protected static String[][] NotfriendSearchList(String kw) {
+		// String[][name, nickname, last_connection]
+
+		//일단 서버에 정보를 요청합니다! (with kw)
+		out.println("SEARCH`|OF`|" + kw);
+		
+		//정보가 오길 기다림
+		while(fsl[1] != true){
+			System.out.println("waiting-NFSL");
+		}
+		fsl[1] = false;
+		return fslInfo;
+	}
+	
+	//친구 내 검색 리스트를 보내주는 함수
+	protected static String[][] FriendSearchList(String kw) {
+		// String[][name, nickname, last_connection]
+
+		//일단 서버에 정보를 요청합니다! (with kw)
+		out.println("SEARCH`|MF`|" + kw);
+		
+		//정보가 오길 기다림
+		while(fsl[0] != true){
+			System.out.println("waiting-FSL");
+		}
+		fsl[0] = false;
+		
+		return fslInfo;
+	}
+	
+	//친구 정보를 받아오는 함수
+	protected static String[] getFriendInfo(String FID) {
+		
+		//일단 서버에 정보를 요청합니다!
+		out.println("FRIEND`|INFO`|" + FID);
+		
+		//정보가 오길 기다림
+		while(friendInfock != true){
+			System.out.println("waiting-FINFO");
+		}
+		friendInfock = false;
+
+		return friendInfo;
+	}
+		
+	//친구신청하는 함수
+	protected static int requsetFriend(String fid) {
+		//1 : 친구신청 완료, 0 : 친구신청 실패 (이미 되어있는거임)
+		
+		//일단, 친구신청 테이블에 존재하는지 확인하기
+		out.println("FRIEND`|PCK`|" + fid);
+		//그리고 친구 테이블에도 존재하는지 확인하기
+		out.println("FRIEND`|FCK`|" + fid);
+
+		//연락기다리기
+		while(friend_dbck[0] == false && friend_dbck[1] == false) {
+			System.out.println("waiting-RF");
+		}
+		friend_dbck[0] = false;
+		friend_dbck[1] = false;
+
+
+		//둘다 false여야 한다 (입력된 값이 없다는 뜻이니까_
+		if(friend_result[0] == false && friend_result[1] == false) {
+			return 0;
+		}
+		
+		//통과한다면 친구신청 테이블에 넣어주라고 요청!
+		out.println("FRIEND`|APP`|" + fid);
+		return 1;
+	}
+	
+	//친구 요청 리스트를 받아오는 함수 (이걸이용하면됩니당)
+	protected static String[][] getFriendPlusInfo() {
+		
+		//일단 서버에 정보를 요청합니다!
+		out.println("FRIEND`|PLUSINFO`|" + ID);
+		
+		//정보가 오길 기다림
+		while(fslInfoPlusck != true){
+			System.out.println("waiting-GFPI");
+		}
+		fslInfoPlusck = false;
+
+		return fslInfoPlus;
+	}
+		
 	
 	
 	
@@ -319,12 +417,10 @@ public class Client {
 
 	}
 
+	
 	// 오로지 입력만 받는 쓰레드 (입력 들어오면 정리해서 필요한 곳에 넣어준다!!)
 	public static class input implements Runnable {
-		// chat이면 챗,
-		// 뭐 친구요청이면 친구요청 등등 처리하게
-		// 친구 신청 요청은 여기서 받게 하자
-		// 즉, 입력의 경우의 수가 전부 존재해야함!!!!!!!!!
+		// 즉, 입력의 경우의 수가 전부 존재해야함!
 
 		@Override
 		public void run() {
@@ -333,15 +429,76 @@ public class Client {
 
 			while (true) {
 				String line = in.nextLine();
+				System.out.println(line);
 
-				// 친구 관련
-				if(line.startsWith("FRIEND")) {
+				//새로운 정보를 업데이트되는 부분
+				if(line.startsWith("UPDATE")) {
 					String info[] = line.split("\\`\\|");
 
-					// 친구 요청이 들어왔다 => FRIEND REQ [친구 이름] [친구 별명]
+					//친구요청이 들어왔어요
+					if(info[1].compareTo("FRIREQ") == 0) {
+						fslInfoPlusREQTOCLIENT = true;
+						
+					}
+
+					
+					
+					
+				}
+				
+				// 친구 관련
+				else if(line.startsWith("FRIEND")) {
+					String info[] = line.split("\\`\\|");
+
+					// 친구 요청리스트가 들어온다 => FRIEND REQ [요청한 친구 수] [ID, name, nickname, last_connection]
 					if(info[1].compareTo("REQ") == 0) {
+						int num = Integer.parseInt(info[2]);
+						
+						for(int i = 1 ; i<=num ; i++) {
+							String ln[] = info[i + 2].split("\\^");
+							
+							for(int j = 0;j<4;j++) {
+								fslInfoPlus[i][j] = ln[j];
+							}
+						}
+						
+						fslInfoPlus[0][0] = Integer.toString(num);
+						fslInfoPlusck = true;			
+					}
+					
+					//친구 정보를 받았다 	=> FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+					else if(info[1].compareTo("INFO") == 0) {
+										
+						//정보를 저장해준다 [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+						friendInfo[0] = info[2];
+						friendInfo[1] = info[3];
+						friendInfo[2] = info[4];
+						friendInfo[3] = info[5];
+						friendInfo[4] = info[6];
+						friendInfo[5] = info[7];
+						friendInfo[6] = info[8];
+						
+						friendInfock = true;
+					}
+					
+					// 친구 추가 테이블에 대해 확인한 정보 => FRIEND`|PCK`|" + T/F
+					else if(info[1].compareTo("PCK") == 0) {
+						if(info[2].compareTo("T") == 0) {
+							friend_result[0] = true;
+						}
+						else friend_result[0] = false;
 
+						friend_dbck[0] = true;
+					}
+					
+					// 친구 테이블에 대해 확인한 정보 => FRIEND`|FCK`|" + T/F
+					else if(info[1].compareTo("FCK") == 0) {
+						if(info[2].compareTo("T") == 0) {
+							friend_result[1] = true;
+						}
+						else friend_result[1] = false;
 
+						friend_dbck[1] = true;
 					}
 				}
 
@@ -349,10 +506,22 @@ public class Client {
 				else if (line.startsWith("SEARCH")) {
 					String info[] = line.split("\\`\\|");
 
-					// 검색 결과가 돌아왔다 => SEARCH REQ [검색된 친구 수] [친구 리스트...  어떻게 넘겨줄것인가.... 이름, 별명, 음... 다른정보들? 일단 지민이가 GUI만든거보고 생각하자]
+					// 검색 결과가 돌아왔다 => SEARCH REQ MF/OF [검색된 친구 수] [친구 리스트...  어떻게 넘겨줄것인가.... 이름, 별명, 음... 다른정보들? 일단 지민이가 GUI만든거보고 생각하자]
 					if(info[1].compareTo("REQ") == 0) {
 
-
+						int num = Integer.parseInt(info[3]);
+						
+						for(int i = 1 ; i<=num ; i++) {
+							String ln[] = info[i + 3].split("\\^");
+							
+							for(int j = 0;j<4;j++) {
+								fslInfo[i][j] = ln[j];
+							}
+						}
+						fslInfo[0][0] = Integer.toString(num);
+											
+						if(info[2].equals("MF")) fsl[0] = true;
+						else fsl[1] = true;
 					}
 				}
 				
@@ -367,7 +536,6 @@ public class Client {
 						for(int i=0;i<8;i++, idx++) {
 							settingInfo[i] = info[idx];
 						}
-					
 						settingInfock = true;
 					}
 

@@ -2,24 +2,49 @@ package client;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
+
 import javax.swing.*;
 import javax.swing.table.*;
+
+/**
+ * 완료
+ * */
+
+
 
 public class AllFriendList extends JFrame implements MouseListener {
 	JTable jTable;
 	DefaultTableModel model;
+	HashMap<String, String> idmatch = new HashMap<String, String>();
 	
 	public void mouseClicked(MouseEvent me) {
+		int row = jTable.getSelectedRow();
+		Object line = model.getValueAt(row, 0);
+		String FID = idmatch.get(line.toString());
+
 		String[] buttons = {"친구신청", "정보보기"};
 		int result = JOptionPane.showOptionDialog(null, "친구신청하시겠습니까?", "친구신청", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "두번째값");
 		if (result == 0) {
-			// 친구신청
+		
+			int requsetResult = Client.requsetFriend(FID);			
+			//1 : 친구신청 완료, 0 : 친구신청 실패 (이미 되어있는거임)
+
+			if(requsetResult == 1) {
+				JOptionPane.showMessageDialog(null,  "친구신청이 완료되었습니다.");
+			}
+			else {
+				JOptionPane.showMessageDialog(null,  "이미 친구신청을 한 상태입니다");
+			}
+			
 		} else if (result == 1) {
-			FriendInfo info = new FriendInfo();
+			System.out.println(FID);
+			FriendInfo info = new FriendInfo(FID.toString(), 0);
+			//정보확인할땐 굳이 창 안닫아도됨
 		}
 	}
 	
-	public AllFriendList() {
+	public AllFriendList (String keyword) {
 		JFrame frame = new JFrame();
 		JPanel friend = new JPanel();
 		
@@ -47,13 +72,14 @@ public class AllFriendList extends JFrame implements MouseListener {
 	       status = new ImageIcon("image/offline.png");
 	    }
 	    
+	    
+	    //외부 친구 검색한 목록 불러오기!!!
+	    String[][] friendlist = Client.NotfriendSearchList(keyword);
+	    //친구검색한 결과리스트 (ID, name, nickname, last_connection)
+	    
 	    String columnNames[] = { "닉네임(이름)", "status" };
 	    Object rowData[][] = // 친구목록 들어가야 될 자리!
-	       {
-	       { "닉네임1(이름)", onlineIcon},
-	       { "닉네임2(이름)", offlineIcon},
-	       { "닉네임3(이름)", status},
-	       };
+	       { };
 	    
 	    model = new DefaultTableModel(rowData, columnNames) {
 	       public boolean isCellEditable(int i, int c) {
@@ -65,6 +91,33 @@ public class AllFriendList extends JFrame implements MouseListener {
 	       }
 	    };
 	
+	    if(friendlist != null) {
+	    	  int idx = 0;
+	    	  int ck = Integer.parseInt(friendlist[0][0]) + 1;
+	    	  System.out.println("ck => " + ck);
+
+	          for(String[] fl : friendlist) {
+	        	  if(idx == ck) break;
+	        	  if(idx == 0) {idx++; continue;}
+	    		  idx++;
+	    		  
+	        	  String line = fl[2] + "(" + fl[1] + ")";
+	        	  
+	    		  idmatch.put(line, fl[0]); //line - 아이디 저장
+	    		  
+	        	  if(fl[3].compareTo("0") == 0) {
+	        		  //ID는 숨겨서 저장
+	            	  Object inData[] = {line, onlineIcon};
+	        		  model.addRow(inData);	
+	        	  }
+	        	  else {
+	            	  Object inData[] = {line, offlineIcon};
+	        		  model.addRow(inData);
+	        	  }
+	          } 
+	    }
+	     
+	    
 	    jTable = new JTable(model);
 	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
 	    jTable.addMouseListener(this);
@@ -72,6 +125,8 @@ public class AllFriendList extends JFrame implements MouseListener {
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
+	    jTable.getTableHeader().setReorderingAllowed(false);
+	      jTable.getTableHeader().setResizingAllowed(false);
 	    
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
@@ -95,9 +150,5 @@ public class AllFriendList extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
-	public static void main(String[] args) {
-		AllFriendList main = new AllFriendList();
-	}
 
 }

@@ -329,7 +329,7 @@ public class query {
 		ResultSet rs = null;
 		ResultSet sr = null;
 
-		String[][] info = new String[20][4];
+		String[][] info = new String[21][4];
 		info[0][0] = "test";
 		int i = 1;
 
@@ -394,36 +394,59 @@ public class query {
 		return info;
 	}
 
-	// 7. 친구요청 목록 받아오기 (자신에게 친구 요청을 건 client의 id를 받아옴)
+	// 7. 친구요청 목록 받아오기 => 이름, 닉네임, 접속여부, 상메
 	// 매개변수: String id
-	// return String[send_id1,. . ., send_id20]
-	public static String[] bringFRIEND_PLUS(String Qid) {
+	// return String[][name, nickname, last_connection, 상메]			
+
+	public static String[][] bringFRIEND_PLUS(String Qid){
 		Connection conn = null;
 		Statement stmt = null;
+		Statement stmt2 = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		ResultSet sr = null;
+
+		String[][] info = new String[21][4];
+		info[0][0] = "test";
+		int i = 1;
+
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
+			stmt2 = conn.createStatement();
 
 			String sql = "SELECT send_id, receive_id" + " FROM friend_plus" + " WHERE receive_id = '" + Qid + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
 			while (rs.next()) {
-				String send_id = rs.getString(1);
-				String receive_id = rs.getString(2);
-
-				System.out.println("send_id: " + send_id);
-				System.out.println("receive_id: " + receive_id);
+				String friend_id = rs.getString(1);
+				System.out.println("friend_id: " + friend_id);
 				System.out.println();
 
-				array[i] = send_id;
-				i++;
+				String sql2 = "SELECT id, name, nickname, last_connection, state_message" + " FROM USER" + " WHERE id='" + friend_id
+						+ "';";
+				sr = stmt2.executeQuery(sql2);
+				while (sr.next()) {
+					String id = sr.getString(1);
+					String name = sr.getString(2);
+					String nickname = sr.getString(3);
+					String last_connection = sr.getString(4);
+					String state_message = sr.getString(5);
+
+
+
+					info[i][0] = name;
+					info[i][1] = nickname;
+					info[i][2] = last_connection;
+					info[i][3] = state_message;
+
+					i++;
+				}
+
 			}
-			return array;
+			info[0][1] = Integer.toString(i);
+			return info;
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");
 		} catch (SQLException e) {
@@ -443,7 +466,8 @@ public class query {
 				e.printStackTrace();
 			}
 		}
-		return array;
+		info[0][1] = Integer.toString(i);
+		return info;
 	}
 
 	/* [메인페이지 조작] */
@@ -1269,19 +1293,19 @@ public class query {
 
 	// 0-1. 문자열을 포함하는 아이디찾기 (내친구o)
 	// 매개변수: String id, String search
-	// return String[id]
-	public static String[] searchMYFRIEND(String Qid, String search) {
+	// return String[][id, nickname, name, last_connection]
+	public static String[][] searchMYFRIEND(String Qid, String search) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		String[][] array = new String[20][4];
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
 
-			String sql = "SELECT id" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
+			String sql = "SELECT id, name, nickname, last_connection" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
 					+ "%' OR" + " nickname LIKE '%" + search + "%') AND " + " id IN(select friend_id" + " from FRIEND"
 					+ " where my_id = '" + Qid + "');";
 
@@ -1290,10 +1314,15 @@ public class query {
 			int i = 0;
 			while (rs.next()) {
 				String id = rs.getString(1);
+				String name = rs.getString(2);
+				String nickname = rs.getString(3);
+				String last_connection = rs.getString(4);
 
-				// System.out.println("id: "+id);
+				array[i][0] = id;
+				array[i][1] = name;
+				array[i][2] = nickname;
+				array[i][3] = last_connection;
 
-				array[i] = id;
 				i++;
 			}
 			System.out.println();
@@ -1322,19 +1351,19 @@ public class query {
 
 	// 0-2. 문자열을 포함하는 아이디찾기 (내친구x)
 	// 매개변수: String id, String search
-	// return String[id]
-	public static String[] searchOTHERFRIEND(String Qid, String search) {
+	// return String[][id, nickname, name, last_connection]
+	public static String[][] searchOTHERFRIEND(String Qid, String search) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		String[][] array = new String[20][4];
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
 
-			String sql = "SELECT id" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
+			String sql = "SELECT id, name, nickname, last_connection" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
 					+ "%' OR" + " nickname LIKE '%" + search + "%') AND " + " id NOT IN(select friend_id"
 					+ " from FRIEND" + " where my_id = '" + Qid + "');";
 
@@ -1343,13 +1372,21 @@ public class query {
 			int i = 0;
 			while (rs.next()) {
 				String id = rs.getString(1);
+				String name = rs.getString(2);
+				String nickname = rs.getString(3);
+				String last_connection = rs.getString(4);
 
-				// System.out.println("id: "+id);
+				array[i][0] = id;
+				array[i][1] = name;
+				array[i][2] = nickname;
+				array[i][3] = last_connection;
 
-				array[i] = id;
 				i++;
 			}
+			if(i == 0) return null;
+			
 			return array;
+			
 		} catch (ClassNotFoundException e) {
 			System.out.println("    ̹   ε      ");
 		} catch (SQLException e) {
@@ -1372,4 +1409,179 @@ public class query {
 		return array;
 	}
 
+	
+	
+	
+	//10. FRIEND 목록에 있는지 확인
+	   //매개변수: String S_id, String R_id
+	   //return 없을 시, null 있을시, S_id(null이 아님) 
+	   public static String checkFRIEND(String S_id, String R_id) {   
+	      Connection conn = null;       
+	      Statement stmt = null;      
+	      ResultSet rs = null;
+	      String str = "false" ;
+	          try{   
+	  			Class.forName("com.mysql.cj.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+         
+	             conn = DriverManager.getConnection(url, "root", "12345");          
+	             stmt = conn.createStatement();
+	          
+	             String sql = "SELECT my_id"
+	                           + " FROM FRIEND"           
+	                           + " WHERE my_id = '"+S_id+"' AND"
+	                           + " friend_id = '"+R_id+"';";
+
+	             rs = stmt.executeQuery(sql);
+	              
+	             while(rs.next()){      
+	                String id = rs.getString(1);              
+	                System.out.println("id: "+id);             
+	                
+	                str=id;
+	             }
+	             System.out.println();
+	             return str;
+	          }
+	          catch( ClassNotFoundException e){
+	             System.out.println("    ̹   ε      ");
+	          }
+	          catch( SQLException e){
+	             System.out.println("     " + e);
+	          }
+	          finally{
+	             try{
+	                if( conn != null && !conn.isClosed()){
+	                   conn.close();
+	                }
+	                if( stmt != null && !stmt.isClosed()){
+	                   stmt.close(); 
+	                }
+	                if( rs != null && !rs.isClosed()){
+	                   rs.close();
+	                }
+	             }
+	             catch( SQLException e){
+	                e.printStackTrace();
+	             }
+	          }
+	         return str;
+	       }
+	   
+	   //10. FRIEND_PLUS목록에 있는지 확인
+	   //매개변수: String S_id, String R_id
+	   //return 없을 시, null 있을시, S_id(null이 아님) 
+	   public static String checkFRIEND_PLUS(String S_id, String R_id) {   
+	      Connection conn = null;       
+	      Statement stmt = null;      
+	      ResultSet rs = null;
+	      String str = "false" ;
+	          try{   
+	  			Class.forName("com.mysql.cj.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+        
+	             conn = DriverManager.getConnection(url, "root", "12345");          
+	             stmt = conn.createStatement();
+	          
+	             String sql = "SELECT send_id"
+	                           + " FROM FRIEND_PLUS"           
+	                           + " WHERE send_id = '"+S_id+"' AND"
+	                           + " receive_id = '"+R_id+"';";
+
+	             rs = stmt.executeQuery(sql);
+	              
+	             while(rs.next()){      
+	                String id = rs.getString(1);              
+	                System.out.println("id: "+id);             
+	                
+	                str=id;
+	             }
+	             System.out.println();
+	             return str;
+	          }
+	          catch( ClassNotFoundException e){
+	             System.out.println("    ̹   ε      ");
+	          }
+	          catch( SQLException e){
+	             System.out.println("     " + e);
+	          }
+	          finally{
+	             try{
+	                if( conn != null && !conn.isClosed()){
+	                   conn.close();
+	                }
+	                if( stmt != null && !stmt.isClosed()){
+	                   stmt.close(); 
+	                }
+	                if( rs != null && !rs.isClosed()){
+	                   rs.close();
+	                }
+	             }
+	             catch( SQLException e){
+	                e.printStackTrace();
+	             }
+	          }
+	         return str;
+	       }
+	
+	
+	   
+	   
+
+	   //11. FRIEND_PLUS목록에 있는지 확인
+	   //매개변수: String S_id, String R_id
+	   //return 없을 시, null 있을시, S_id(null이 아님) 
+	      public static int checkPLUS(String Qid) {   
+	         Connection conn = null;       
+	         Statement stmt = null;      
+	         ResultSet rs = null;
+
+	             try{   
+	 	  			Class.forName("com.mysql.cj.jdbc.Driver");
+					String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+	        	                conn = DriverManager.getConnection(url, "root", "12345");          
+	                stmt = conn.createStatement();
+	             
+	                String sql = "SELECT receive_id"
+	                              + " FROM FRIEND_PLUS"           
+	                              + " WHERE receive_id = '"+Qid+"';";
+	                
+	                rs = stmt.executeQuery(sql);
+	                 
+	                while(rs.next()){      
+	                   String id = rs.getString(1);              
+	                   System.out.println("id: "+id);             
+	                   
+	                   return 1;
+	                }
+	                System.out.println();
+	                return 0;
+	             }
+	             catch( ClassNotFoundException e){
+	                System.out.println("    ̹   ε      ");
+	             }
+	             catch( SQLException e){
+	                System.out.println("     " + e);
+	             }
+	             finally{
+	                try{
+	                   if( conn != null && !conn.isClosed()){
+	                      conn.close();
+	                   }
+	                   if( stmt != null && !stmt.isClosed()){
+	                      stmt.close(); 
+	                   }
+	                   if( rs != null && !rs.isClosed()){
+	                      rs.close();
+	                   }
+	                }
+	                catch( SQLException e){
+	                   e.printStackTrace();
+	                }
+	             }
+	            return 0;
+	          }
+
+	   
+	
 }
