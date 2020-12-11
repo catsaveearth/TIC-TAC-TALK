@@ -29,6 +29,24 @@ public class Client {
 	private static AtomicInteger writeSocket = new AtomicInteger(1);
 	// socket에 값을 넣고 빼는걸 제어할 친구! 초기값은 1 : 1일때는 사용가능, 0일때는 사용 불가능!
 
+
+	// thread들과 소통하기 위한 변수 부분!!!
+	static boolean PWck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
+	static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
+	static boolean settingInfock = false; //settingInfo의 값 업데이트 확인
+	static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+	static boolean fsl[] = {false, false}; //{친구내검색 업데이트, 외부친구검색 업데이트)
+	static String[][] fslInfo = new String[21][4]; //친구검색한 결과리스트 (ID, name, nickname, last_connection)
+	static boolean friendInfock = false; 
+	static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+	static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
+	static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
+	
+	static String lefsfe;
+	//boolean변수들을 True로 해놓으면 MainScreen에서 정보를 빼가고 false로 돌려놓을 것.
+
+	
+	
 	// IP주소와 port number를 통해서 서버와 연결을 시작하는 method.
 	public static void startConnection(String ip, int port) throws UnknownHostException, IOException {
 		clientSocket = new Socket(ip, port);
@@ -136,7 +154,7 @@ public class Client {
 	// MainScreen에서 사용한다 - 두 함수를 불러와서 메인 정보를 꾸미게 됩니다.
 	protected static String[] basicinfo() {
 		String[] binfo = new String[3];
-
+		
 		for (int i = 0; i < 3; i++) {
 			String line = in.nextLine();
 			
@@ -161,8 +179,8 @@ public class Client {
 	}
 
 	public static String[][] friendList() {
-		String[][] info = new String[20][4];
-		// String[][name, nickname, last_connection, 상메]
+		String[][] info = new String[20][5];
+		// String[][ID, name, nickname, last_connection, 상메]
 
 		String line = in.nextLine();
 
@@ -176,7 +194,7 @@ public class Client {
 		while (line.compareTo("BFEND") != 0) {
 			String i[] = line.trim().split("\\`\\|");
 
-			for (int k = 0; k < 4; k++) { // 이름, 닉네임, 접속여부, 상메는?
+			for (int k = 0; k < 5; k++) { // 아이디, 이름, 닉네임, 접속여부, 상메는?
 				info[idx][k] = i[k];
 			}
 			idx++;
@@ -194,26 +212,6 @@ public class Client {
 
 	// ========================================이제 여기 위는 건들지마라
 
-	// thread들과 소통하기 위한 변수 부분!!!
-
-	
-	static boolean PWck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
-	static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
-	static boolean settingInfock = false; //settingInfo의 값 업데이트 확인
-	static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
-	static boolean fsl[] = {false, false}; //{친구내검색 업데이트, 외부친구검색 업데이트)
-	static String[][] fslInfo = new String[21][4]; //친구검색한 결과리스트 (ID, name, nickname, last_connection)
-	static boolean friendInfock = false; 
-	static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
-	static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
-	static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
-	
-	static String[][] fslInfoPlus = new String[21][4]; //요청받은 친구리스트 (ID, name, nickname, last_connection)
-	static boolean fslInfoPlusck = false; //서버-클라 : 친구리스트 업데이트 확인
-	static boolean fslInfoPlusREQTOCLIENT = false; //main에게 getFriendPluseInfo를 부르라느 신호
-	//True로 해놓으면 MainScreen에서 정보를 빼가고 false로 돌려놓을 것.
-
-
 	
 	// 정보수정할때 pw맞는지 확인하는 함수
 	protected static boolean pwcheck(char[] pw) {
@@ -227,7 +225,7 @@ public class Client {
 
 		// 비밀번호의 체크 여부를 여기서 수령하게 됩니다. -> 새로 체크될 떄 까지 기다리기
 		while(PWck[0] != true){
-			System.out.println("waiting-pwcheck");
+			System.out.println(lefsfe);
 		}
 		
 		PWck[0] = false; //재활용 가능하게 바꿔준다
@@ -235,12 +233,13 @@ public class Client {
 
 		
 		if (PWck[1] == true) { //비밀번호가 맞다면 true, 아니라면 false를 리턴
+			PWck[1] = false;
 			return true;
 		}
 		return false;
 	}
 
-	// 내정보 수정 함수
+	//내정보 수정 함수
 	protected static int modifyInfo(String temp) {
 		// 0 - 수정 성공
 		// 2 - 닉네임 중복
@@ -332,39 +331,25 @@ public class Client {
 		//그리고 친구 테이블에도 존재하는지 확인하기
 		out.println("FRIEND`|FCK`|" + fid);
 
-		//연락기다리기
-		while(friend_dbck[0] == false && friend_dbck[1] == false) {
+		//연락기다리기 (둘 중 하나라도 아직 false면 넘기면 안됨)
+		while(friend_dbck[0] == false || friend_dbck[1] == false) {
 			System.out.println("waiting-RF");
 		}
 		friend_dbck[0] = false;
 		friend_dbck[1] = false;
 
 
-		//둘다 false여야 한다 (입력된 값이 없다는 뜻이니까_
+		//둘다 false여야 친구도 아니고 친구신청 테이블에도 없는 것이 된다 => 그럼 신청해도 된다는 뜻!
 		if(friend_result[0] == false && friend_result[1] == false) {
-			return 0;
+			//통과한다면 친구신청 테이블에 넣어주라고 요청!
+			out.println("FRIEND`|APP`|" + fid);
+			return 1;
 		}
-		
-		//통과한다면 친구신청 테이블에 넣어주라고 요청!
-		out.println("FRIEND`|APP`|" + fid);
-		return 1;
+		return 0;
 	}
 	
-	//친구 요청 리스트를 받아오는 함수 (이걸이용하면됩니당)
-	protected static String[][] getFriendPlusInfo() {
-		
-		//일단 서버에 정보를 요청합니다!
-		out.println("FRIEND`|PLUSINFO`|" + ID);
-		
-		//정보가 오길 기다림
-		while(fslInfoPlusck != true){
-			System.out.println("waiting-GFPI");
-		}
-		fslInfoPlusck = false;
-
-		return fslInfoPlus;
-	}
-		
+	
+	
 	
 	
 	
@@ -406,13 +391,12 @@ public class Client {
 		ExecutorService b_pool = Executors.newFixedThreadPool(2);
 
 		b_pool.execute(new input());
-		b_pool.execute(new basic());
-//		
+
+		
 //		//채팅방 받을 얘
 //		ExecutorService chat_pool = Executors.newFixedThreadPool(100);
-//
-//
 
+		
 //		//이제부터 서버에서 오는 모든 입력은 input thread를 통해서 처리됨
 
 	}
@@ -428,21 +412,44 @@ public class Client {
 			// 연락 받는건 무조건 이 thread에서 처리!
 
 			while (true) {
+				System.out.println("뱅뱅");
 				String line = in.nextLine();
 				System.out.println(line);
 
-				//새로운 정보를 업데이트되는 부분
+				
+				//새로운 정보가 업데이트되는 부분
 				if(line.startsWith("UPDATE")) {
 					String info[] = line.split("\\`\\|");
-
-					//친구요청이 들어왔어요
+					
+					//친구요청이 들어왔어요 => UPDATE FRIREQ NN name FID
 					if(info[1].compareTo("FRIREQ") == 0) {
-						fslInfoPlusREQTOCLIENT = true;
+						int result = MainScreen.showFriendPlus(info[2], info[3]);
 						
+						if(result == 1) { //친구를 수락햇다면
+							out.println("FRIEND`|OK`|" + info[4]);
+							
+						}
+						else if(result == 0) {//친구를 거절했다면
+							out.println("FRIEND`|NO`|" + info[4]);	
+						}
 					}
 
+					//내 정보를 업데이트 하라네? 형식 ; UPDATE MYINFO name nn state_m
+					else if(info[1].compareTo("MYINFO") == 0) {
+						MainScreen.changeMyInfo(info[2], info[3], info[4]);
+					}
+					
+					//친구 정보를 업데이트 해주자! 형식 ; UPDATE FINFO ID name nn state_m
+					else if(info[1].compareTo("FINFO") == 0) {
+						String[] finfo = {info[2], info[3], info[4], info[5]};
+						MainScreen.changeFriendInfo(finfo);
+					}
 					
 					
+					//친구가 들어왔다/나갔다? 형식 ; UPDATE F_state F_ID 상태(0이면 온라인)
+					else if(info[1].compareTo("F_state") == 0) {
+						MainScreen.changeFriendstate(info[2], info[3]);
+					}
 					
 				}
 				
@@ -450,25 +457,9 @@ public class Client {
 				else if(line.startsWith("FRIEND")) {
 					String info[] = line.split("\\`\\|");
 
-					// 친구 요청리스트가 들어온다 => FRIEND REQ [요청한 친구 수] [ID, name, nickname, last_connection]
-					if(info[1].compareTo("REQ") == 0) {
-						int num = Integer.parseInt(info[2]);
-						
-						for(int i = 1 ; i<=num ; i++) {
-							String ln[] = info[i + 2].split("\\^");
-							
-							for(int j = 0;j<4;j++) {
-								fslInfoPlus[i][j] = ln[j];
-							}
-						}
-						
-						fslInfoPlus[0][0] = Integer.toString(num);
-						fslInfoPlusck = true;			
-					}
 					
 					//친구 정보를 받았다 	=> FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
-					else if(info[1].compareTo("INFO") == 0) {
-										
+					if(info[1].compareTo("INFO") == 0) {
 						//정보를 저장해준다 [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 						friendInfo[0] = info[2];
 						friendInfo[1] = info[3];
@@ -499,6 +490,12 @@ public class Client {
 						else friend_result[1] = false;
 
 						friend_dbck[1] = true;
+					}
+					
+					// 새 친구를 list에 업데이트 해주세요~~ => FRIEND`|APND`|" + ID, name, nickname, last_connection, 상메
+					else if(info[1].compareTo("APND") == 0) {
+						String[] finfo = {info[2], info[3], info[4], info[5], info[6]};
+						MainScreen.changeFriend(finfo);
 					}
 				}
 
@@ -545,8 +542,6 @@ public class Client {
 						else PWck[1] = false;
 						
 						PWck[0] = true;
-						System.out.println("=>" + PWck[0] + " " + PWck[1]);
-
 					}
 					 
 					// 셋팅 저장에서 닉네임 겹치는 경우 체크 => SETTING NN
@@ -605,15 +600,7 @@ public class Client {
 		}
 	}
 
-	// 메인화면을 제어할 친구!
-	public static class basic implements Runnable {
 
-		@Override
-		public void run() {
-
-		}
-
-	}
 
 	// 채팅방 마다 생기는 스레드
 	public static class chat implements Runnable {

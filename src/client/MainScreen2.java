@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 
 import client.Client;
 
-public class MainScreen extends JFrame {
+public class MainScreen2 extends JFrame {
 	static JTable jTable;
 	static String columnNames[] = { "ID", "닉네임(이름)", "한줄메시지", "status" };
 	static Object rowData[][] = {}; // 친구목록 들어가야 될 자리!
@@ -19,16 +19,11 @@ public class MainScreen extends JFrame {
 		}
 
 		public Class getColumnClass(int column) {
-			try {
-				System.out.println(column);
-				return getValueAt(0, column).getClass();
-			}
-			catch (Exception e) {
-				return null;
-			}
+			System.out.println(column);
+			return getValueAt(0, column).getClass();
 		}
 	};
-	
+
 	int flag = 0;
 	private JMenuItem menuItemAdd;
 	int searchingFlag = 0;
@@ -43,6 +38,7 @@ public class MainScreen extends JFrame {
 	
 	//내정보 수정!!
 	public static void changeMyInfo(String name, String nn, String state_M) { // 밖에서 부르면 내 정보를 수정
+
 		if (state_M.compareTo("null") == 0)
 			state_M = null;
 
@@ -63,7 +59,7 @@ public class MainScreen extends JFrame {
 
   	  	if(row == -1) return;
   	  	
-		if (info[3].compareTo("null") == 0) info[3]  = " ";;
+		if (info[3].compareTo("null") == 0) info[3] = null;
   	  	
 	  	model.setValueAt(info[2] + "(" + info[1] + ")", row, 1);
 	  	model.setValueAt(info[3], row, 2);
@@ -94,7 +90,7 @@ public class MainScreen extends JFrame {
 		// ID, name, nickname, last_connection, 상메
 		String nn_name = flist[2] + "(" + flist[1] + ")";
 		
-		if (flist[4].compareTo("null") == 0) flist[4]  = " ";
+		if (flist[4].compareTo("null") == 0) flist[4] = null;
 
 		if (flist[3].compareTo("0") == 0) {
 			Object inData[] = { flist[0], nn_name, flist[4], onlineIcon };
@@ -105,7 +101,7 @@ public class MainScreen extends JFrame {
 		}
 		friendnum++;
 	}
-	
+		
 	//친구신청 팝업 보여주기
 	public static int showFriendPlus(String nn, String name) {
 		String[] buttons = {"Yes", "No"};
@@ -123,7 +119,7 @@ public class MainScreen extends JFrame {
 	}
 	
 	
-	public MainScreen() {
+	public MainScreen2() {
       JFrame frame = new JFrame();
       JPanel panel = new JPanel();
       
@@ -275,9 +271,6 @@ public class MainScreen extends JFrame {
       }
 
       
-      
-      
-      
       //친구목록 불러오기!=========================================
       String[][] friendlist = Client.friendList();
       // String[][ID, name, nickname, last_connection, 상메]
@@ -294,11 +287,11 @@ public class MainScreen extends JFrame {
 					continue;
 				}
 				idx++;
-				
+
 				String line = fl[0] + "(" + fl[1] + ")";
 
 				// 상메가 null일 경우 처리해주기
-				if (fl[3].compareTo("null") == 0) fl[3] = " ";
+				if (fl[3].compareTo("null") == 0) fl[3] = null;
 
 				if (fl[2].compareTo("0") == 0) {
 					Object inData[] = { fl[4], line, fl[3], onlineIcon };
@@ -310,10 +303,6 @@ public class MainScreen extends JFrame {
 			}
 		}
 
-      
-      
-      
-      
       //왜 이거 선택이 안먹지?? 나중에물어보기
       jTable = new JTable(model);
       jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
@@ -361,6 +350,7 @@ public class MainScreen extends JFrame {
       
       //모든 구축이 끝나면 socket풀어줌
       Client.freeSocket();
+      
       
       String[] buttons = {"수락", "거절"};
 

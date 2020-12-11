@@ -178,16 +178,16 @@ public class Setting extends JFrame {
 				String state_m = null;
 				//생일, 깃헙, 상메 더해주기
 				if (github.getText().equals("")) {
-					Git = "";
+					Git = "null";
 				}
 				else Git = github.getText();
 				
 				if (smessage.getText().equals("")) {
-					state_m = "";
+					state_m = "null";
 				}
 				else state_m = smessage.getText();
 				
-				message = message + year + m + d + "`|" + Git + "`|" + smessage.getText();
+				message = message + year + m + d + "`|" + Git + "`|" + state_m + "`|" ;
 
 
 				//pw입력됬는지 확인
@@ -202,11 +202,13 @@ public class Setting extends JFrame {
 				}
 				
 				//이제 client에서 update!!
+				System.out.println(message);
 				int tf = Client.modifyInfo(message);
 				
 
 				if(tf == 0) {
 					JOptionPane.showMessageDialog(null, "SUCCESS!!");
+					dispose();
 				}
 				else if(tf == 1) {
 					//뭐 아이디가 중복된다, 그런거 알려줘야 하나???

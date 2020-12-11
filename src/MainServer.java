@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import Variable.RequestRoom;
+import client.Client.input;
 import Variable.Message;
 
 import java.sql.Connection;
@@ -52,6 +53,8 @@ public class MainServer {
 	public static void main(String[] args) throws Exception {
 		// client와 소통하는 thread를 관리할 pool생성 (최대 500명까지 가능)
 		ExecutorService pool = Executors.newFixedThreadPool(500);
+		ExecutorService chatpool = Executors.newFixedThreadPool(500);
+
 		
 		// chatroom을 관리하는 roomManage 실행
 		pool.execute(new RoomManage());
@@ -72,7 +75,8 @@ public class MainServer {
 		private Socket socket;
 		private Scanner in;
 		private PrintWriter out;
-
+		Thread thread;
+		
 		// 사용자 정보 저장
 		private String ID = null;
 
@@ -169,11 +173,7 @@ public class MainServer {
 				
 				//접속상태 업데이트!!! -> 지금 접속중이라는 뜻
 				query.updateLAST_CONNECTION(ID, "0");
-				
-				//=====================================================================================================
-				//===============================>> 여기 위까지 구현 완료 (로그인 & 회원가입) <<==================================
-				//친구목록 받아오기는 아직 client 구현 안됨 + 테스트 안해봄
-				
+								
 				//친구목록(친구가 접속중인지 아닌지도)
 				//친구목록 받아오기
 				String[][] f_list = query.selectFRIEND(ID);
@@ -192,16 +192,28 @@ public class MainServer {
 						ck++;
 					}
 					out.println(flist);
-					System.out.println("=> " + flist);
 				}
 				out.println("BFEND"); //이제 넘기는거 종료라는 뜻!
 
 				
-				//이렇게 기본 정보들을 다 넘겨주게 되면 이제 thread상에서 계속 돌면서 행동하는 일만 남게 된ㄷ..... 근데 성공하면 엄청 뿌듯하겟지??
+				//다른 사람들에게 내가 들어왔다고 알린다!
+				for (PrintWriter output : client.values()) {
+					if(output.equals(out)) continue;
+					//모두에게 보내면 client에서 알아서 걸러서 들을것임
+					//형식 ; UPDATE F_state F_ID 상태(1이면 오프라인)
+					output.println("UPDATE`|F_state`|" + ID + "`|" + 0);
+				}
 				
-								
-				//main update는 어떻게 할지 좀더 생각해보기 -> 친구 요청이라던가, 다른 유저의 활동 상태 등등
+				
+				//===============================>> 여기 위까지 구현 완료 (로그인 & 회원가입 & 기본 정보 보내주기) <<==================================
 
+				//이제 친구신청을 감지하는 Thread와 아래의 while이 동시에 돌아가게 됩니다
+				RealTimeUpdater runnable = new RealTimeUpdater(ID, out);
+				thread = new Thread(runnable);
+
+				thread.start();
+				//친구신청 확인 thread돌아갑니다~
+				
 				System.out.println("돌기시작합니다!");
 
 				//프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는다! / client -> server)
@@ -226,6 +238,21 @@ public class MainServer {
 							//친구신청 테이블에서 삭제해주고, 친구 테이블에 추가해준다.
 							query.deleteFRIEND_PLUS(ID, info[2]);
 							query.insertFRIEND(ID, info[2]);
+							
+							//친구를 수락해서 Friend가 되었다면, client에도 추가를 해줘야겠죠?
+							//일단 내꺼 업데이트하기 => 친구 테이블을 재구성하라고 알려주는거임
+							//ID, name, nickname, last_connection, 상메
+							HashMap<String, String> mapmy = query.bringINFO(info[2]);	
+							out.println("FRIEND`|APND`|" + mapmy.get("ID") + "`|" + mapmy.get("NAME") + "`|" + mapmy.get("NICKNAME") + "`|"
+									+ mapmy.get("LAST_CONNECTION") + "`|"+ mapmy.get("STATE_MESSAGE"));
+							
+							//만약 친구도 접속중이라면, 친구 list를 업데이트 시켜주라고 직접 말해주기!
+							if(client.containsKey(info[2])) {
+								HashMap<String, String> mapp = query.bringINFO(ID);	
+								client.get(info[2]).println("FRIEND`|APND`|" + mapp.get("ID") + "`|" + mapp.get("NAME") + "`|" + mapp.get("NICKNAME") + "`|"
+										+ mapp.get("LAST_CONNECTION") + "`|"+ mapp.get("STATE_MESSAGE"));
+							}
+							
 						}
 						
 						//친구 거절 => FRIEND NO [FID]
@@ -242,57 +269,31 @@ public class MainServer {
 						}
 						
 						//친구 신청 테이블에 있는지 확인 => FRIEND PCK [FID]
+						//없으면 false를 리턴한다.
 						else if(info[1].compareTo("PCK") == 0) {
 
 							String ck = query.checkFRIEND_PLUS(ID, info[2]);
-							
-							if(ck.compareTo(ID) != 0) {
-								out.println("FRIEND`|PCK`|F");
+							System.out.println("ww" + ck);
+
+							if(ck.compareTo("true") == 0) {
+								out.println("FRIEND`|PCK`|T");
 							}
-							else out.println("FRIEND`|PCK`|T");
+							else out.println("FRIEND`|PCK`|F");
 						}
 						
 						//친구 테이블에 있는지 확인 => FRIEND FCK [FID]
 						else if(info[1].compareTo("FCK") == 0) {
 
 							String ck = query.checkFRIEND(ID, info[2]);
+							System.out.println(ck);
 
-							if(ck.compareTo(ID) != 0) {
-								out.println("FRIEND`|FCK`|F");
+							if(ck.compareTo("true") == 0) {
+								out.println("FRIEND`|FCK`|T");
 							}
-							else out.println("FRIEND`|FCK`|T");
+							else out.println("FRIEND`|FCK`|F");
 							
 						}
-						
-						//친구요청 상세정보 확인 => FRIEND PLUSINFO [ID]
-						else if(info[1].compareTo("PLUSINFO") == 0) {
-							String[][] idlist = query.bringFRIEND_PLUS(info[2]);
-		
-							int num = 0;
-							String list = null;
-							
-							
-							if(idlist == null) {
-								out.println("FRIEND`|REQ`|" + 0);
-								continue;
-							}
-							
-							for(String[] s : idlist) {
-								if(s[0] == null) break;
-								num++;
-								int ck = 1;
-								
-								for(String k : s) {
-									if(num == 1 && ck == 1) list =  k;
-									else if(ck == 1) list = list + "`|" + k;
-									else list = list + "^" + k;
-									ck++;
-								}
-								System.out.println(list);
-							
-							}
-							out.println("FRIEND`|REQ`|" + num + "`|" + list);
-						}
+
 					}
 					
 					/**검색 관련 처리========================================*/
@@ -383,8 +384,10 @@ public class MainServer {
 							if(ck == 1) {
 								out.println("SETTING`|PWCK`|OK");
 							}
-							else
+							else {
 								out.println("SETTING`|PWCK`|NO");
+							}
+
 						}
 						
 						//설정을 저장 => SETTING SAVE [0 NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
@@ -430,19 +433,58 @@ public class MainServer {
 							}
 							
 							//이거 두개는 걍 업데이트 하자 => GITHUB STATE_MESSAGE
-							if(info[8 + ck].compareTo("") == 0)
+							try {
+								if(info[8 + ck].compareTo("") == 0)
+									query.updateGITHUB(ID, null);
+								else
+									query.updateGITHUB(ID, info[8 + ck]);
+							}
+							catch(Exception e) {
 								query.updateGITHUB(ID, null);
-							else
-								query.updateGITHUB(ID, info[8 + ck]);
-							
-							if(info[9 + ck].compareTo("") == 0)
-								query.updateSTATE_MESSAGE(ID, null);
-							else
-								query.updateSTATE_MESSAGE(ID, info[9 + ck]);
+								info[8 + ck] = null;
+							}
 
 							
+							try {
+								if(info[9 + ck].compareTo("") == 0)
+									query.updateSTATE_MESSAGE(ID, null);
+								else
+									query.updateSTATE_MESSAGE(ID, info[9 + ck]);
+							}
+							catch(Exception e) {
+								query.updateSTATE_MESSAGE(ID, null);
+								info[9 + ck] = null;
+
+							}
+
 							//비밀번호 업데이트
 							if(ck == 2) query.updatePASSWORD(ID, info[3], info[3]);
+							
+							//모든 입력이 무사히 다 끝나면 그제서야 업데이트!
+							out.println("UPDATE`|MYINFO`|" + info[4 + ck] + "`|" + info[3 + ck] + "`|" + info[9 + ck]);
+							
+							//친구들에게도 바뀐 내 정보를 자랑해야지
+							//일단 내 친구 정보 받아오고
+							String[][] f_list2 = query.selectFRIEND(ID);
+							
+							//친구들의 ID가 접속중이라면 보내주세요~
+							int plag = 1;
+							for(String[] l : f_list2) {
+								if(plag == 1) {
+									plag++;
+									continue;
+								}
+								if(client.containsKey(l[4])) {
+									client.get(l[4]).println("UPDATE`|FINFO`|" + ID + "`|" + info[4 + ck] + "`|" + info[3 + ck] + "`|" + info[9 + ck]);
+								}
+							}
+							
+							
+							
+							
+
+							
+							
 						}
 						
 						//내 정보 요청 => SETTING REQ (GUI에 채워넣을 내 정보를 요청하는 것)
@@ -524,24 +566,7 @@ public class MainServer {
 						messageSet.add(m);
 						//이렇게 추가하면 이제 chat thread에서 처리할 것임
 					}
-					
-					
-					//들어온 친구 요청이 있다면, 친구 쿼리를 날려줍니다!
-					//친구요청을 어떻게 확인하냐면, query를 통해 확인합니다~
-					//확인할거 없으면 굳이 다른건 리턴 안해도 됨.
-					
-					if(query.checkPLUS(ID) == 1) {
-						out.println("UPDATE`|FRIREQ");
-					}
-					
-					
-					
-					
-					
-					
-					
-					
-					
+									
 				}
 
 			} catch (IOException e) {
@@ -555,8 +580,21 @@ public class MainServer {
 					//마지막 접속시간도 업데이트되어야함
 					query.updateLAST_CONNECTION(ID, getCurrentTime());
 					
-
+					//친구들에게도 나 종료한다고 동네방네 소문내기
+					for (PrintWriter output : client.values()) {
+						if(output.equals(out)) continue;
+						//모두에게 보내면 client에서 알아서 걸러서 들을것임
+						//형식 ; UPDATE F_state F_ID 상태(1이면 오프라인)
+						output.println("UPDATE`|F_state`|" + ID + "`|" + 1);
+					}
+					
+					
 					// 채팅방에서도 다 나가져야한다!!!
+
+					//친신받는것도 꺼줌
+					
+					//client에서 빠짐
+					client.remove(ID);
 				}
 				//비로그인 상태에는 남는게 없어서 걍 ㄹㅇ이소켓만 끝내면 됨
 			
@@ -573,7 +611,6 @@ public class MainServer {
 	public static class RoomManage implements Runnable {
 
 		ExecutorService chat_pool = Executors.newFixedThreadPool(500);
-
 
 		@Override
 		public void run() {
@@ -601,7 +638,7 @@ public class MainServer {
 					
 					//새로운 채팅에 대한 스레드 작동!
 					//이 chat pool은 client에 직접 메세지를 보내주게 되는데, 위의 client hashmap을 이용하게 됨.
-					chat_pool.execute(new chat(num, temp.getRequester_ID(), temp.getType(), temp.getParticipants_num(), temp.getParticipants_list()));
+					chat_pool.execute(new Chat(num, temp.getRequester_ID(), temp.getType(), temp.getParticipants_num(), temp.getParticipants_list()));
 				}
 					
 				
@@ -613,7 +650,7 @@ public class MainServer {
 	
 	
 	// 채팅방 thread 코드
-	public static class chat implements Runnable {
+	public static class Chat implements Runnable {
 		int room_num;
 		private String requester_ID;
 		private int type; //0이면 개인, 1이면 단체
@@ -621,7 +658,7 @@ public class MainServer {
 		private ArrayList<String> participants_list = new ArrayList<String>();
 
 		
-		public chat(int room_num, String requester_ID, int type, int participants_num, ArrayList<String> participants_list) {
+		public Chat(int room_num, String requester_ID, int type, int participants_num, ArrayList<String> participants_list) {
 			this.room_num = room_num;
 			this.requester_ID = requester_ID;
 			this.type = type;
@@ -720,4 +757,65 @@ public class MainServer {
 
 	}
 
+	
+	
+	// 실시간으로 친구 신청 감시하는 얘
+	public static class RealTimeUpdater implements Runnable {
+		// 사용자 정보 저장
+		private String ID = null;
+		private PrintWriter out;
+
+		// constructor -> stream 연결작업
+		public RealTimeUpdater(String id, PrintWriter out) throws IOException {
+			ID = id;
+			this.out = out;
+		}
+
+
+		@Override
+		public void run() {
+			System.out.println("realtime!");
+
+			while (client.containsKey(ID)) {
+				System.out.println("rego");
+
+				if (query.checkPLUS(ID) == 1) { // 만약 친구신청 리스트에 내가 있다면?
+
+					String[][] FriendPlusList = query.bringFRIEND_PLUS(ID);
+					int i = 0;
+
+					// 걍 있는거 다 보내~~ // return String[][name, nickname, last_connection, 상메 ,id]
+					for (String[] list : FriendPlusList) {
+						try {
+							if (list[0].compareTo("null") == 0)
+								continue;
+						} catch (Exception e) {
+							break;
+						}
+
+						out.println("UPDATE`|FRIREQ`|" + list[1] + "`|" + list[0] + "`|" + list[4]);
+
+						System.out.println("!");
+
+						// client에서 응답해서 무언가 바뀔때까지 기다림
+						while (query.checkFRIEND_PLUS(list[4], ID).compareTo("false") != 0) {
+							;
+						}
+						System.out.println("change!");
+
+						// 바뀌어서 DB에 적용되면 그제서야 다음으로 넘어갑니다
+					}
+				}
+				try {
+					Thread.sleep(1000);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				System.out.println("안죽엇닥");
+			}
+		}
+	}
 }
