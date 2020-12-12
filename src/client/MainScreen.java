@@ -20,7 +20,6 @@ public class MainScreen extends JFrame {
 
 		public Class getColumnClass(int column) {
 			try {
-				System.out.println(column);
 				return getValueAt(0, column).getClass();
 			}
 			catch (Exception e) {
@@ -120,6 +119,25 @@ public class MainScreen extends JFrame {
 	    	  return 0; //친구거절
 	      }
     	  return 0; //친구거절
+	}
+
+	//일댈채팅신청 팝업 보여주기
+	public static void showPCHAT(String fid, String nn, String name) {
+		String windowName = "채팅 신청";
+		String showMessage = nn + "(" + name + ") 님의 1대 1 채팅을 수락하시겠습니까?";
+			
+		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			System.out.println("1 => Yes");
+			Client.CHATANSWER(fid, true);
+			ChattingOne newchat = new ChattingOne(fid);
+			newchat.setoppenInfo(nn, name);
+			newchat.setTextFree();
+			Client.addPCHAT(fid, newchat);
+		} else {
+			Client.CHATANSWER(fid, false);
+		}
 	}
 	
 	
@@ -361,9 +379,5 @@ public class MainScreen extends JFrame {
       
       //모든 구축이 끝나면 socket풀어줌
       Client.freeSocket();
-      
-      String[] buttons = {"수락", "거절"};
-
    }
-
 }

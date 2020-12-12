@@ -91,7 +91,7 @@ public class MainServer {
 				in = new Scanner(socket.getInputStream());
 			    out = new PrintWriter(socket.getOutputStream(), true);
 
-				
+//메인 화면 뜰 떄 까지 돌아가는 것				
 				while (true) { // 처음에 로그인 과정 + 회원가입 => 로그인을 해야지 while을 넘어간다
 					String line = in.nextLine();
 					System.out.println(line);
@@ -216,14 +216,14 @@ public class MainServer {
 				
 				System.out.println("돌기시작합니다!");
 
-				//프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는다! / client -> server)
+//프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는다! / client -> server)
 				while (true) {
 					System.out.println("빙글뱅글!");
 
 					String line = in.nextLine();
 					System.out.println(line);
 					
-					/**친구 관련 처리========================================*/
+/**친구 관련 처리========================================*/
 					if (line.startsWith("FRIEND")) {
 						String info[] = line.split("\\`\\|");
 						
@@ -296,7 +296,7 @@ public class MainServer {
 
 					}
 					
-					/**검색 관련 처리========================================*/
+/**검색 관련 처리========================================*/
 					else if (line.startsWith("SEARCH")) {
 						String info[] = line.split("\\`\\|");
 						
@@ -371,7 +371,7 @@ public class MainServer {
 					}
 
 								
-					/**설정 관련 처리========================================*/
+/**설정 관련 처리========================================*/
 					else if (line.startsWith("SETTING")) {
 						String info[] = line.split("\\`\\|");
 
@@ -478,13 +478,6 @@ public class MainServer {
 									client.get(l[4]).println("UPDATE`|FINFO`|" + ID + "`|" + info[4 + ck] + "`|" + info[3 + ck] + "`|" + info[9 + ck]);
 								}
 							}
-							
-							
-							
-							
-
-							
-							
 						}
 						
 						//내 정보 요청 => SETTING REQ (GUI에 채워넣을 내 정보를 요청하는 것)
@@ -505,23 +498,58 @@ public class MainServer {
 
 					
 					
-					/**채팅방 관련 (1:1) chat not multi ========================================*/
-					else if (line.startsWith("NMCHAT")) {
+/**채팅방 관련 (1:1) personal chat ========================================*/
+					else if (line.startsWith("PCHAT")) {
 						String info[] = line.split("\\`\\|");
 						
-						//1:1 채팅 신청 => CHATNM APP [thread 식별번호] [상대ID]
-						if(info[1].compareTo("APP") == 0) {
-							//방을 요청했다! <--- 여기서는 이거까지
-
-							//새 방을 요청하는 형식을 짜서
-							RequestRoom r = new RequestRoom(ID, 0, 2, info[2], info);
-							//방만드는 대기 queue에 넣어준다
-							createRoomQueue.add(r);
+						//PCHAT`|REQCHAT`|" + FID : 얘랑 채팅하고 싶다고 신호주기
+						if(info[1].compareTo("REQCHAT") == 0) {
+							//상대방에게 채팅방에 참여할건지 물어봐야함
+							HashMap<String, String> map = query.bringINFO(ID);
+							//여기서 id는 A. (b가 A의 정보를 받는 상황) (지금 여기는 A고, B에게 보내야 합니다!)
+							
+							//PCHAT`|QUSCHAT`|" + 채팅요청자ID + 별명 + 이름 : 상대방 알려주면서 채팅할거냐고 물어보기   =>받는쪽 : 이때 별명(이름), ID 저장하기
+							client.get(info[2]).println("PCHAT`|QUSCHAT`|" + ID+ "`|" + map.get("NICKNAME")+ "`|" + map.get("NAME"));
 						}
+						
+						
+						//PCHAT`|PESPONCHAT`|" + 채팅요청자ID + Y/N : 채팅할거냐고 물어봣을때 채팅 할건지 말건지 답변
+						else if(info[1].compareTo("PESPONCHAT") == 0) {
+							//PCHAT`|ANSCHAT`|" + 채팅요청자ID + 별명(이름) : 상대방이 채팅 수락했다고 알려주기 + 채팅 잠금 풀림 //보낸쪽 : 이때 별명(이름), ID 저장하기
+							HashMap<String, String> map = query.bringINFO(ID);
+							//여기서 id는 B (A가 B의 수락 여부와 정보를 받는 상황) => a에게 정보를 전달해야 하는 상황 (지금 여기는 B다)
 
+							if(info[3].equals("Y")) { //채팅을 수락한다면 수락한다고 알려줌
+								client.get(info[2]).println("PCHAT`|ANSCHAT`|" + ID +"`|" + map.get("NICKNAME")+ "`|" + map.get("NAME") + "`|" + "Y");
+							}
+							else { //거절한다면 거절한다고 알림
+								client.get(info[2]).println("PCHAT`|ANSCHAT`|" + ID + "`|" + map.get("NICKNAME")+ "`|" + map.get("NAME") + "`|" + "N");
+							}
+						}
+						
+						
+						//A가 쓴 채팅을 B에게 보내주는 상황 (지금 여기는 A이고, 나는 b으 ㅣ클라이언트에 바로 채팅 보내기! (서버가 아님))
+						//PCHAT`|sendCHAT`|" + 채팅받는자ID + Content : 채팅내용 전송 (내가쓴거임)
+						else if(info[1].compareTo("sendCHAT") == 0) {
+							//PCHAT`|receivedCHAT`|" + 채팅보낸자ID + Content : 채팅내용 전송 (내가 받은거)
+							client.get(info[2]).println("PCHAT`|receivedCHAT`|" + ID +"`|" + info[3]);
+						}
+						
+						
+						//A가 B에게 본인이 나간다고 알려주는 부분
+						//PCHAT`|outCHAT`|" + 채팅받는자ID
+						else if(info[1].compareTo("outCHAT") == 0) {
+							//PCHAT`|outCHAT`|" + 채팅보낸자ID
+							client.get(info[2]).println("PCHAT`|OUTCHAT`|" + ID);
+						}
+						
+
+						
+						
+						
 					}
 						
-					/**채팅방 관련 (멀티) chat multi ========================================*/
+/**채팅방 관련 (멀티) chat multi ========================================*/
 					else if (line.startsWith("MCHAT")) {
 						String info[] = line.split("\\`\\|");
 						
@@ -537,7 +565,7 @@ public class MainServer {
 						}
 					}
 					
-					/**채팅 수락 여부 ========================================*/
+/**채팅 수락 여부 ========================================*/
 					else if (line.startsWith("CHAT")) { 
 						String info[] = line.split("\\`\\|");
 						
@@ -555,7 +583,7 @@ public class MainServer {
 						}
 					}
 					
-					/**채팅 ========================================*/
+/**채팅 ========================================*/
 					else if (line.startsWith("CHAT")) { //CHAT room_id sender_id time message 순으로 => message가 맨 뒤로 가야함!!
 						String info[] = line.split("\\`\\|");
 						

@@ -8,26 +8,40 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 public class MyFriendList extends JFrame implements MouseListener {
+	JFrame frame = new JFrame();
+	JPanel friend = new JPanel();
 	JTable jTable;
 	DefaultTableModel model;
 	HashMap<String, String> idmatch = new HashMap<String, String>();
+	HashMap<String, String> statematch = new HashMap<String, String>();
 
 	
 	public void mouseClicked(MouseEvent me) {
 		int row = jTable.getSelectedRow();
 		Object line = model.getValueAt(row, 0);
+		Object stateline = model.getValueAt(row, 1);
 		String FID = idmatch.get(line.toString());
+		String state = statematch.get(line.toString());
+
 
 		String[] buttons = {"1:1채팅", "정보보기"};
 		int result = JOptionPane.showOptionDialog(null, "옵션을 선택하세요", "옵션", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "두번째값");
 		if (result == 0) {
+	
 			// 일대일채팅 스타또! - 채팅중이면 이미 채팅중입니다
-			dispose();
-			ChattingOne chatting = new ChattingOne();
+			if(Client.ckINPCHAT(FID) || !state.equals("0")) {
+				JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
+			}
+			else {
+				frame.dispose();
+				ChattingOne chatting = new ChattingOne(FID); //채팅방 키고
+				Client.addPCHAT(FID, chatting); //채팅중인 상대에 상대방을 더해주고
+		        Client.ckANSWER(FID);
+			}
+
 			
 			
 		} else if (result == 1) {
-			System.out.println(FID);
 			FriendInfo info = new FriendInfo(FID.toString(), 1);
 			//정보확인할땐 굳이 창 안닫아도됨
 		}
@@ -35,8 +49,7 @@ public class MyFriendList extends JFrame implements MouseListener {
 	
 	
 	public MyFriendList(String keyword) {
-		JFrame frame = new JFrame();
-		JPanel friend = new JPanel();
+
 		
 	    JLabel friend2 = new JLabel("친구리스트");
 	    friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
@@ -94,6 +107,7 @@ public class MyFriendList extends JFrame implements MouseListener {
 	        	  String line = fl[2] + "(" + fl[1] + ")";
 	        	  
 	    		  idmatch.put(line, fl[0]); //line - 아이디 저장
+	    		  statematch.put(line, fl[3]);
 	    		  
 	        	  if(fl[3].compareTo("0") == 0) {
 	        		  //ID는 숨겨서 저장

@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +29,7 @@ public class Client {
 	private static AtomicInteger readSocket = new AtomicInteger(1);
 	private static AtomicInteger writeSocket = new AtomicInteger(1);
 	// socket에 값을 넣고 빼는걸 제어할 친구! 초기값은 1 : 1일때는 사용가능, 0일때는 사용 불가능!
+	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 
 
 	// thread들과 소통하기 위한 변수 부분!!!
@@ -350,6 +352,50 @@ public class Client {
 	
 	
 	
+	//==================채팅 기능 관련 함수
+	
+	// <일대일 채팅>
+	//상대방이랑 일대일 채팅중인지 확인
+	protected static boolean ckINPCHAT(String FID) {
+		if(PCHAT.containsKey(FID)) return true;
+		else return false;
+	}
+	
+	//일대일 채팅중인 사람들 모아두는 hashmap에 넣기
+	protected static void addPCHAT(String FID, ChattingOne chat) {
+		PCHAT.put(FID, chat);
+	}
+	
+	//일대일 채팅중인 사람들 모아두는 hashmap에서 삭제하고 상대방에게 나간다고 말함
+	protected static void delPCHAT(String FID) {
+		PCHAT.remove(FID);
+		out.println("PCHAT`|outCHAT`|" + FID);
+	}
+	
+	//상대방에게 채팅 하고 싶다고 요청
+	protected static void ckANSWER(String FID) {
+		//서버에 나 얘랑 채팅하고 싶다고 요청하기!
+		out.println("PCHAT`|REQCHAT`|" + FID);
+	}
+	
+	//상대방에게 채팅을 수락한다고 Y/N 보내기
+	protected static void CHATANSWER(String FID, boolean ans) {
+		//PCHAT`|PESPONCHAT`|" + 채팅요청자ID + Y/N : 채팅할거냐고 물어봣을때 채팅 할건지 말건지 답변
+		System.out.println("2 =>" + ans);
+		
+		//그래 나 너랑 채팅할게!
+		if(ans) out.println("PCHAT`|PESPONCHAT`|" + FID + "`|Y");
+		else out.println("PCHAT`|PESPONCHAT`|" + FID+ "`|N");
+	}
+	
+	//사용자가 보내는 채팅을 받아서 서버로 전송하는 역할. (받는사람과 보내는 내용)
+	//PCHAT`|sendCHAT`|" + 채팅받는자ID + Content : 채팅내용 전송 (내가쓴거임)
+	protected static void sendPCHAT(String FID, String chat) {
+		out.println("PCHAT`|sendCHAT`|" + FID + "`|" + chat);
+	}
+	
+	
+	
 	
 	
 	
@@ -393,11 +439,11 @@ public class Client {
 		b_pool.execute(new input());
 
 		
-//		//채팅방 받을 얘
-//		ExecutorService chat_pool = Executors.newFixedThreadPool(100);
+		//채팅방 받을 얘
+		//ExecutorService chat_pool = Executors.newFixedThreadPool(100);
 
 		
-//		//이제부터 서버에서 오는 모든 입력은 input thread를 통해서 처리됨
+		//이제부터 서버에서 오는 모든 입력은 input thread를 통해서 처리됨
 
 	}
 
@@ -426,8 +472,7 @@ public class Client {
 						int result = MainScreen.showFriendPlus(info[2], info[3]);
 						
 						if(result == 1) { //친구를 수락햇다면
-							out.println("FRIEND`|OK`|" + info[4]);
-							
+							out.println("FRIEND`|OK`|" + info[4]);	
 						}
 						else if(result == 0) {//친구를 거절했다면
 							out.println("FRIEND`|NO`|" + info[4]);	
@@ -552,30 +597,43 @@ public class Client {
 						NNck[0] = true;
 						System.out.println("=>" + NNck[0] + " " + NNck[1]);
 					}
-					 
-					 
-					
 				}
 
 				//채팅방 관련 (1댇)
-				else if (line.startsWith("NMCHAT")) {
+				else if (line.startsWith("PCHAT")) {
 					String info[] = line.split("\\`\\|");
 
-
-					if(info[1].compareTo("INFO") == 0) {
-
-						
-						
-
+					//PCHAT`|QUSCHAT`|" + 채팅요청자ID + 별명 + 이름 : 
+					//상대방 알려주면서 채팅할거냐고 물어보기   =>받는쪽 : 이때 별명(이름), ID 저장하기
+					if(info[1].compareTo("QUSCHAT") == 0) {
+						//채팅할거냐고 물어보기 -> 메인 페이지에서 팝업 띄워서 물어보자!
+						MainScreen.showPCHAT(info[2], info[3], info[4]);		
 					}
 
-					// 비밀번호 체크 요청한거 응답=> SETTING PWCK 1/0 (1이 true, 0이 false)
-					else if(info[1].compareTo("PWCK") == 0) {
-
-
+					//상대방이 채팅을 수락햇는지 거절햇는지 체크
+					//"PCHAT`|ANSCHAT`|" + ID +"`|" + map.get("NICKNAME")+ "`|" + map.get("NAME")
+					else if(info[1].compareTo("ANSCHAT") == 0) {
+						//상대방의 수락여부를 체크 info[5]& 이름과 닉네임 저장
+						PCHAT.get(info[2]).checkAnswer(info[5], info[3], info[4]);
+					}
+					
+					//PCHAT`|receivedCHAT`|" + 채팅보낸자ID + Content : 채팅내용 전송 (내가 받은거)
+					else if(info[1].compareTo("receivedCHAT") == 0) {
+						//받은 채팅 내용 보내주기!
+						PCHAT.get(info[2]).receiveChat(info[3]);
+					}
+					
+					//PCHAT`|OUTCHAT`|" + 채팅보낸자ID
+					else if(info[1].compareTo("OUTCHAT") == 0) {
+						//받은 채팅 내용 보내주기!
+						if(PCHAT.containsKey(info[2]))
+							PCHAT.get(info[2]).endchat();
 					}
 				}
 
+				
+				
+				
 				//채팅방 관련 (멀티)
 				else if (line.startsWith("MCHAT")) {
 					String info[] = line.split("\\`\\|");

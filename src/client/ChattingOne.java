@@ -7,12 +7,13 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-public class ChattingOne {
-    static int port;
-	String serverAddress;
-    Scanner in;
-    PrintWriter out;
-    JFrame frame = new JFrame("Chatter");
+public class ChattingOne{
+	private String FID;
+    private String NN;
+    private String name;
+    private String sender;
+    
+    JFrame frame = new JFrame(FID);
     JPanel panel = new JPanel();
     JTextField textField = new JTextField(25);
     JTextArea messageArea = new JTextArea(16, 50);
@@ -22,52 +23,89 @@ public class ChattingOne {
     JPanel top = new JPanel();
     JLabel label = new JLabel("CHATTING ROOM");
 
-    public ChattingOne() {
+
+    //상대방의 반응에 따른 결정
+    public void checkAnswer(String YN, String nn, String name) {
+    	if(YN.equals("N")) {
+			JOptionPane.showMessageDialog(null, "상대방이 채팅을 거절하셨습니다.");
+			Client.delPCHAT(FID);
+	        frame.dispose();
+    	}
+    	else {
+    		setoppenInfo(nn, name);
+    		messageArea.append("상대방이 입장하셨습니다. \n");
+
+    		//채팅 활성화
+            textField.setEditable(true);
+    	}
+    }
+    
+    public void setoppenInfo(String nn, String name) {
+		NN = nn;
+		this.name = name;
+		sender = nn + "(" + name + ")";
+    }
+    
+    public void setTextFree() {
+        textField.setEditable(true);
+    }
+
+    public void endchat() {
+		messageArea.append("상대방이 나가셨습니다. \n");
+        textField.setEditable(false);
+		button.setEnabled(false);
+
+    }
+    
+	//메세지 추가
+    public void receiveChat(String content) {
+    	messageArea.append(sender + ": "+ content + "\n");
+    }
+    
+    //메세지 보내기
+    public void sendChat() {
+		String getTxt = textField.getText();
+		if(getTxt.equals("")) return;
+		Client.sendPCHAT(FID, getTxt); //이게 핵심!
+		
+		messageArea.append("나 : " + getTxt + "\n");
+		textField.setText("");
+    }
+     
+    public void exitChat() { //채팅 종료하기
+    	//종료할거냐고 한 번 더 물어보기
+		int reply = JOptionPane.showConfirmDialog(null, "채팅을 종료하시겠습니까?", "채팅알림", JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			Client.delPCHAT(FID);
+	        frame.dispose();
+		}	
+    }
+    
+    public ChattingOne(String FID) {
+    	this.FID = FID;
+    	
+    	frame.addWindowListener(new WindowListener() {
+            public void windowOpened(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {}
+            public void windowDeactivated(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+            	exitChat();
+            }
+            public void windowClosed(WindowEvent e) {
+            	
+            }
+            public void windowActivated(WindowEvent e) {}
+        }); 
+    	
         label.setFont(new Font("고딕", Font.BOLD, 30));
         label.setForeground(Color.WHITE);
-        
-    	ImageIcon icon = new ImageIcon("image/add.png");
-    	Image addImage = icon.getImage();
-	    Image addChangingImg = addImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
-	    ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
-	     
-	    ImageIcon icon3 = new ImageIcon("image/user.png");
-	    Image userImage = icon3.getImage();
-	    Image userChangeImg = userImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
-	    ImageIcon userChangeIcon = new ImageIcon(userChangeImg);
-
-	    JButton add = new JButton();
-	    add.setBounds(10, 10, 30, 30);
-	    add.setIcon(addChangeIcon);
-
-	    add.addActionListener(new ActionListener() {
-	       @Override
-	       public void actionPerformed(ActionEvent e) {
-	      	 System.out.println("add");
-	      	 InviteFriend invite = new InviteFriend();
-	          // 만약 비밀번호가 맞으면 Setting setting = new Setting();
-	          // 틀리면 JOptionPane.showMessageDialog(null,  "Wrong!!");
-	       }
-	    });
-	      
-	    JButton user = new JButton();
-	    user.setBounds(354, 10, 30, 30);
-	    user.setIcon(userChangeIcon);
-	      
-	    user.addActionListener(new ActionListener() {
-	       @Override
-	       public void actionPerformed(ActionEvent e) {
-	    	   ChattingOnlinePeople people = new ChattingOnlinePeople();
-	       }
-	    });
-	      
-
-        frame.getContentPane().add(add);
-        frame.getContentPane().add(user);
+	  
         top.add(label);
         leftLine.setBackground(new Color(0, 78, 150));
         rightLine.setBackground(new Color(0, 78, 150));
-        textField.setEditable(true);
+        textField.setEditable(false);
         Font font = new Font("고딕", Font.PLAIN, 14);
         messageArea.setFont(font);
         messageArea.setEditable(false); // 기존에 입력한 문자를 수정할 수 없도록 한다.
@@ -89,25 +127,19 @@ public class ChattingOne {
         frame.getContentPane().add(panel, BorderLayout.SOUTH);
         frame.pack();
         
+        
+        //버튼 눌러도, 엔터를 쳐도 같은 동작!
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                out.println(textField.getText());
-                textField.setText("");
-                //textField.setHorizontalAlignment(RIGHT);
+            	sendChat();
             }
         });
         
+        
         button.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		String getTxt = textField.getText();
-        		
-        		if (getTxt.contentEquals("a")) {
-        			messageArea.setForeground(Color.blue);  //txt1의 글자색상을 파란색으로 지정합니다.
-        		}
-        		
-        		
-        		messageArea.append(getTxt + "\n");
-        		textField.setText("");
+        		if(textField.isEnabled())
+        		sendChat();
 	        }
         });
 
@@ -115,19 +147,8 @@ public class ChattingOne {
         frame.setVisible(true);
         frame.setSize(400, 600);
         frame.setResizable(false);
-    }
-	
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE );
 
-    private String getName() {
-        return JOptionPane.showInputDialog(
-            frame,
-            "Choose a your nickname",
-            "Nickname selection",
-            JOptionPane.PLAIN_MESSAGE
-        );
     }
-
-    public static void main(String[] args) throws Exception {
-        ChattingOne chatting = new ChattingOne();
-    }
+ 
 }
