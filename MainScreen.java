@@ -195,6 +195,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       // 버튼 있는 부분
       JPanel top = new JPanel();
       top.setPreferredSize(new Dimension(430, 40));
+      JLabel topTitle = new JLabel("TIC TAC _ TALK");
+      topTitle.setForeground(new Color(0, 54, 78));
+      topTitle.setFont(new Font("고딕", Font.BOLD, 24));
+      top.add(topTitle);
       top.setBorder(null);
       top.setBackground(new Color(74, 210, 149));
       // 버튼에 이미지 넣고 버튼 크기에 맞게 이미지 넣기
@@ -204,7 +208,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       ImageIcon searchChangeIcon = new ImageIcon(searchChangingImg);
       ImageIcon icon2 = new ImageIcon("image/chatting.png");
       Image chatImage = icon2.getImage();
-      Image chatChangingImage = chatImage.getScaledInstance(26, 26, Image.SCALE_SMOOTH);
+      Image chatChangingImage = chatImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
       ImageIcon chatChangingIcon = new ImageIcon(chatChangingImage);
       ImageIcon icon3 = new ImageIcon("image/setting.png");
       Image settingImage = icon3.getImage();
@@ -213,7 +217,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 
       JButton searching = new JButton();
       searching.setPreferredSize(new Dimension(30, 30));
-      searching.setBounds(10, 10, 30, 30);
+      searching.setBounds(15, 10, 30, 30);
       searching.setIcon(searchChangeIcon);
       System.out.println(searching);
       top.add(searching);
@@ -259,7 +263,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       
       JButton chatting = new JButton();
-      chatting.setBounds(350, 10, 30, 30);
+      chatting.setBounds(360, 10, 30, 30);
       chatting.setIcon(chatChangingIcon);
       top.add(chatting);
       
@@ -276,7 +280,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       JButton setting = new JButton();
       setting.setPreferredSize(new Dimension(30, 30));
-      setting.setBounds(390, 10, 30, 30);
+      setting.setBounds(400, 10, 30, 30);
       setting.setIcon(settingChangeIcon);
       
       
