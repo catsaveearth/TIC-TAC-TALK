@@ -20,16 +20,16 @@ public class TicTacToe {
 		gameboard[x][y]=player;
 		count++;
 	}
-	
+	  
 	public void displayBoard() {
-		System.out.println("          �ㅡㅡㅡㅡㅡㅡ�");
+		System.out.println("      �ㅡ�ㅡ�ㅡ�");
 		for(int i=0;i<gameboard.length;i++) {
 			System.out.print(i+"  | ");
 			for(int j=0;j<gameboard[i].length;j++) {
 				System.out.print(gameboard[i][j]+"| ");
 			}
 			System.out.println();
-			System.out.println("          �ㅡㅡㅡㅡㅡㅡ�");
+			System.out.println("      �ㅡ�ㅡ�ㅡ�");
 		}
 		System.out.println("x/y  0  1  2");
 	}
