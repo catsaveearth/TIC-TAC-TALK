@@ -1,18 +1,14 @@
 package client;
+
 import java.awt.event.*;
-import java.io.*;
-import java.net.Socket;
-import java.util.Scanner;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
 
-public class ChattingOne{
-	private String FID;
-    private String NN;
-    private String nm;
-    private String sender;
-    
+public class ChattingMulti {
+	public int roomnumber;
+	private String room_name;
+
+
     JFrame frame = new JFrame("Chatter");
     JPanel panel = new JPanel();
     JTextField textField = new JTextField(23);
@@ -27,42 +23,19 @@ public class ChattingOne{
     JPanel name = new JPanel();
     JLabel label = new JLabel("CHATTING ROOM");
 
-
-    //상대방의 반응에 따른 결정
-    public void checkAnswer(String YN, String nn, String name) {
-    	if(YN.equals("N")) {
-			JOptionPane.showMessageDialog(null, "상대방이 채팅을 거절하셨습니다.");
-			Client.delPCHAT(FID);
-	        frame.dispose();
-    	}
-    	else {
-    		setoppenInfo(nn, name);
-    		frame.setTitle("1:1 chat with " + sender);
-    		messageArea.append("상대방이 입장하셨습니다. \n");
-
-    		//채팅 활성화
-            textField.setEditable(true);
-    	}
+    
+	//누군가 들어왓어요 알림
+    public void notifyCome(String sender) {
+    	messageArea.append(sender + "님이 입장하셨습니다.\n");
     }
     
-    public void setoppenInfo(String nn, String name) {
-		NN = nn;
-		this.nm = name;
-		sender = nn + "(" + nm + ")";
-    }
-    
-    public void setTextFree() {
-        textField.setEditable(true);
-    }
-
-    public void endchat() {
-		messageArea.append("상대방이 나가셨습니다. \n");
-        textField.setEditable(false);
-		button.setEnabled(false);
+	//누군가 나가요 알림
+    public void notifyOut(String sender) {
+    	messageArea.append(sender + "님이 퇴장하셨습니다.\n");
     }
     
 	//메세지 추가
-    public void receiveChat(String content) {
+    public void receiveChat(String sender, String content) {
     	messageArea.append(sender + ": "+ content + "\n");
     }
     
@@ -70,29 +43,42 @@ public class ChattingOne{
     public void sendChat() {
 		String getTxt = textField.getText();
 		if(getTxt.equals("")) return;
-		Client.sendPCHAT(FID, getTxt); //이게 핵심!
-		
-		messageArea.append("나 : " + getTxt + "\n");
+		Client.sendMCHAT(roomnumber, getTxt); //이게 핵심!
 		textField.setText("");
     }
-     
-    public void exitChat() { //채팅 종료하기
+    
+    //채팅 종료하기
+    public void exitChat() { 
     	//종료할거냐고 한 번 더 물어보기
 		int reply = JOptionPane.showConfirmDialog(null, "채팅을 종료하시겠습니까?", "채팅알림", JOptionPane.YES_NO_OPTION);
 
 		if (reply == JOptionPane.YES_OPTION) {
-			Client.delPCHAT(FID);
+			Client.delMCHAT(roomnumber);
 	        frame.dispose();
 		}	
     }
     
-    public void FexitChat() { //채팅 종료하기
-    	Client.delPCHAT(FID);
+    //채팅 강제로종료하기
+    public void FexitChat() { 
+    	//종료할거냐고 한 번 더 물어보기
+    	Client.delMCHAT(roomnumber);
         frame.dispose();
     }
     
-    public ChattingOne(String FID) {
-    	this.FID = FID;
+	//premessage 추가
+    public void PrereceiveChat(int num, String[][] clist) {
+    	for(int i=0;i<num-1;i++) {
+        	messageArea.append(clist[i][0] + ": "+ clist[i][1] + "\n");
+    	}
+    	messageArea.append("---------------------------------\n");
+
+    }
+    
+ 
+    public ChattingMulti(int roomnumber, String roomname) {
+    	this.roomnumber = roomnumber;
+    	this.room_name = roomname;
+    	frame.setTitle(roomname);
     	
     	frame.addWindowListener(new WindowListener() {
             public void windowOpened(WindowEvent e) {}
@@ -108,6 +94,7 @@ public class ChattingOne{
             public void windowActivated(WindowEvent e) {}
         }); 
     	
+    	
     	name.setPreferredSize(new Dimension(300, 30));
     	name.add(label);
     	label.setHorizontalAlignment(JLabel.CENTER);
@@ -115,8 +102,43 @@ public class ChattingOne{
         label.setFont(new Font("고딕", Font.BOLD, 23));
         label.setForeground(Color.black);
         
-        
-      
+    	ImageIcon icon = new ImageIcon("image/add.png");
+    	Image addImage = icon.getImage();
+	    Image addChangingImg = addImage.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+	    ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
+
+	    ImageIcon icon3 = new ImageIcon("image/user.png");
+	    Image userImage = icon3.getImage();
+	    Image userChangeImg = userImage.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+	    ImageIcon userChangeIcon = new ImageIcon(userChangeImg);
+
+	    JButton add = new JButton();
+	    add.setBounds(10, 6, 28, 28);
+	    add.setIcon(addChangeIcon);
+	      
+	    //친구초대기능!! 어케 구현할까...
+	    add.addActionListener(new ActionListener() {
+		       @Override
+		       public void actionPerformed(ActionEvent e) {
+		    	   MainScreen.showInviteInOriginRoom(roomnumber);
+		       }
+		});
+	    
+	    JButton user = new JButton();
+	    user.setBounds(304, 6, 28, 28);
+	    user.setIcon(userChangeIcon);
+	    
+	    //현재 접속 유저 확인 기능!
+	    user.addActionListener(new ActionListener() {
+		       @Override
+		       public void actionPerformed(ActionEvent e) {
+		    	   Client.reqULIST(roomnumber);
+		       }
+		});
+	    
+	    
+        frame.getContentPane().add(add);
+        frame.getContentPane().add(user);
         topLine.setPreferredSize(new Dimension(600, 10));
         topLine.setBackground(new Color(255, 229, 110));
         leftLine.setBackground(new Color(255, 229, 110));
@@ -155,17 +177,17 @@ public class ChattingOne{
         frame.getContentPane().add(top, BorderLayout.NORTH);
         frame.getContentPane().add(panel, BorderLayout.SOUTH);
         frame.pack();
-        
         messageArea.setForeground(Color.white);
-   
+
+        
+        //채팅보내기!!!
         //버튼 눌러도, 엔터를 쳐도 같은 동작!
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	sendChat();
             }
         });
-        
-        
+       
         button.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		if(textField.isEnabled())
@@ -177,7 +199,8 @@ public class ChattingOne{
         frame.setVisible(true);
         frame.setSize(350, 550);
         frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE );
-
     }
+	
 }

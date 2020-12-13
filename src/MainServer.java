@@ -16,8 +16,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import Variable.RequestRoom;
 import client.Client.input;
 import Variable.Message;
 
@@ -34,12 +34,15 @@ public class MainServer {
 
 	// 접속중인 client의 정보를 관리한다. - 로그인에 성공해야 여기에 들어올 수 있음
 	public static HashMap<String, PrintWriter> client = new HashMap<>();
+	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>();
+	private static AtomicInteger messageCK = new AtomicInteger(1);
 
-	// client thread와 room manage thread를 이어줄 친구들
-	public static Queue<RequestRoom> createRoomQueue = new LinkedList();
-	public static Queue<Message> messageSet = new LinkedList(); //메세지의 경우 여러 쓰레드들이 동시에 접근이 가능해야함 -> hashMap! (room number가 밖에서 체크 가능하도록)
-	
+	static ExecutorService messagepool = Executors.newFixedThreadPool(500);
+
+	//메세지의 경우 여러 쓰레드들이 동시에 접근이 가능해야함 -> hashMap! (room number가 밖에서 체크 가능하도록)
+
 	final private static int portnum = 6789;
+	private static int forroomnumber = 1;
 		
 	public static String getCurrentTime() {
 		Date date_now = new Date(System.currentTimeMillis()); // 현재시간을 가져와 Date형으로 저장한다
@@ -53,11 +56,6 @@ public class MainServer {
 	public static void main(String[] args) throws Exception {
 		// client와 소통하는 thread를 관리할 pool생성 (최대 500명까지 가능)
 		ExecutorService pool = Executors.newFixedThreadPool(500);
-		ExecutorService chatpool = Executors.newFixedThreadPool(500);
-
-		
-		// chatroom을 관리하는 roomManage 실행
-		pool.execute(new RoomManage());
 		
 		System.out.println("start server!");
 		try (ServerSocket listener = new ServerSocket(portnum)) { // listener socket생성
@@ -67,7 +65,6 @@ public class MainServer {
 		}
 	}
 
-	
 	
 	/** client thread 코드. - 이제 client와 관련된 일은 모두 여기서 처리한다. */
 	public static class Handler implements Runnable {
@@ -548,53 +545,72 @@ public class MainServer {
 						
 						
 					}
-						
+				
+					
 /**채팅방 관련 (멀티) chat multi ========================================*/
 					else if (line.startsWith("MCHAT")) {
+						while (messageCK.get() == 0) {};
+						messageCK.set(0);
+						
 						String info[] = line.split("\\`\\|");
 						
-						//1:1 채팅 신청 => CHATM APP [thread 식별번호] [초대인원 수] [상대ID]
-						if(info[1].compareTo("APP") == 0) {
-							//방을 요청했다! <--- 여기서는 이거까지
+						//"MCHAT`|REQROOM`|" + 방이름 + 내용 보임 여부 +  방만들기 요청자 ID + flist      
+						//방만들기 요청
+						if(info[1].compareTo("REQROOM") == 0) {
+							//방 숫자를 부여받는다
+							int rn = forroomnumber;
+							forroomnumber++;
+							
+							//flist를 나눠서 찐으로 리스트 만들기?
+							String requset_flist[] = info[5].split("\\^");
+														
+							messagepool.execute(new Chat(rn, info[2], info[3], info[4], requset_flist)); // socket연결요청이 오면 accept하고 thread를 생성하며 socket을 넘겨줌
 
-							//새 방을 요청하는 형식을 짜서
-							RequestRoom r = new RequestRoom(ID, 1, Integer.parseInt(info[1]), info[2], info);
-
-							//방만드는 대기 queue에 넣어준다
-							createRoomQueue.add(r);
-						}
-					}
-					
-/**채팅 수락 여부 ========================================*/
-					else if (line.startsWith("CHAT")) { 
-						String info[] = line.split("\\`\\|");
-						
-						//1:1 채팅 수락 => CHAT OK [roomID]
-						if(info[1].compareTo("OK") == 0) {
-							//나에게 들어온 요청에 대해 채팅방에 들어가는 것을 수락햇다.
-							//이런거 의사를 표현하는 queue를 하나 더 둘까????????????????????????????????????????
+							Queue<Message> m = new LinkedList();
+							messageSet.put(rn, m);
+							
+							//"MCHAT`|RoomNumber`|" + 방번호    //방 번호 보내주기 - 이건 연속된 스텝으로 가야할듯??? 즉, 방이름 저기서 기다려야 하는 부분임.
+							out.println("MCHAT`|RoomNumber`|" + rn);
 						}
 						
 						
-						//1:1 채팅 거절 => CHAT NO [roomID]
-						else if(info[1].compareTo("NO") == 0) {
-							//나에게 들어온 요청에 대해 채팅방에 들어가는 것을 거절했다.
-							//이런거 의사를 표현하는 queue를 하나 더 둘까????????????????????????????????????????
+						//"MCHAT`|RESPONCHAT`|" + 방번호+ 내 ID?? + Y // 채팅할거냐고 물어봣을때 채팅 할건지 말건지 답변
+						else if(info[1].compareTo("RESPONCHAT") == 0) {
+							//이거 받으면 바로 채팅에 참여하겠다는 의미와 같습니다.
+							Message m = new Message(Integer.parseInt(info[2]), 0, ID, "0", "0");
+							messageSet.get(Integer.parseInt(info[2])).add(m);
 						}
-					}
-					
-/**채팅 ========================================*/
-					else if (line.startsWith("CHAT")) { //CHAT room_id sender_id time message 순으로 => message가 맨 뒤로 가야함!!
-						String info[] = line.split("\\`\\|");
 						
-						int room_id = Integer.parseInt(info[1]);
-						Message m = new Message(room_id, info[2], info[3], line.substring(line.indexOf(info[4])));
-						//룸 아이디, 보낸이, 시간, 내용
+						//out.println("MCHAT`|sendCHAT`|"+ Integer.toString(rn) + "`|" + ID + "`|" + getCurrentTime() + "`|" + chat);
+						//메세지받음
+						else if(info[1].compareTo("sendCHAT") == 0) {
+							Message m = new Message(Integer.parseInt(info[2]), 1, ID, info[4], info[5]);
+							messageSet.get(Integer.parseInt(info[2])).add(m);
+							}
 						
-						messageSet.add(m);
-						//이렇게 추가하면 이제 chat thread에서 처리할 것임
-					}
-									
+						//"MCHAT`|OUTCHAT`|" + 방번호 + 나가는ID //채팅에서 나갑니다
+						//나간다고 말하기
+						else if(info[1].compareTo("OUTCHAT") == 0) {
+							//나간다 - rn, 3, 나가는자 ID, 0, 0
+							Message m = new Message(Integer.parseInt(info[2]), 3, ID, "0", "0");
+							messageSet.get(Integer.parseInt(info[2])).add(m);
+						}
+						
+						//"MCHAT`|REQuLIST`|" + 방번호  //채팅에서 나갑니다
+						//나간다고 말하기
+						else if(info[1].compareTo("REQuLIST") == 0) {
+							Message m = new Message(Integer.parseInt(info[2]), 4, ID, "0", "0");
+							messageSet.get(Integer.parseInt(info[2])).add(m);
+						}
+						
+						//"MCHAT`|InviteFriend`|" + 방번호 + 친구 아이디(들)
+						else if(info[1].compareTo("InviteFriend") == 0) {
+							Message m = new Message(Integer.parseInt(info[2]), 5, ID, info[3], "0");
+							messageSet.get(Integer.parseInt(info[2])).add(m);
+						}
+						
+						messageCK.set(1);
+					}					
 				}
 
 			} catch (IOException e) {
@@ -615,17 +631,13 @@ public class MainServer {
 						//형식 ; UPDATE F_state F_ID 상태(1이면 오프라인)
 						output.println("UPDATE`|F_state`|" + ID + "`|" + 1);
 					}
-					
-					
-					// 채팅방에서도 다 나가져야한다!!!
+	
+					// 채팅방에서도 다 나가져야한다!!! => client에서 처리
 
-					//친신받는것도 꺼줌
-					
 					//client에서 빠짐
 					client.remove(ID);
 				}
 				//비로그인 상태에는 남는게 없어서 걍 ㄹㅇ이소켓만 끝내면 됨
-			
 			}
 			try {
 				socket.close();
@@ -634,158 +646,173 @@ public class MainServer {
 		}
 	}
 
-	
-	// roomManage thread 코드
-	public static class RoomManage implements Runnable {
 
-		ExecutorService chat_pool = Executors.newFixedThreadPool(500);
-
-		@Override
-		public void run() {
-			
-			Random random = new Random(); //랜덤 객체 생성(디폴트 시드값 : 현재시간)
-	        random.setSeed(System.currentTimeMillis()); //시드값 설정을 따로 할수도 있음
-			
-			while(true) {
-				
-				//방 만들어달라는 요청이 잇다면
-				if(!createRoomQueue.isEmpty()) {
-					//요청 꺼내오기
-					RequestRoom temp = createRoomQueue.poll();
-					
-					//방번호 랜덤으로 생성하기
-					
-					
-					
-					
-					
-					int num = random.nextInt(10000);
-					//데이터베이스 room_num에 혹시 이미 있는수인지 체크, 만약 있다면 다시 난수 생성
-					
-					
-					
-					//새로운 채팅에 대한 스레드 작동!
-					//이 chat pool은 client에 직접 메세지를 보내주게 되는데, 위의 client hashmap을 이용하게 됨.
-					chat_pool.execute(new Chat(num, temp.getRequester_ID(), temp.getType(), temp.getParticipants_num(), temp.getParticipants_list()));
-				}
-					
-				
-				
-				
-			}
-		}
-	}
 	
-	
-	// 채팅방 thread 코드
+	// 멀티 채팅방 하나씩을 담당하는 thread 코드
 	public static class Chat implements Runnable {
 		int room_num;
-		private String requester_ID;
-		private int type; //0이면 개인, 1이면 단체
-		private int participants_num; //방장 포함
-		private ArrayList<String> participants_list = new ArrayList<String>();
-
+		String room_name;
+		private String type; //이전내용 보여줄지 말지 => N면 안보여주고 Y면 보여줌
+		private int participants_num = 0; //방장 포함
+		private HashSet<String> participants_list = new HashSet<String>(); //list를 모아둔 것
 		
-		public Chat(int room_num, String requester_ID, int type, int participants_num, ArrayList<String> participants_list) {
+		public Chat(int room_num, String room_name, String type, String requester_ID, String[] flist) {
 			this.room_num = room_num;
-			this.requester_ID = requester_ID;
-			this.type = type;
-			this.participants_num = participants_num;
-			this.participants_list = participants_list;
+			this.room_name = room_name;
+			this.type = type; //1이 들어오면 전에꺼 다보여줘야함.
 			
-			//그리고 DB에 추가하는 연산! => chatTable에 추가
+			HashMap<String, String> map = query.bringINFO(requester_ID);
+			String makerInfo = map.get("NICKNAME")+ "(" + map.get("NAME") + ")";
+						
+			//flist돌면서 사람들에게 채팅 초대 메세지 보내기
+			for(String id : flist) {
+				//"MCHAT`|INVCHAT`|" + 방번호 + 방이름 + 초대자 이름    //상대방에게 님 초대당햇다고 알려주기
+				if(client.containsKey(id))
+					client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + makerInfo);
+			}	
+			participants_list.add(requester_ID);
+			participants_num++;
 		}
-
-		//먼저 방이 만들어진다!
-		/**이 thread가 해야할 행동들을 적어보자
-		 * 
-		 * 먼저 만들어진다면 방에 초대하는 행동을 취해야 한다.
-		 * (예외처리는 나중에 생각해 제발 일단 기능부터 만들어!!!!!)
-		 * 
-		 * - 일댈인경우
-		 * 
-		 * 1. 먼저 사용자에게 방이 만들어졌다고 알림 => 그럼 일단 client측에서는 채팅방을 하나 띄우고, 채팅 입력은 못하는 상태로 만들거임.
-		 * 2. 다른 상대에게도 채팅 요청이 왔다고 알림 => 상대에게 보내면 그 client측에서는 팝업을 띄우고 수락하시겠습니까? 가 뜸
-		 * 3. 일단 그 다른 상대에게서 응답이 올 것임 (Y/N)
-		 * 
-		 * 4-1. 상대가 거절한다? -> 방만든 사람의 client로 거절의 메세지를 보냄 : 그럼 방만든 사람의 client는 상대방이 채팅을 거절했습니다! 메세지 뜨고 채팅방 닫기
-		 *  				=> 그리고 DB에서 이 채팅방을 삭제하고, thread도 종료된다.
-		 * 
-		 * 4-2. 상대가 수락한다? -> 방만든 사람의 client로 수락의 메세지를 보냄 : 그럼 방만든 사람의 client의 채팅방은 활성화된다
-		 * 					 -> 수락한 상대쪽에서도 수락한 순간 채팅방이 뜨면서 활성화 되어야 함. (이건 그쪽 클라이언트에서 할 일)
-		 * 
-		 * (상대가 수락한다는 가정 하에)
-		 * 5. while을 돌면서 client로부터 입력이 있는지 확인함. => peek을 통해 queue맨 위를 보면서 내 메세진지 아닌지 확인 => queue니까 시간순서대로 들어올수밖에 없다!
-		 * 만약 우리 방의 메세지다?
-		 * 
-		 * 메세지를 DB에 저장하고, 방에 있는 모든 사람들에게 message를 뿌린다. (그래봣자 1댈은 두명밖에 없지만...)
-		 * 
-		 * 
-		 * 지금 해둔 가정이 단순히 창을 닫은건 나가진게 아니고, 채팅방 내에서 나가기 버튼을 누르거나 로그아웃을 해야 완전히 꺼진것으로 간주한다!!!
-		 * 이걸 어덯게 판단하지? => 아 이거 너무 어려워ㅠㅠㅠ => 건의해보자...어케할건지...ㅠㅠㅠㅠ
-		 * 
-		 *  
-		 * 6. 이를 반복하다가 누구 한명이 종료한다면? -> ~~님이 나가셨습니다. 채팅이 종료되었습니다. 
-		 * 									=> 그리고 남은 상대방 측의 text area의 활성화가 채팅을 못치게 됨. 
-		 * 
-		 *
-		 *
-		 * - 멀티인경우
-		 * 
-		 * 1. 먼저 사용자에게 방이 만들어졌다고 알림 => 그럼 일단 client측에서는 채팅방을 하나 띄움
-		 * 2. 다른 상대에게도 채팅 요청이 왔다고 알림 => 상대에게 보내면 그 client측에서는 팝업을 띄우고 수락하시겠습니까? 가 뜸
-		 * 3. 일단 그 다른 상대에게서 응답이 올 것임 (Y/N)
-		 * 
-		 * 4-1. 상대가 거절한다? -> 그냥 그사람은 안들어오게 되는 것. 목록에서 삭제한다.(DB에서나...) 아 이거솓 꼬인다...
-		 * 
-		 * 4-2. 상대가 수락한다? -> 수락한 상대 client에 채팅방이 뜸 + 다른 상대들에게 누구님이 들어왔습니다~ 뜨게하기.
-		 * 
-		 * (상대가 수락한다는 가정 하에)
-		 * 5. while을 돌면서 client로부터 입력이 있는지 확인함. => peek을 통해 queue맨 위를 보면서 내 메세진지 아닌지 확인 => queue니까 시간순서대로 들어올수밖에 없다!
-		 * 만약 우리 방의 메세지다?
-		 * 메세지를 DB에 저장하고, 방에 있는 모든 사람들에게 message를 뿌린다. (그래봣자 1댈은 두명밖에 없지만...)
-		 * 
-		 * 
-		 * 지금 해둔 가정이 단순히 창을 닫은건 나가진게 아니고, 채팅방 내에서 나가기 버튼을 누르거나 로그아웃을 해야 완전히 꺼진것으로 간주한다!!!
-		 * 이걸 어덯게 판단하지? => 아 이거 너무 어려워ㅠㅠㅠ => 건의해보자...어케할건지...ㅠㅠㅠㅠ
-		 * 
-		 * 
-		 * 
-		 * 6. 이를 반복하다가 누군가에게서 나간다는 신호가 왔다면? => 상대가 나갓다고 다른 사용자들에게 알린다.
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * */
-		
 		
 		@Override
 		public void run() {
+			boolean flag = true;
 			
-			while(true) {				
-				//메세지셋에 메세지가 들어있는데
-				if(!messageSet.isEmpty()) {
-					if(messageSet.peek().getRoom_id() == room_num) {
-						//그 메세지가 우리거넹?
-						
-						
+			while (flag) {
+				// 메세지셋에 메세지가 들어있는데
+
+				System.out.println(Integer.toString(room_num) + messageSet.get(room_num).isEmpty());
+				
+				if (!messageSet.get(room_num).isEmpty()){
+					Message m = messageSet.get(room_num).poll();
+					
+					if (m.equals(null))
+						continue;
+
+					int k = m.getType();
+
+					if (k == 0) {
+						// 참여한다 - rn, 0, 참여자 ID, 0, 0
+						// 다른 참여자들에게 이사람이 들어왔다고 알려주는 부분 + 들어온 사람에게는 Type체크해서 
+						// "MCHAT`|ANSCHAT`|" + 방번호 + 상대ID
+						HashMap<String, String> map = query.bringINFO(m.getSender_id());
+						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+
+						for (String id : participants_list) {
+							client.get(id).println("MCHAT`|ANSCHAT`|" + room_num + "`|" + senderInfo);
+						}
+
+						if(type.equals("1")) { //1이라고 하면 들어오기 전의 메세지를 다 보내준다
+							// return array[][time, sender, content]
+							String[][] chatlist = query.bringCHATTING(Integer.toString(room_num));
+							
+							int cnum = Integer.parseInt(chatlist[0][0]);
+							
+							String messagelist = "";
+							
+							for(int i=2;i<=cnum;i++) {
+								HashMap<String, String>  map2 = query.bringINFO(chatlist[i][1]);
+								String senderInfo2 = map2.get("NICKNAME") + "(" + map2.get("NAME") + ")";
+								client.get(m.getSender_id()).println("=====>" + chatlist[i][2]);
+
+								messagelist =  messagelist + "`|" + senderInfo2 + "^" + chatlist[i][2];
+							}
+							
+							//이전 챗내용 보내주기
+							client.get(m.getSender_id()).println("MCHAT`|PRECHAT`|" + room_num +  "`|" + cnum + messagelist);
+					
+						}
+
+						participants_list.add(m.getSender_id());
+						participants_num++;
 					}
+
+					else if (k == 1) {// 메세지보내기 - rn, 1, sender ID, time, message
+						// "MCHAT`|receivedCHAT`|" + 방번호 + 채팅보낸자ID + 별명(name) + content //채팅내용 전송 (뿌리기)
+						HashMap<String, String> map = query.bringINFO(m.getSender_id());
+						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+
+						for (String id : participants_list) {
+							client.get(id).println("MCHAT`|receivedCHAT`|" + room_num + "`|" + m.getSender_id() + "`|"
+									+ senderInfo + "`|" + m.getMessage());
+						}
+						query.insertCHATTING(Integer.toString(room_num), m.getTime(), m.getSender_id(), m.getMessage());
+					}
+
+					else if (k == 2) { // 초대한다- rn, 2, 초대자 ID, 초대받는자 ID, 0
+						client.get(m.getTime())
+								.println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + m.getSender_id());
+					} 
+					
+					else if (k == 3) { // 나간다 - rn, 3, 나가는자 ID, 0, 0
+						participants_list.remove(m.getSender_id());
+						participants_num--;
+						// "MCHAT`|outCHAT`|" + 방번호 + 나가는ID + 별명(name) //채팅에서 나갑니다 (뿌리기)
+						HashMap<String, String> map = query.bringINFO(m.getSender_id());
+						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+
+						for (String id : participants_list) {
+							client.get(id).println(
+									"MCHAT`|outCHAT`|" + room_num + "`|" + m.getSender_id() + "`|" + senderInfo);
+						}
+					} 
+					
+					else if (k == 4) {
+						// "MCHAT`|ulist`|" + 방번호 + 리스트 채울 수 있는 정보 //접속중인 유저리스트를 요청자에게 전송
+						String userlist = null; // 이거 채워주기!!!!
+						int a = 0;
+						
+						for (String id : participants_list) {
+							HashMap<String, String> map = query.bringINFO(id);
+							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+							
+							if(a == 0) {
+								a++;
+								userlist = senderInfo;
+							}
+							else {
+								userlist = userlist + "^" + senderInfo;
+							}
+						}
+	
+						client.get(m.getSender_id()).println("MCHAT`|ulist`|" + room_num + "`|" + userlist);
+					}
+					
+					else if (k == 5) { //친구에게 초대하기
+
+						String ulist[] = m.getTime().split("\\^");
+						
+						HashMap<String, String> map = query.bringINFO(m.getSender_id());
+						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+						
+						//flist돌면서 사람들에게 채팅 초대 메세지 보내기
+						for(String id : ulist) {
+							//"MCHAT`|INVCHAT`|" + 방번호 + 방이름 + 초대자 이름    //상대방에게 님 초대당햇다고 알려주기
+							if(client.containsKey(id) && !participants_list.contains(id))
+								client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + senderInfo);
+						}
+					}
+
+					messageCK.set(1);
+				} else {
+					System.out.println("+");
+				}
+
+				// 인원수가 0명이 되면 챗이 종료됨 => 이것도 사라짐
+				if (participants_num < 1) {
+					flag = false;
+					messageSet.remove(room_num);
+				} else {
+					System.out.println(".");
 				}
 			}
+			
+			//스레드 종료하기전에 chat내용 전체 삭제, room에서 본인 삭제 해야함	
+			query.deleteCHATTING(Integer.toString(room_num));
 
-			
-			
-			
-			//인원수가 1명이 되면 챗이 종료됨
-			//스레드 종료하기전에 chat내용 전체 삭제, room에서 본인 삭제 해야함
-			
-			
 		}
-
 	}
 
-	
 	
 	// 실시간으로 친구 신청 감시하는 얘
 	public static class RealTimeUpdater implements Runnable {
@@ -805,7 +832,6 @@ public class MainServer {
 			System.out.println("realtime!");
 
 			while (client.containsKey(ID)) {
-				System.out.println("rego");
 
 				if (query.checkPLUS(ID) == 1) { // 만약 친구신청 리스트에 내가 있다면?
 
@@ -841,8 +867,6 @@ public class MainServer {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				System.out.println("안죽엇닥");
 			}
 		}
 	}

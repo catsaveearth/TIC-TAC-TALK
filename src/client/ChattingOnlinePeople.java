@@ -9,7 +9,7 @@ public class ChattingOnlinePeople extends JFrame {
 	JTable jTable;
 	DefaultTableModel model;
 	
-	public ChattingOnlinePeople() {
+	public ChattingOnlinePeople(String[] ulist) {
 		JFrame frame = new JFrame();
 		JPanel friend = new JPanel();
 		
@@ -17,40 +17,20 @@ public class ChattingOnlinePeople extends JFrame {
 	    friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
 	    //friend2.setPreferredSize(new Dimension(430, 13));
 	    friend.setPreferredSize(new Dimension(430, 380));
-	    
-	    ImageIcon onlineImgIcon = new ImageIcon("image/online.png");
-	    Image online = onlineImgIcon.getImage();
-	    Image onlineImg = online.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon onlineIcon = new ImageIcon(onlineImg);
-	    
-	    ImageIcon offlineImgIcon = new ImageIcon("image/offline.png");
-	    Image offline = offlineImgIcon.getImage();
-	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // online인지 offline인지 정하는 부분
-	    Icon status = new ImageIcon();
-	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
+
 	    String columnNames[] = { "닉네임(이름)" };
-	    Object rowData[][] = // 친구목록 들어가야 될 자리!
-	       {
-	       { "닉네임1(이름)"},
-	       { "닉네임2(이름)"},
-	       { "닉네임3(이름)"},
-	       };
-	    
+	    Object rowData[][] = { };    
 	    model = new DefaultTableModel(rowData, columnNames) {
 	       public boolean isCellEditable(int i, int c) {
 	          return false;
 	       }
 	    };
 	
+	    for(String ul : ulist) {
+			Object inData[] = {ul};
+			model.addRow(inData);
+	    }
+	    
 	    jTable = new JTable(model);
 	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
 	    jTable.getColumn("닉네임(이름)").setPreferredWidth(100);
@@ -66,12 +46,7 @@ public class ChattingOnlinePeople extends JFrame {
 	    
 	    frame.setVisible(true);
         frame.setSize(200, 300);
-        //frame.setResizable(false);
-	}
-
-	public static void main(String[] args) {
-	      ChattingOnlinePeople main = new ChattingOnlinePeople();
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
 	}
 }
-
-

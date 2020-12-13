@@ -139,6 +139,25 @@ public class MainScreen extends JFrame {
 			Client.CHATANSWER(fid, false);
 		}
 	}
+
+	//멀티채팅신청 팝업 보여주기
+	public static void showMCHAT(int roomnumber, String roomname, String makerinfo) {
+		String windowName = "채팅 신청";
+		String showMessage = roomname + "(by " + makerinfo + ")방의 멀티 채팅을 수락하시겠습니까?";
+			
+		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			Client.MCHATANSWER(roomnumber, roomname, true);
+		} else {
+			Client.MCHATANSWER(roomnumber, roomname, false);
+		}
+	}
+	
+	
+	public static void showInviteInOriginRoom(int rn) {
+		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
+	}
 	
 	
 	public MainScreen() {
@@ -215,7 +234,7 @@ public class MainScreen extends JFrame {
       chatting.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-            InviteFriend invite = new InviteFriend();
+            InviteFriend invite = new InviteFriend(model);
          }
       });
       
@@ -292,10 +311,6 @@ public class MainScreen extends JFrame {
          status = new ImageIcon("image\\offline.png");
       }
 
-      
-      
-      
-      
       //친구목록 불러오기!=========================================
       String[][] friendlist = Client.friendList();
       // String[][ID, name, nickname, last_connection, 상메]
@@ -327,10 +342,7 @@ public class MainScreen extends JFrame {
 				}
 			}
 		}
-
-      
-      
-      
+    
       
       //왜 이거 선택이 안먹지?? 나중에물어보기
       jTable = new JTable(model);

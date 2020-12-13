@@ -1177,7 +1177,7 @@ public class query {
 			String sql = "SELECT time, sender, content" + " FROM CHATTING" + " WHERE chat_id = '" + Qchat_id + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
+			int i = 1;
 			while (rs.next()) {
 				String time = rs.getString(1);
 				String sender = rs.getString(2);
@@ -1193,6 +1193,8 @@ public class query {
 				array[i][2] = content;
 				i++;
 			}
+			array[0][0] = Integer.toString(i - 1);
+
 			return array;
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");

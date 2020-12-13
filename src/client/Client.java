@@ -12,9 +12,10 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,8 +31,18 @@ public class Client {
 	private static AtomicInteger writeSocket = new AtomicInteger(1);
 	// socket에 값을 넣고 빼는걸 제어할 친구! 초기값은 1 : 1일때는 사용가능, 0일때는 사용 불가능!
 	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
+	private static HashMap<Integer, ChattingMulti> MCHAT = new HashMap<Integer, ChattingMulti>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 
+	public static String getCurrentTime() {
+		Date date_now = new Date(System.currentTimeMillis()); // 현재시간을 가져와 Date형으로 저장한다
+		
+		//HHmmss
+		SimpleDateFormat date_format = new SimpleDateFormat("yyMMddHHmmssSS");
 
+		return date_format.format(date_now).toString();
+	}
+	
+	
 	// thread들과 소통하기 위한 변수 부분!!!
 	static boolean PWck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
 	static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
@@ -43,8 +54,9 @@ public class Client {
 	static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 	static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
 	static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
-	
 	static String lefsfe;
+	static int roomNum = 0;
+	static boolean ckroomNum = false; 
 	//boolean변수들을 True로 해놓으면 MainScreen에서 정보를 빼가고 false로 돌려놓을 것.
 
 	
@@ -378,7 +390,7 @@ public class Client {
 		out.println("PCHAT`|REQCHAT`|" + FID);
 	}
 	
-	//상대방에게 채팅을 수락한다고 Y/N 보내기
+	//상대방에게 채팅을 수락한다고 Y/N 보내기 (일댈버전)
 	protected static void CHATANSWER(String FID, boolean ans) {
 		//PCHAT`|PESPONCHAT`|" + 채팅요청자ID + Y/N : 채팅할거냐고 물어봣을때 채팅 할건지 말건지 답변
 		System.out.println("2 =>" + ans);
@@ -387,11 +399,71 @@ public class Client {
 		if(ans) out.println("PCHAT`|PESPONCHAT`|" + FID + "`|Y");
 		else out.println("PCHAT`|PESPONCHAT`|" + FID+ "`|N");
 	}
+
 	
 	//사용자가 보내는 채팅을 받아서 서버로 전송하는 역할. (받는사람과 보내는 내용)
 	//PCHAT`|sendCHAT`|" + 채팅받는자ID + Content : 채팅내용 전송 (내가쓴거임)
 	protected static void sendPCHAT(String FID, String chat) {
 		out.println("PCHAT`|sendCHAT`|" + FID + "`|" + chat);
+	}
+	
+	
+	// <멀티챗>==========================================
+	//서버에게 룸만든다고 요청
+	protected static void makeMultiRoom(String roomname, String showpre, String flist) {
+		//"MCHAT`|REQROOM`|" + 방이름 + 내용 보임 여부 +  방만들기 요청자 ID + flist      //방만들기 요청 
+		out.println("MCHAT`|REQROOM`|" + roomname + "`|" + showpre + "`|" + ID + "`|" + flist);
+		
+		// room number를 받기를 기다림
+		while(ckroomNum != true){
+			System.out.println("wait roomNum");
+		}
+		ckroomNum = false; //재활용 가능하게 바꿔준다
+		
+		int rn = roomNum;
+		//멀티 챗을 위한 채팅창을 띄워줍니다
+		ChattingMulti nchat = new ChattingMulti(rn, roomname);
+		
+		//채팅창을 관리 hashMap에 넣어줍니다
+		MCHAT.put(rn, nchat);
+	}
+
+	//상대방에게 채팅을 수락한다고 Y/N 보내기 (멀티버전)
+	protected static void MCHATANSWER(int roomid, String roomname, boolean ans) {
+		//그래 나 너랑 채팅할게!
+		if(ans) {
+			out.println("MCHAT`|RESPONCHAT`|" + roomid + "`|" + ID + "`|Y");
+			ChattingMulti nchat = new ChattingMulti(roomid, roomname);
+			//채팅창을 관리 hashMap에 넣어줍니다
+			MCHAT.put(roomid, nchat);
+			System.out.println(roomid + "한다구");
+		}
+		//아니면 아예 무시! 
+	}
+	
+	//사용자가 보내는 채팅을 받아서 서버로 전송하는 역할. (받는사람과 보내는 내용)
+	//"MCHAT`|sendCHAT`|" + 방번호 + 채팅 보낸자ID + 시간 + content // 채팅 전송
+	protected static void sendMCHAT(int rn, String chat) {
+		out.println("MCHAT`|sendCHAT`|"+ Integer.toString(rn) + "`|" + ID + "`|" + getCurrentTime() + "`|" + chat);
+	}
+	
+	//나 나가용
+	//"MCHAT`|OUTCHAT`|" + 방번호 + 나가는ID //채팅에서 나갑니다
+	protected static void delMCHAT(int rn) {
+		MCHAT.remove(rn);
+		out.println("MCHAT`|OUTCHAT`|" + rn + "`|" + ID);
+	}
+	
+	//들어온 사람 리스트좀 주세요
+	//"MCHAT`|REQuLIST`|" + 방번호 //채팅에서 나갑니다
+	protected static void reqULIST(int rn) {
+		out.println("MCHAT`|REQuLIST`|" + rn);
+	}
+		
+	//친구 초대할거에요!
+	//"MCHAT`|InviteFriend`|" + 친구 아이디(들)
+	protected static void InviteFriend(int rn, String list) {
+		out.println("MCHAT`|InviteFriend`|" + rn + "`|" + list);
 	}
 	
 	
@@ -430,7 +502,6 @@ public class Client {
 
 		// main구축이 끝나면 MainScreen에서 함수를 불러서 socket의 제한을 풀어줄 것.
 		// => 이때부터 thread에서 입출력가능
-
 		// 이제부터는 동적 이벤트 뿐! 즉, server에서 연락이 오던지, client가 먼저 작동하던지 둘 중 하나다.
 
 		// input이랑 Basic받을 얘
@@ -438,15 +509,8 @@ public class Client {
 
 		b_pool.execute(new input());
 
-		
-		//채팅방 받을 얘
-		//ExecutorService chat_pool = Executors.newFixedThreadPool(100);
-
-		
 		//이제부터 서버에서 오는 모든 입력은 input thread를 통해서 처리됨
-
 	}
-
 	
 	// 오로지 입력만 받는 쓰레드 (입력 들어오면 정리해서 필요한 곳에 넣어준다!!)
 	public static class input implements Runnable {
@@ -457,6 +521,7 @@ public class Client {
 			while (readSocket.get() == 0) {}; // 1되면 풀려남
 			// 연락 받는건 무조건 이 thread에서 처리!
 
+			try {
 			while (true) {
 				System.out.println("뱅뱅");
 				String line = in.nextLine();
@@ -631,45 +696,91 @@ public class Client {
 					}
 				}
 
-				
-				
+			
 				
 				//채팅방 관련 (멀티)
 				else if (line.startsWith("MCHAT")) {
 					String info[] = line.split("\\`\\|");
 
-
-					if(info[1].compareTo("INFO") == 0) {
-
-						
-						
+					//상대방 알려주면서 채팅할거냐고 물어보기  
+					//client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + makerInfo);
+					if(info[1].compareTo("INVCHAT") == 0) {
+						//채팅할거냐고 물어보기 -> 메인 페이지에서 팝업 띄워서 물어보자!
+						MainScreen.showMCHAT(Integer.parseInt(info[2]), info[3], info[4]);		
+					}
+					
+					//밤 번호 알려주는 부분
+					//"MCHAT`|RoomNumber`|" + 방번호
+					else if(info[1].compareTo("RoomNumber") == 0) {
+						roomNum = Integer.parseInt(info[2]);
+						ckroomNum = true;
+					}
+					
+					//client.get(id).println("MCHAT`|ANSCHAT`|" + room_num + "`|" + m.getSender_id());
+					//누구 들어왔다고 알리는 부분
+					else if(info[1].compareTo("ANSCHAT") == 0) {
+						System.out.println(MCHAT.keySet());
+						MCHAT.get(Integer.parseInt(info[2])).notifyCome(info[3]);
+					}
+					
+					
+					//client.get(id).println("MCHAT`|receivedCHAT`|" + room_num 
+					//		+ "`|" + m.getSender_id() + "`|" + senderInfo + "`|" + m.getMessage());
+					//메세지를 받았습니다
+					else if(info[1].compareTo("receivedCHAT") == 0) {
+						if(info[3].equals(ID)) 	MCHAT.get(Integer.parseInt(info[2])).receiveChat("나", info[5]);
+						else MCHAT.get(Integer.parseInt(info[2])).receiveChat(info[4], info[5]);
 
 					}
+					
+					//client.get(id).println("MCHAT`|outCHAT`|" + room_num + "`|" + m.getSender_id() + "`|" + senderInfo);
+					//누구 나간다고 알리는 부분
+					else if(info[1].compareTo("outCHAT") == 0) {
+						MCHAT.get(Integer.parseInt(info[2])).notifyOut(info[4]);
+					}
+					
+					//"MCHAT`|ulist`|" + 방번호 + 리스트 채울 수 있는 정보 
+					//방에 있는 사람들 리스트
+					else if(info[1].compareTo("ulist") == 0) {
+						String userList[] = info[3].split("\\^");
+						ChattingOnlinePeople people = new ChattingOnlinePeople(userList);
+					}
+					
+					//"MCHAT`|PRECHAT`|" + room_num +  "`|" + cnum + "`|" + messagelist
+					//입장전 채팅 보여주는 얘!
+					else if(info[1].compareTo("PRECHAT") == 0) {
+						String ulist[][] = new String[100][2];
+						
+						for(int i = 4 ; i < 3 + Integer.parseInt(info[3]) ; i++) {
+							String userList[] = info[i].split("\\^");
 
-					// 비밀번호 체크 요청한거 응답=> SETTING PWCK 1/0 (1이 true, 0이 false)
-					else if(info[1].compareTo("PWCK") == 0) {
+							ulist[i-4][0] = userList[0];
+							ulist[i-4][1] = userList[1];
+							System.out.println("=> " + userList[0] + userList[1]);
+						}
 
+						MCHAT.get(Integer.parseInt(info[2])).PrereceiveChat(Integer.parseInt(info[3]), ulist); ;
 
 					}
+					
 				}
-				
-				
 			}
+		
+		}finally {
+			//개인채팅들 다 나가기
+			for(ChattingOne a : PCHAT.values()) {
+				a.FexitChat();
+			}
+			PCHAT.clear();
+			
+			//멀티채팅들도 다 나가기
+			for(ChattingMulti a : MCHAT.values()) {
+				int rnum = a.roomnumber;
+				MCHAT.remove(rnum);
+				out.println("MCHAT`|OUTCHAT`|" + rnum + "`|" + ID);
+			}
+			MCHAT.clear();
 		}
 	}
-
-
-
-	// 채팅방 마다 생기는 스레드
-	public static class chat implements Runnable {
-
-		private int room_num;
-
-		@Override
-		public void run() {
-
-		}
-
-	}
-
+}
 }

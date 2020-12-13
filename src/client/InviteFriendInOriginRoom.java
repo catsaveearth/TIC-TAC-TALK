@@ -7,7 +7,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 
-public class InviteFriend extends JFrame implements MouseListener {
+public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 	JTable jTable;
 	DefaultTableModel model;
 	HashSet<Integer> selectnum = new HashSet<Integer>();
@@ -34,29 +34,20 @@ public class InviteFriend extends JFrame implements MouseListener {
 	}
 	
 	
-	public InviteFriend(DefaultTableModel m) {
+	public InviteFriendInOriginRoom(DefaultTableModel m, int rn) {
 		model = m;
 		JFrame frame = new JFrame();
 		JPanel friend = new JPanel();
 	    JButton makeroom = new JButton();
 	    makeroom.setPreferredSize(new Dimension(180, 25));
-		makeroom.setText("방만들기");
+		makeroom.setText("초대하기");
 		flist.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
 
-		//멀티 룸 만들기
+		//친구 초대하기
 		makeroom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(!selectnum.isEmpty()) {
-					String roomname = JOptionPane.showInputDialog(null, "room name", "방 이름을 설정하세요", JOptionPane.OK_CANCEL_OPTION);
-					//방 이름 신청 받음
-					int preck = JOptionPane.showConfirmDialog(null, "중간에 초대받은 사람도 처음부터 메세지를 보게 할까요?", "Set type", JOptionPane.YES_NO_OPTION);
-					
-					String showpre = null;
-
-					if(preck == 0) showpre = "1";
-					else showpre = "0";
-					
 					//ID를 굴비엮기
 					String IDs = "";
 					int first = 0;
@@ -65,9 +56,10 @@ public class InviteFriend extends JFrame implements MouseListener {
 						else IDs = IDs + "^" + model.getValueAt(i, 0);
 					}
 					
-				   //멀티 채팅을 신청한다 (사람 리스트랑 방 이름을 보냄)
-				   Client.makeMultiRoom(roomname, showpre, IDs);
-				   frame.dispose();
+					frame.dispose();
+
+				   //초대 요청
+					Client.InviteFriend(rn, IDs);
 				}
 			}
 		});
@@ -141,7 +133,6 @@ public class InviteFriend extends JFrame implements MouseListener {
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
 
-	
 }
 
 
