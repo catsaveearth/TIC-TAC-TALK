@@ -200,93 +200,86 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
 	}
 	
-	 public void mouseClicked(MouseEvent me) {
-	      int row = jTable.getSelectedRow();
-	      Object line = model.getValueAt(row, 0);
-	      System.out.println("line2 = " + model.getValueAt(row, 3));
-	      Object line2 = model.getValueAt(row, 3);
-	      String FID = line.toString();
-	      //String state = line2.toString();
-	      //System.out.println(state);
-	      //String FID = idmatch.get(line.toString());
-	      //System.out.println("state = " + state);
-	        if (me.getButton() == MouseEvent.BUTTON1) {
-	           flag++;
-	           System.out.println(flag);
-	        }
-	        if (me.getButton() == MouseEvent.BUTTON3) {
-	           flag += 2;
-	           System.out.println(flag);
-	           if (flag == 3) {
-	               JPopupMenu pm = new JPopupMenu();
-	                JMenuItem pm_item1 = new JMenuItem("정보");
-	                pm_item1.addActionListener(this);
-	                System.out.println(this);
-	                JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
-	                pm_item2.addActionListener(this);
-	                JMenuItem pm_item3 = new JMenuItem("파일전송");
-	                pm_item3.addActionListener(this);
-	                JMenuItem pm_item4 = new JMenuItem("게임하기");
-	                pm_item4.addActionListener(this);
-	                pm.add(pm_item1);
-	                pm.add(pm_item2);
-	                pm.add(pm_item3);
-	                pm.add(pm_item4);
-	                pm.show(me.getComponent(), me.getX(), me.getY());
-	                
-	                pm_item1.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   FriendInfo info = new FriendInfo(FID, 1);
-	                	   }
-	                	   
-	                });
-	                pm_item2.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   //내 친구 찾기
-	                		   /*if(Client.ckINPCHAT(FID) || !state.equals("0")) {
-	                	            JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
-	                	         }*/
-	                		   /*if (Client.ckINPCHAT(FID)) {
-	                	            JOptionPane.showMessageDialog(null, "이미 채팅중");
-	                		   } else if (!state.equals("0")) {
-	                	            JOptionPane.showMessageDialog(null, "오프라인");
-	                		   } else {
-	                	            ChattingOne chatting = new ChattingOne(FID); //채팅방 키고
-	                	            Client.addPCHAT(FID, chatting); //채팅중인 상대에 상대방을 더해주고
-	                	            Client.ckANSWER(FID);
-	                	       }*/
-	                	   }
-	                	   
-	                });
-	                
-	                FileNameExtensionFilter filter = new FileNameExtensionFilter("txt 파일", "txt");
-	                pm_item3.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   //내 친구 찾기
-	                		    c.setFileFilter(filter);
-           	                	int rVal = c.showOpenDialog(null);
-           	                	if (rVal == c.APPROVE_OPTION) {
-           	                    path = c.getSelectedFile().getAbsolutePath();
-           	                }
-	                		   
-	                	   }
-	                	   
-	                });
-	                pm_item4.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   //내 친구 찾기
-	                		   
-	                	   }
-	                	   
-	                });
-	           }
-	           flag = 0;
-	        }
-	   }
+    public void mouseClicked(MouseEvent me) {
+        int row = jTable.getSelectedRow();
+        Object line = model.getValueAt(row, 0);
+        System.out.println("line2 = " + model.getValueAt(row, 3));
+        Object line2 = model.getValueAt(row, 3);
+        String FID = line.toString();
+        
+          if (me.getButton() == MouseEvent.BUTTON1) {
+             flag=1;
+             System.out.println(flag);
+          }
+          if (me.getButton() == MouseEvent.BUTTON3) {
+             flag += 2;
+             System.out.println(flag);
+             if (flag == 3) {
+                 JPopupMenu pm = new JPopupMenu();
+                  JMenuItem pm_item1 = new JMenuItem("정보");
+                  pm_item1.addActionListener(this);
+                  System.out.println(this);
+                  JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
+                  pm_item2.addActionListener(this);
+                  JMenuItem pm_item3 = new JMenuItem("파일전송");
+                  pm_item3.addActionListener(this);
+                  JMenuItem pm_item4 = new JMenuItem("게임하기");
+                  pm_item4.addActionListener(this);
+                  pm.add(pm_item1);
+                  pm.add(pm_item2);
+                  pm.add(pm_item3);
+                  pm.add(pm_item4);
+                  pm.show(me.getComponent(), me.getX(), me.getY());
+                  
+                  pm_item1.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           FriendInfo info = new FriendInfo(FID, 1);
+                        }
+                        
+                  });
+                  pm_item2.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                           if(Client.ckINPCHAT(FID) || !line2.equals(onlineIcon)) {
+                                 JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
+                              }
+                           else {
+                                 ChattingOne chatting = new ChattingOne(FID); //채팅방 키고
+                                 Client.addPCHAT(FID, chatting); //채팅중인 상대에 상대방을 더해주고
+                                 Client.ckANSWER(FID);
+                            }
+                        }
+                        
+                  });
+                  
+                  FileNameExtensionFilter filter = new FileNameExtensionFilter("txt 파일", "txt");
+                  pm_item3.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                            c.setFileFilter(filter);
+                                int rVal = c.showOpenDialog(null);
+                                if (rVal == c.APPROVE_OPTION) {
+                                 path = c.getSelectedFile().getAbsolutePath();
+                             }
+                           
+                        }
+                        
+                  });
+                  pm_item4.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                           
+                        }
+                        
+                  });
+             }
+             flag = 0;
+          }
+     }
 	   
 	   public void mouseEntered(MouseEvent e) {}
 	   public void mouseExited(MouseEvent e) {}

@@ -12,12 +12,13 @@ public class InviteFriend extends JFrame implements MouseListener {
 	DefaultTableModel model;
 	HashSet<Integer> selectnum = new HashSet<Integer>();
     JLabel flist = new JLabel("친구를 선택하세요");
+    JPanel listPanel = new JPanel();
 
 	
 //getSelectedRows ()
 	public void mouseClicked(MouseEvent me) {
 		int row = jTable.getSelectedRow();
-
+		//jTable.
 		if(selectnum.contains(row)) {//선택해제
 			selectnum.remove(row);
 		}
@@ -37,11 +38,16 @@ public class InviteFriend extends JFrame implements MouseListener {
 	public InviteFriend(DefaultTableModel m) {
 		model = m;
 		JFrame frame = new JFrame();
+		frame.setBackground(Color.yellow);
 		JPanel friend = new JPanel();
+		friend.setPreferredSize(new Dimension(250, 100));
 	    JButton makeroom = new JButton();
+	    makeroom.setBackground(new Color(74, 210, 149));
 	    makeroom.setPreferredSize(new Dimension(180, 25));
 		makeroom.setText("방만들기");
-		flist.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
+		makeroom.setFont(new Font("나눔바른펜", Font.BOLD, 10));
+		flist.setFont(new Font("나눔바른펜", Font.PLAIN, 18));
+		flist.setForeground(Color.white);
 
 		//멀티 룸 만들기
 		makeroom.addActionListener(new ActionListener() {
@@ -72,9 +78,11 @@ public class InviteFriend extends JFrame implements MouseListener {
 			}
 		});
 
+		JPanel title = new JPanel();
+		title.setPreferredSize(new Dimension(250, 30));
+		title.setBackground(new Color(74, 210, 149));
 	    JLabel friend2 = new JLabel("친구초대");
 	    friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
-	    //friend2.setPreferredSize(new Dimension(430, 13));
 	    friend.setPreferredSize(new Dimension(430, 380));
 	    
 	    ImageIcon onlineImgIcon = new ImageIcon("image/online.png");
@@ -119,15 +127,35 @@ public class InviteFriend extends JFrame implements MouseListener {
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
 	    
-	    friend.add(friend2);
-	    friend.add(jScollPane, "Left"); //JScrooPane에 담은 JList를 나타내기 위해 배치한다.3
-	    friend.add(flist);
-	    friend.add(makeroom);
-	    frame.add(friend);
+
+	    listPanel.setPreferredSize(new Dimension(230, 20));
+	    listPanel.add(flist);
+	    
+	    title.add(friend2);
+	    //friend.add(friend2);
+	    //friend.add(jScollPane, "Left"); //JScrooPane에 담은 JList를 나타내기 위해 배치한다.
+	    jScollPane.setPreferredSize(new Dimension(230, 230));
+	    JPanel table = new JPanel();
+	    table.setPreferredSize(new Dimension(250, 280));
+	    table.setBackground(new Color(0, 54, 78));
+	    
+	    table.add(jScollPane, "Left");
+	    table.add(flist);
+	    //friend.add(flist);
+	    //friend.add(makeroom);
+	    
+	    frame.add(title, BorderLayout.NORTH);
+	    //frame.add(jScollPane);
+	    frame.add(table);
+	    //frame.add(listPanel);
+	    //frame.add(friend);
+	    //frame.add(flist);
+	    frame.add(makeroom, BorderLayout.SOUTH);
+	    //frame.add(friend, BorderLayout.SOUTH);
 
 	    
 	    frame.setVisible(true);
-        frame.setSize(200, 350);
+        frame.setSize(250, 350);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 	}

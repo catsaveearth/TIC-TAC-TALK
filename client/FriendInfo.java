@@ -12,42 +12,162 @@ public class FriendInfo extends JFrame{
 
 	//type : 0 - NF, 1 - F
 	public FriendInfo(String ID, int type) {
-        super.setLayout(new GridLayout(8, 1));
-		//JFrame frame = new JFrame();
-		JPanel panel = new JPanel();
-		JLabel name = new JLabel("´Ð³×ÀÓ(ÀÌ¸§)");
-		name.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 30));
-		JLabel message = new JLabel("ÇÑÁÙ¸Þ½ÃÁö");
-		message.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
-		JLabel email = new JLabel("ÀÌ¸ÞÀÏ");
-		email.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
-		
-
-		JLabel phone = new JLabel("ÀüÈ­¹øÈ£");
-		phone.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
-		JLabel birth = new JLabel("»ýÀÏ");
-		birth.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
-		JLabel github = new JLabel("±êÇé");
-		github.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
-		
-		
+		JFrame frame = new JFrame();
 		JPanel namePanel = new JPanel();
-		namePanel.add(name);
+		namePanel.setPreferredSize(new Dimension(500, 60));
+		namePanel.setBackground(new Color(0, 54, 78));
+		JLabel nameLabel = new JLabel("ÀÌ¸§µé¾î°©´Ï´Ù");
+		nameLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 40));
+		nameLabel.setForeground(Color.white);
+		
+		namePanel.add(nameLabel);
+
+		JPanel infoPanel = new JPanel();
 		JPanel messagePanel = new JPanel();
-		messagePanel.add(message);
+		messagePanel.setPreferredSize(new Dimension(500, 50));
+		messagePanel.setBackground(Color.white);
+		messagePanel.setBorder(null);
+		JButton messageBtn = new JButton();
+		messageBtn.setBounds(0, 70, 150, 50);
+		messageBtn.setBorder(null);
+		ImageIcon icon1 = new ImageIcon("image/message.png");
+	    Image messageImage = icon1.getImage();
+	    Image messageChangeImg = messageImage.getScaledInstance(150, 50, Image.SCALE_SMOOTH);
+	    ImageIcon messageChangeIcon = new ImageIcon(messageChangeImg);
+	    messageBtn.setIcon(messageChangeIcon);
+		JPanel messageLabelPanel = new JPanel();
+		messageLabelPanel.setPreferredSize(new Dimension(330, 50));
+		messageLabelPanel.setBackground(Color.white);
+		JLabel messageLabel = new JLabel("ÇÑÁÙ¸Þ½ÃÁöµé¾î°©´Ï´Ù");
+		messageLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		messageLabel.setForeground(Color.black);
+		JPanel messageIcon = new JPanel();
+		messageIcon.setPreferredSize(new Dimension(150, 50));
+		messageIcon.setBackground(new Color(74, 210, 149));
+		
+		messageLabelPanel.add(messageLabel);
+		messagePanel.add(messageIcon);
+		messagePanel.add(messageLabelPanel);
+		
 		JPanel emailPanel = new JPanel();
-		emailPanel.add(email);
+		emailPanel.setPreferredSize(new Dimension(500, 50));
+		emailPanel.setBackground(Color.white);
+		emailPanel.setBorder(null);
+		JButton emailBtn = new JButton();
+		emailBtn.setBounds(0, 125, 150, 50);
+		emailBtn.setBorder(null);
+		ImageIcon icon2 = new ImageIcon("image/email.png");
+	    Image emailImage = icon2.getImage();
+	    Image emailChangeImg = emailImage.getScaledInstance(150, 50, Image.SCALE_SMOOTH);
+	    ImageIcon emailChangeIcon = new ImageIcon(emailChangeImg);
+	    emailBtn.setIcon(emailChangeIcon);
+		JPanel emailLabelPanel = new JPanel();
+		emailLabelPanel.setPreferredSize(new Dimension(330, 50));
+		emailLabelPanel.setBackground(Color.white);
+		JLabel emailLabel = new JLabel("ÀÌ¸ÞÀÏµé¾î°©´Ï´Ù");
+		emailLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		emailLabel.setForeground(Color.black);
+		JPanel emailIcon = new JPanel();
+		emailIcon.setPreferredSize(new Dimension(150, 50));
+		emailIcon.setBackground(new Color(74, 210, 149));
+		
+		emailLabelPanel.add(emailLabel);
+		emailPanel.add(emailIcon);
+		emailPanel.add(emailLabelPanel);
+		
+		
+		
+		
 		
 		JPanel phonePanel = new JPanel();
-		phonePanel.add(phone);
-		JPanel birthPanel = new JPanel();
-		birthPanel.add(birth);
-		JPanel githubPanel = new JPanel();
-		githubPanel.add(github);
+		phonePanel.setPreferredSize(new Dimension(500, 50));
+		phonePanel.setBackground(Color.white);
+		phonePanel.setBorder(null);
+		JButton phoneBtn = new JButton();
+		phoneBtn.setBounds(0, 180, 150, 50);
+		phoneBtn.setBorder(null);
+		ImageIcon icon3 = new ImageIcon("image/phonenumber.png");
+	    Image phoneImage = icon3.getImage();
+	    Image phoneChangeImg = phoneImage.getScaledInstance(150, 50, Image.SCALE_SMOOTH);
+	    ImageIcon phoneChangeIcon = new ImageIcon(phoneChangeImg);
+	    phoneBtn.setIcon(phoneChangeIcon);
+		JPanel phoneLabelPanel = new JPanel();
+		phoneLabelPanel.setPreferredSize(new Dimension(330, 50));
+		phoneLabelPanel.setBackground(Color.white);
+		JLabel phoneLabel = new JLabel("ÀüÈ­¹øÈ£µé¾î°©´Ï´Ù");
+		phoneLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		phoneLabel.setForeground(Color.black);
+		JPanel phoneIcon = new JPanel();
+		phoneIcon.setPreferredSize(new Dimension(150, 50));
+		phoneIcon.setBackground(new Color(74, 210, 149));
 		
-		add(namePanel);
-		add(messagePanel);
-		add(emailPanel);
+		phoneLabelPanel.add(phoneLabel);
+		phonePanel.add(phoneIcon);
+		phonePanel.add(phoneLabelPanel);
+		
+		
+		
+		
+		
+		JPanel birthPanel = new JPanel();
+		birthPanel.setPreferredSize(new Dimension(500, 50));
+		birthPanel.setBackground(Color.white);
+		birthPanel.setBorder(null);
+		JButton birthBtn = new JButton();
+		birthBtn.setBounds(0, 235, 150, 50);
+		birthBtn.setBorder(null);
+		ImageIcon icon4 = new ImageIcon("image/birth.png");
+	    Image birthImage = icon4.getImage();
+	    Image birthChangeImg = birthImage.getScaledInstance(150, 50, Image.SCALE_SMOOTH);
+	    ImageIcon birthChangeIcon = new ImageIcon(birthChangeImg);
+	    birthBtn.setIcon(birthChangeIcon);
+		JPanel birthLabelPanel = new JPanel();
+		birthLabelPanel.setPreferredSize(new Dimension(330, 50));
+		birthLabelPanel.setBackground(Color.white);
+		JLabel birthLabel = new JLabel("»ý³â¿ùÀÏµé¾î°©´Ï´Ù");
+		birthLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		birthLabel.setForeground(Color.black);
+		JPanel birthIcon = new JPanel();
+		birthIcon.setPreferredSize(new Dimension(150, 50));
+		birthIcon.setBackground(new Color(74, 210, 149));
+		
+		birthLabelPanel.add(birthLabel);
+		birthPanel.add(birthIcon);
+		birthPanel.add(birthLabelPanel);
+		
+		
+		
+
+		
+		JPanel githubPanel = new JPanel();
+		githubPanel.setPreferredSize(new Dimension(500, 50));
+		githubPanel.setBackground(Color.white);
+		birthPanel.setBorder(null);
+		JButton githubBtn = new JButton();
+		githubBtn.setBounds(0, 290, 150, 50);
+		githubBtn.setBorder(null);
+		ImageIcon icon5 = new ImageIcon("image/github.png");
+	    Image githubImage = icon5.getImage();
+	    Image githubChangeImg = githubImage.getScaledInstance(150, 50, Image.SCALE_SMOOTH);
+	    ImageIcon githubChangeIcon = new ImageIcon(githubChangeImg);
+	    githubBtn.setIcon(githubChangeIcon);
+		JPanel githubLabelPanel = new JPanel();
+		githubLabelPanel.setPreferredSize(new Dimension(330, 50));
+		githubLabelPanel.setBackground(Color.white);
+		JLabel githubLabel = new JLabel("githubµé¾î°©´Ï´Ù");
+		githubLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		githubLabel.setForeground(Color.black);
+		JPanel githubIcon = new JPanel();
+		githubIcon.setPreferredSize(new Dimension(150, 50));
+		githubIcon.setBackground(new Color(74, 210, 149));
+		
+		githubLabelPanel.add(githubLabel);
+		githubPanel.add(githubIcon);
+		githubPanel.add(githubLabelPanel);
+
+		
+		
+		
 		
 		//Á¤º¸ ¹Þ¾Æ¿À±â
 		String info[] = Client.getFriendInfo(ID);
@@ -59,24 +179,45 @@ public class FriendInfo extends JFrame{
 		
 		
 		String line1 = info[0] + "(" + info[1] + ")";
-		name.setText(line1);
-		message.setText(info[2]);
-		email.setText(info[3]);
-		phone.setText(info[4]);
-		birth.setText(info[5]);
-		github.setText(info[6]);
+		nameLabel.setText(line1);
+		messageLabel.setText(info[2]);
+		emailLabel.setText(info[3]);
+		phoneLabel.setText(info[4]);
+		birthLabel.setText(info[5]);
+		githubLabel.setText(info[6]);
 
 		
 		//Ä£±¸¶ó¸é Á¤º¸ Á» ´õ º¸¿©ÁÜ
 		if(type == 1) {
-			add(phonePanel);
+			phoneLabel.setText("ºñ°ø°³");
+			birthLabel.setText("ºñ°ø°³");
+			githubLabel.setText("ºñ°ø°³");
+			
+			/*add(phonePanel);
 			add(birthPanel);
-			add(githubPanel);
+			add(githubPanel);*/
 		}
+		
 
-		setVisible(true);
-		setSize(500, 400);
-		setLocationRelativeTo(null);
-		setResizable(false);
+		infoPanel.setBackground(new Color(153, 255, 153));
+		infoPanel.add(namePanel);
+		infoPanel.add(messagePanel);
+		infoPanel.add(emailPanel);
+		infoPanel.add(phonePanel);
+		infoPanel.add(birthPanel);
+		infoPanel.add(githubPanel);
+		
+		frame.getContentPane().add(messageBtn);
+		frame.getContentPane().add(emailBtn);
+		frame.getContentPane().add(phoneBtn);
+		frame.getContentPane().add(birthBtn);
+		frame.getContentPane().add(githubBtn);
+		frame.getContentPane().add(infoPanel);
+
+		
+		frame.setVisible(true);
+		frame.setSize(450, 374);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
 }
