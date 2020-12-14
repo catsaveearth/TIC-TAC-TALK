@@ -53,13 +53,13 @@ public class Setting extends JFrame {
 	    label.addActionListener(new ActionListener() {
 	     @Override
 	     	public void actionPerformed(ActionEvent e) {
-	          // ¸¸¾à ºñ¹Ğ¹øÈ£°¡ ¸ÂÀ¸¸é Setting setting = new Setting();
-	          // Æ²¸®¸é JOptionPane.showMessageDialog(null,  "Wrong!!");
+	          // ë§Œì•½ ë¹„ë°€ë²ˆí˜¸ê°€ ë§ìœ¼ë©´ Setting setting = new Setting();
+	          // í‹€ë¦¬ë©´ JOptionPane.showMessageDialog(null,  "Wrong!!");
 	        }
 	    });
 		
-		JLabel option = new JLabel("ºñ¹Ğ¹øÈ£¸¦ º¯°æÇÏÁö ¾Ê´Â´Ù¸é ºñ¹Ğ¹øÈ£ Ä­À» ºñ¿öµÎ¼¼¿ä");
-		option.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 16));
+		JLabel option = new JLabel("ë¹„ë°€ë²ˆí˜¸ë¥¼ ë³€ê²½í•˜ì§€ ì•ŠëŠ”ë‹¤ë©´ ë¹„ë°€ë²ˆí˜¸ ì¹¸ì„ ë¹„ì›Œë‘ì„¸ìš”");
+		option.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 16));
 		
 		JLabel labelID = new JLabel("ID                           : ");
 		JLabel labelNickName = new JLabel("NickName           : ");
@@ -138,7 +138,7 @@ public class Setting extends JFrame {
 		panelBtn.add(SettingBtn, BorderLayout.SOUTH);
 		
 		
-		//Á¤º¸ ºÒ·¯¿À±â!![ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+		//ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°!![ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
 		String[] infoo = Client.settinginfo();
 		for(String k : infoo) {
 			System.out.println(k);
@@ -174,34 +174,34 @@ public class Setting extends JFrame {
 		
 		
 		
-		//setting save ¹öÆ° ¾×¼Ç!
+		//setting save ë²„íŠ¼ ì•¡ì…˜!
 		SettingBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String git = "0";
 				
 				if(NickName.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "NickNameÀ» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "NickNameì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 
 				if(name.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 				
 				if(phoneNumber.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "ÀüÈ­¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "ì „í™”ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 				
 				if(email.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "emailÀ» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "emailì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 
 			
-				//¸ğµç Á¶°ÇÀ» Åë°úÇÏ¸é ±×Á¦¾ß ÁØ´Ù
+				//ëª¨ë“  ì¡°ê±´ì„ í†µê³¼í•˜ë©´ ê·¸ì œì•¼ ì¤€ë‹¤
 				String message = NickName.getText() + "`|" + name.getText() 
 				                 + "`|" + phoneNumber.getText() + "`|"
 								+ email.getText() + "`|";
@@ -219,7 +219,7 @@ public class Setting extends JFrame {
 
 				String Git = null;
 				String state_m = null;
-				//»ıÀÏ, ±êÇé, »ó¸Ş ´õÇØÁÖ±â
+				//ìƒì¼, ê¹ƒí—™, ìƒë©” ë”í•´ì£¼ê¸°
 				if (github.getText().equals("")) {
 					Git = "null";
 				}
@@ -233,29 +233,29 @@ public class Setting extends JFrame {
 				message = message + year + m + d + "`|" + Git + "`|" + state_m + "`|" ;
 
 
-				//pwÀÔ·Â‰ç´ÂÁö È®ÀÎ
+				//pwì…ë ¥Â‰æ¦®ì© í™•ì¸
 				//+ " " + String.valueOf(txtPass.getPassword())
 				if(String.valueOf(txtPass.getPassword()).equals("")) {
-					System.out.println("pw°¡ ÇöÀç nullÀÔ´Ï´Ù.");
+					System.out.println("pwê°€ í˜„ì¬ nullì…ë‹ˆë‹¤.");
 					message = "0`|" + message;
 				}
 				else {
-					System.out.println("pw°¡ ÇöÀç °ªÀÌ ÀÖ½À´Ï´Ù.");
+					System.out.println("pwê°€ í˜„ì¬ ê°’ì´ ìˆìŠµë‹ˆë‹¤.");
 					message = "1`|" + String.valueOf(txtPass.getPassword()) + "`|" + message;
 				}
 				
-				//ÀÌÁ¦ client¿¡¼­ update!!
+				//ì´ì œ clientì—ì„œ update!!
 				System.out.println(message);
 				int tf = Client.modifyInfo(message);
 				
 
 				if(tf == 0) {
 					JOptionPane.showMessageDialog(null, "SUCCESS!!");
-					dispose();
+					frame.dispose();
 				}
 				else if(tf == 1) {
-					//¹¹ ¾ÆÀÌµğ°¡ Áßº¹µÈ´Ù, ±×·±°Å ¾Ë·ÁÁà¾ß ÇÏ³ª???
-					JOptionPane.showMessageDialog(null, "¾ÆÀÌµğ Áßº¹!!");
+					//ë­ ì•„ì´ë””ê°€ ì¤‘ë³µëœë‹¤, ê·¸ëŸ°ê±° ì•Œë ¤ì¤˜ì•¼ í•˜ë‚˜???
+					JOptionPane.showMessageDialog(null, "ë‹‰ë„¤ì„ ì¤‘ë³µ!!");
 				}			
 			}
 		});
@@ -264,7 +264,7 @@ public class Setting extends JFrame {
 		back.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 			}			
 		});
 			

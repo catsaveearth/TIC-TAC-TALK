@@ -17,7 +17,7 @@ public class Searching extends JFrame {
 		back.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 				MainScreen main = new MainScreen();
 			}
 			

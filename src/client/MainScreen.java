@@ -195,135 +195,147 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 			Client.MCHATANSWER(roomnumber, roomname, false);
 		}
 	}
-	//멀티채팅초대 팝업 보여주기	
+
 	public static void showInviteInOriginRoom(int rn) {
 		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
 	}
-	
-	
-	//파일전송에서 상대방에게 물어보는 부분
+
+	// 파일전송에서 상대방에게 물어보는 부분
 	public static int confirmFileSend(String nme) {
-		String[] buttons = {"Yes", "No"};
+		String[] buttons = { "Yes", "No" };
 		String windowName = "file 전송";
 		String showMessage = nme + "이 보내는 파일을 받으시겠습니까?";
-	    int result = JOptionPane.showOptionDialog(null, showMessage, windowName, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "두번째값");
-	    
-	    if (result == 0) {
-	    	  return 1; //수락
-	      } else if (result == 1) {
-	    	  return 0; //거절
-	      }
-    	  return 0; //거절
+		int result = JOptionPane.showOptionDialog(null, showMessage, windowName, JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, buttons, "두번째값");
+
+		if (result == 0) {
+			return 1; // 수락
+		} else if (result == 1) {
+			return 0; // 거절
+		}
+		return 0; // 거절
 	}
-	
-	//저장 경로를 선택하자
+
+	// 저장 경로를 선택하자
 	public static String returnPath() {
-	    JFileChooser h = new JFileChooser();
-	    h.setCurrentDirectory(new File("C:\\"));
-	    h.setFileSelectionMode(h.DIRECTORIES_ONLY);
-	    File savepath = null;
-	    
-	    int re = h.showSaveDialog(null);
-	    if(re == JFileChooser.APPROVE_OPTION) {
-	    	savepath = h.getSelectedFile();
-	    }
+		JFileChooser h = new JFileChooser();
+		h.setCurrentDirectory(new File("C:\\"));
+		h.setFileSelectionMode(h.DIRECTORIES_ONLY);
+		File savepath = null;
 
-	    String fname = savepath.getAbsolutePath() + "\\\\";
-        
-        return fname;
+		int re = h.showSaveDialog(null);
+		if (re == JFileChooser.APPROVE_OPTION) {
+			savepath = h.getSelectedFile();
+		}
+
+		String fname = savepath.getAbsolutePath() + "\\\\";
+		return fname;
 	}
 
-	//파일전송에서 상대방에게 물어보는 부분
+	// 파일전송에서 상대방에게 물어보는 부분
 	public static void successFileReceive() {
 		String windowName = "file 저장";
 		String showMessage = "파일 저장 성공";
-	    JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
 	}
-	
-	
-	 public void mouseClicked(MouseEvent me) {
-	      int row = jTable.getSelectedRow();
-	      Object line = model.getValueAt(row, 0);
-	      Object line2 = model.getValueAt(row, 3);
-	      String FID = line.toString();
-	      
-	        if (me.getButton() == MouseEvent.BUTTON1) {
-	           flag=1;
-	        }
-	        if (me.getButton() == MouseEvent.BUTTON3) {
-	           flag += 2;
-	           if (flag == 3) {
-	                JPopupMenu pm = new JPopupMenu();
-	                JMenuItem pm_item1 = new JMenuItem("정보");
-	                pm_item1.addActionListener(this);
-	                System.out.println(this);
-	                JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
-	                pm_item2.addActionListener(this);
-	                JMenuItem pm_item3 = new JMenuItem("파일전송");
-	                pm_item3.addActionListener(this);
-	                JMenuItem pm_item4 = new JMenuItem("게임하기");
-	                pm_item4.addActionListener(this);
-	                pm.add(pm_item1);
-	                pm.add(pm_item2);
-	                pm.add(pm_item3);
-	                pm.add(pm_item4);
-	                pm.show(me.getComponent(), me.getX(), me.getY());
-	                
-	                pm_item1.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   FriendInfo info = new FriendInfo(FID, 1);
-	                	   }
-	                	   
-	                });
-	                pm_item2.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   //내 친구 찾기
-	                		   if(Client.ckINPCHAT(FID) || !line2.equals(onlineIcon)) {
-	                	            JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
-	                	         }
-	                		   else {
-	                	            ChattingOne chatting = new ChattingOne(FID); //채팅방 키고
-	                	            Client.addPCHAT(FID, chatting); //채팅중인 상대에 상대방을 더해주고
-	                	            Client.ckANSWER(FID);
-	                	       }
-	                	   }
-	                	   
-	                });
-	                pm_item3.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							//파일 전송!
-       	                	int rVal = c.showOpenDialog(null);
-       	                	if (rVal == c.APPROVE_OPTION) {
-       	                    path = c.getSelectedFile().getAbsolutePath();
-       	                    Client.setFilematch(FID, path);
-       	                    Client.FileSendWant(FID);
-       	                }
-                	   }                	   
-                });
-					
-	                pm_item4.addActionListener(new ActionListener() {
-	                	   @Override
-	                	   public void actionPerformed(ActionEvent e) {
-	                		   //내 친구 찾기
-	                		   
-	                	   }
-	                	   
-	                });
-	           }
-	           flag = 0;
-	        }
-	   }
-	   
-	   public void mouseEntered(MouseEvent e) {}
-	   public void mouseExited(MouseEvent e) {}
-	   public void mousePressed(MouseEvent e) {}
-	   public void mouseReleased(MouseEvent e) {}
-	
-	   
-	   
+
+	public void mouseClicked(MouseEvent me) {
+		int row = jTable.getSelectedRow();
+		Object line = model.getValueAt(row, 0);
+		Object line2 = model.getValueAt(row, 3);
+		String FID = line.toString();
+
+		if (me.getButton() == MouseEvent.BUTTON1) {
+			flag = 1;
+		}
+		if (me.getButton() == MouseEvent.BUTTON3) {
+			flag += 2;
+			if (flag == 3) {
+				JPopupMenu pm = new JPopupMenu();
+				JMenuItem pm_item1 = new JMenuItem("정보");
+				pm_item1.addActionListener(this);
+				System.out.println(this);
+				JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
+				pm_item2.addActionListener(this);
+				JMenuItem pm_item3 = new JMenuItem("파일전송");
+				pm_item3.addActionListener(this);
+				JMenuItem pm_item4 = new JMenuItem("게임하기");
+				pm_item4.addActionListener(this);
+				pm.add(pm_item1);
+				pm.add(pm_item2);
+				pm.add(pm_item3);
+				pm.add(pm_item4);
+				pm.show(me.getComponent(), me.getX(), me.getY());
+
+				pm_item1.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						FriendInfo info = new FriendInfo(FID, 1);
+					}
+
+				});
+				pm_item2.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//일댈챗
+						if (Client.ckINPCHAT(FID) || !line2.equals(onlineIcon)) {
+							JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
+						} else {
+							ChattingOne chatting = new ChattingOne(FID); // 채팅방 키고
+							Client.addPCHAT(FID, chatting); // 채팅중인 상대에 상대방을 더해주고
+							Client.ckANSWER(FID);
+						}
+					}
+
+				});
+				pm_item3.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// 파일 전송!
+						if (!line2.equals(onlineIcon)) {
+							JOptionPane.showMessageDialog(null, "상대가 오프라인입니다.");
+						} else {
+							int rVal = c.showOpenDialog(null);
+							if (rVal == c.APPROVE_OPTION) {
+								path = c.getSelectedFile().getAbsolutePath();
+								Client.setFilematch(FID, path);
+								Client.FileSendWant(FID);
+							}
+						}
+					}
+				});
+				pm_item4.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// 틱택토
+						if (!line2.equals(onlineIcon)) {
+							JOptionPane.showMessageDialog(null, "상대가 오프라인입니다.");
+						} else {
+							
+							
+							//틱택토
+						}
+
+					}
+
+				});
+			}
+			flag = 0;
+		}
+	}
+
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	public void mouseExited(MouseEvent e) {
+	}
+
+	public void mousePressed(MouseEvent e) {
+	}
+
+	public void mouseReleased(MouseEvent e) {
+	}
+
 	public MainScreen() {
       JFrame frame = new JFrame();
       JPanel panel = new JPanel();
@@ -504,7 +516,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				}
 				idx++;
 				
-				String line = fl[0] + "(" + fl[1] + ")";
+				String line = fl[1] + "(" + fl[0] + ")";
 
 				// 상메가 null일 경우 처리해주기
 				if (fl[3].compareTo("null") == 0) fl[3] = " ";

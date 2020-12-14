@@ -76,7 +76,7 @@ public class PWCheck extends JFrame {
 		checkBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (Client.pwcheck(passward.getPassword())) {
-					dispose();
+					frame.dispose();
 					Setting setting = new Setting();
 				} else {
 					JOptionPane.showMessageDialog(null,  "Wrong!!");

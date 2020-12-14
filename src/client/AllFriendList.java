@@ -113,25 +113,23 @@ public class AllFriendList extends JFrame implements MouseListener {
 	        	  }
 	          } 
 	    }
-	     
 	    
 	    jTable = new JTable(model);
 	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
 	    jTable.setBackground(Color.white);
 	    jTable.setFillsViewportHeight(true);
 	    jTable.addMouseListener(this);
+	    jTable.setGridColor(new Color(0,128,0));
 	    jTable.getColumn("닉네임(이름)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 210));
-	    jScollPane.setBorder(null);
-		jTable.setShowVerticalLines(false);
-	    jTable.setGridColor(new Color(0, 54, 78));
 	    jTable.getTableHeader().setReorderingAllowed(false);
 	    jTable.getTableHeader().setResizingAllowed(false);
 	    
-	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
+	    jTable.setShowGrid(false);
+		jTable.setShowVerticalLines(false);
 	    
 	    JPanel panel = new JPanel();
 	    friend.add(panel);
@@ -160,5 +158,4 @@ public class AllFriendList extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
 }

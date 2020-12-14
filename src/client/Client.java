@@ -760,7 +760,7 @@ public class Client {
 					else if(info[1].compareTo("PRECHAT") == 0) {
 						String ulist[][] = new String[100][2];
 						
-						for(int i = 4 ; i < 3 + Integer.parseInt(info[3]) ; i++) {
+						for(int i = 4 ; i < 4 + Integer.parseInt(info[3]) ; i++) {
 							String userList[] = info[i].split("\\^");
 
 							ulist[i-4][0] = userList[0];

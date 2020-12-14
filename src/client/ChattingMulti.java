@@ -67,7 +67,7 @@ public class ChattingMulti {
     
 	//premessage Ãß°¡
     public void PrereceiveChat(int num, String[][] clist) {
-    	for(int i=0;i<num-1;i++) {
+    	for(int i=0;i<num;i++) {
         	messageArea.append(clist[i][0] + ": "+ clist[i][1] + "\n");
     	}
     	messageArea.append("---------------------------------\n");

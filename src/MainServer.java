@@ -832,7 +832,7 @@ public class MainServer {
 							
 							String messagelist = "";
 							
-							for(int i=2;i<=cnum;i++) {
+							for(int i=1;i<=cnum;i++) {
 								HashMap<String, String>  map2 = query.bringINFO(chatlist[i][1]);
 								String senderInfo2 = map2.get("NICKNAME") + "(" + map2.get("NAME") + ")";
 								client.get(m.getSender_id()).println("=====>" + chatlist[i][2]);

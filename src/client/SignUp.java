@@ -146,7 +146,7 @@ public class SignUp extends JFrame {
 		backBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 				LogIn check = new LogIn();
 				// 중복 체크 해주기!!
 			}
@@ -218,7 +218,7 @@ public class SignUp extends JFrame {
 
 				if(tf == 0) {
 					JOptionPane.showMessageDialog(null, "SUCCESS!!");
-					dispose();
+					frame.dispose();
 					LogIn check = new LogIn();
 				}
 				else if(tf == 1) {

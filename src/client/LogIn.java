@@ -85,7 +85,7 @@ public class LogIn extends JFrame {
 				boolean log = Client.logincheck(txtID.getText(), txtPass.getPassword());
 						
 				if (log) {//로그인 성공하면
-					dispose();
+					frame.dispose();
 					MainScreen frame = new MainScreen(); //main으로 고고씽~
 					
 				} else {
@@ -98,7 +98,7 @@ public class LogIn extends JFrame {
 		signUpBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 				SignUp frame = new SignUp();
 			}
 			

@@ -65,7 +65,7 @@ public class FindAllFriend extends JFrame {
 	         @Override
 		     public void actionPerformed(ActionEvent e) {
 	        	 searchFriend = find.getText(); // 찾을 친구의 이름을 string으로 저장
-	        	 dispose();
+	        	 frame.dispose();
 
 	        	 AllFriendList list = new AllFriendList(searchFriend);
 	         }
