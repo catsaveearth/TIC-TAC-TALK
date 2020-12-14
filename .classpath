@@ -4,6 +4,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.8.0_251/lib/mysql-connector-java-8.0.22.jar"/>
 	<classpathentry kind="lib" path="C:/Users/tpfbd/Documents/카카오톡 받은 파일/gson-2.8.6/gson-2.8.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/tpfbd/Documents/카카오톡 받은 파일/json-simple-1.1.1/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

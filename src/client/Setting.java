@@ -6,21 +6,61 @@ import javax.swing.*;
 
 public class Setting extends JFrame {
 	public Setting() {
-		super.setLayout(new GridLayout(16, 2));
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(16, 2));
+		frame.setBackground(new Color(74, 210, 149));
+
+		JPanel blank = new JPanel();
+		blank.setBackground(new Color(74, 210, 149));
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		JPanel blank2 = new JPanel();
+		blank2.setBackground(new Color(74, 210, 149));
+		JPanel blank3 = new JPanel();
+		blank3.setBackground(new Color(74, 210, 149));
+		
 		JPanel panel = new JPanel();
 		JPanel panel1 = new JPanel();
+		panel1.setBackground(new Color(74, 210, 149));
 		JPanel IDPanel = new JPanel();
+		IDPanel.setBackground(new Color(74, 210, 149));
 		JPanel NickNamePanel = new JPanel();
+		NickNamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PWPanel = new JPanel();
+		PWPanel.setBackground(new Color(74, 210, 149));
 		JPanel NamePanel = new JPanel();
+		NamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PNPanel = new JPanel();
+		PNPanel.setBackground(new Color(74, 210, 149));
 		JPanel EmailPanel = new JPanel();
+		EmailPanel.setBackground(new Color(74, 210, 149));
 		JPanel BirthPanel = new JPanel();
+		BirthPanel.setBackground(new Color(74, 210, 149));
 		JPanel GithubPanel = new JPanel();
+		GithubPanel.setBackground(new Color(74, 210, 149));
 		JPanel messagePanel = new JPanel();
-		JLabel label = new JLabel("Please modify your information!");
-		JLabel label1 = new JLabel("비밀번호를 변경하지 않는다면 비밀번호 칸을 비워두세요");
-
+		messagePanel.setBackground(new Color(74, 210, 149));
+		
+		ImageIcon icon = new ImageIcon("image/modifyInfo.png");
+	    Image titleImage = icon.getImage();
+	    Image titleChangeImg = titleImage.getScaledInstance(600, 40, Image.SCALE_SMOOTH);
+	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+	    JButton label = new JButton();
+	    label.setPreferredSize(new Dimension(100, 30));
+	    label.setBounds(5, 5, 15, 15);
+	    label.setIcon(titleChangeIcon);
+	    label.setBorder(null);
+	    label.addActionListener(new ActionListener() {
+	     @Override
+	     	public void actionPerformed(ActionEvent e) {
+	          // 만약 비밀번호가 맞으면 Setting setting = new Setting();
+	          // 틀리면 JOptionPane.showMessageDialog(null,  "Wrong!!");
+	        }
+	    });
+		
+		JLabel option = new JLabel("비밀번호를 변경하지 않는다면 비밀번호 칸을 비워두세요");
+		option.setFont(new Font("나눔바른펜", Font.BOLD, 16));
+		
 		JLabel labelID = new JLabel("ID                           : ");
 		JLabel labelNickName = new JLabel("NickName           : ");
 		JLabel labelPW = new JLabel("Password           : ");
@@ -68,10 +108,13 @@ public class Setting extends JFrame {
 		add(dayCombo);	
 		
 		JPanel panelBtn = new JPanel();
+		panelBtn.setBackground(new Color(74, 210, 149));
 		JButton SettingBtn = new JButton("SAVE");
+		SettingBtn.setBackground(new Color(0, 54, 78));
+		SettingBtn.setForeground(Color.white);
 		
 		panel.add(label);
-		panel1.add(label1);
+		panel1.add(option);
 		IDPanel.add(labelID);
 		IDPanel.add(ID);
 		NickNamePanel.add(labelNickName);
@@ -225,24 +268,27 @@ public class Setting extends JFrame {
 			}			
 		});
 			
+		frame.add(blank);
+		frame.add(label);
+		frame.add(panel1);
+		frame.add(IDPanel);
+		frame.add(NickNamePanel);
+		frame.add(PWPanel);
+		frame.add(NamePanel);
+		frame.add(PNPanel);
+		frame.add(EmailPanel);
+		frame.add(BirthPanel);
+		frame.add(GithubPanel);
+		frame.add(messagePanel);
+		frame.add(panelBtn);
+		frame.add(blank1);
+		frame.add(blank2);
+		frame.add(blank3);
 		
-		add(panel);
-		add(panel1);
-		add(IDPanel);
-		add(NickNamePanel);
-		add(PWPanel);
-		add(NamePanel);
-		add(PNPanel);
-		add(EmailPanel);
-		add(BirthPanel);
-		add(GithubPanel);
-		add(messagePanel);
-		add(panelBtn);
-		
-		setVisible(true);
-		setSize(450, 600);
-		setLocationRelativeTo(null);
-		setResizable(false);
+		frame.setVisible(true);
+		frame.setSize(450, 600);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
 	
 }

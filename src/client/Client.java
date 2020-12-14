@@ -1,10 +1,17 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.Socket;
@@ -23,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Client {
 	private static Socket clientSocket;
+	private static String ip = null;
 	private static PrintWriter out;
 	private static Scanner in;
 	private static String salt = null;
@@ -32,7 +40,11 @@ public class Client {
 	// socket에 값을 넣고 빼는걸 제어할 친구! 초기값은 1 : 1일때는 사용가능, 0일때는 사용 불가능!
 	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 	private static HashMap<Integer, ChattingMulti> MCHAT = new HashMap<Integer, ChattingMulti>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
+	private static HashMap<String, String> FileMatch = new HashMap<String, String>(); //누구에게 뭔파일 보낼지 저장해둠
 
+	static ExecutorService filepool = Executors.newFixedThreadPool(50);
+
+	
 	public static String getCurrentTime() {
 		Date date_now = new Date(System.currentTimeMillis()); // 현재시간을 가져와 Date형으로 저장한다
 		
@@ -79,7 +91,6 @@ public class Client {
 
 			return salt;
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -97,7 +108,6 @@ public class Client {
 			return hex;
 
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -362,10 +372,7 @@ public class Client {
 		return 0;
 	}
 	
-	
-	
-	//==================채팅 기능 관련 함수
-	
+	//==================채팅 기능 관련 함수	
 	// <일대일 채팅>
 	//상대방이랑 일대일 채팅중인지 확인
 	protected static boolean ckINPCHAT(String FID) {
@@ -400,14 +407,12 @@ public class Client {
 		else out.println("PCHAT`|PESPONCHAT`|" + FID+ "`|N");
 	}
 
-	
 	//사용자가 보내는 채팅을 받아서 서버로 전송하는 역할. (받는사람과 보내는 내용)
 	//PCHAT`|sendCHAT`|" + 채팅받는자ID + Content : 채팅내용 전송 (내가쓴거임)
 	protected static void sendPCHAT(String FID, String chat) {
 		out.println("PCHAT`|sendCHAT`|" + FID + "`|" + chat);
 	}
-	
-	
+		
 	// <멀티챗>==========================================
 	//서버에게 룸만든다고 요청
 	protected static void makeMultiRoom(String roomname, String showpre, String flist) {
@@ -466,14 +471,21 @@ public class Client {
 		out.println("MCHAT`|InviteFriend`|" + rn + "`|" + list);
 	}
 	
+
+	//파일 전송=========================
+	//서버에 나 파일 전송하고 싶다고 알려주는 부분
+	protected static void FileSendWant(String FID) {
+		out.println("FILES`|ASK`|" + FID);
+	}
 	
-	
+	protected static void setFilematch(String FID, String path) {
+		FileMatch.put(FID, path);
+	}
 	
 	
 	
 	public static void main(String[] args) {
 		String file = "serverinfo.dat";
-		String ip = null;
 		int port = 0;
 
 		// server에 대한 환경 설정을 위한 파일 읽어오기
@@ -493,7 +505,7 @@ public class Client {
 		// stream이 연결되었습니다!
 
 		// main screen을 구축하는 동안, 다른곳에서는 socket사용 못하게 막아놓기!
-		// mainsScreen구축까지 돌아가는 login안의 로직은 atomic이 보장됨 (순서대로 가기 때문)
+		// mainScreen구축까지의 login안의 로직은 atomic이 보장됨 (순서대로 가기 때문)
 		readSocket.set(0);
 		writeSocket.set(0);
 
@@ -696,8 +708,6 @@ public class Client {
 					}
 				}
 
-			
-				
 				//채팅방 관련 (멀티)
 				else if (line.startsWith("MCHAT")) {
 					String info[] = line.split("\\`\\|");
@@ -722,7 +732,6 @@ public class Client {
 						System.out.println(MCHAT.keySet());
 						MCHAT.get(Integer.parseInt(info[2])).notifyCome(info[3]);
 					}
-					
 					
 					//client.get(id).println("MCHAT`|receivedCHAT`|" + room_num 
 					//		+ "`|" + m.getSender_id() + "`|" + senderInfo + "`|" + m.getMessage());
@@ -756,25 +765,50 @@ public class Client {
 
 							ulist[i-4][0] = userList[0];
 							ulist[i-4][1] = userList[1];
-							System.out.println("=> " + userList[0] + userList[1]);
 						}
 
 						MCHAT.get(Integer.parseInt(info[2])).PrereceiveChat(Integer.parseInt(info[3]), ulist); ;
 
 					}
+
+				}
+				
+
+				//파일 전송 관련
+				else if (line.startsWith("FILES")) {
+					String info[] = line.split("\\`\\|");
+
+					//상대가 나에게 파일 보내고 싶어 했다고 요청 => FILES`|ASK`|" + ID + "`|" + senderInfo
+					if(info[1].compareTo("ASK") == 0) {
+						int result = MainScreen.confirmFileSend(info[3]);	
+						if(result == 1) out.println("FILES`|ANS`|" + info[2] + "`|" + "Y" );
+						else out.println("FILES`|ANS`|" + info[2] + "`|" + "N" );
+					}
+
+					//새 socket만들라구 portnum주면 받아서 thread로 넘긴다 => "FILES`|PNUM`|" + fileportnum )
+					else if(info[1].compareTo("PNUM") == 0) {
+						//새로운 thread가 있어야 하려나??
+						filepool.execute(new filereceiverThread(Integer.parseInt(info[2]))); 
+					}
 					
+					//상대의 응답을 확인한다! => "FILES`|ANS`|" + ID + "`|" + "Y" + "`|" + fileportnum+1
+					else if(info[1].compareTo("ANS") == 0) {
+						if(info[3].equals("Y")) {
+							filepool.execute(new filesenderThread(Integer.parseInt(info[4]), info[2])); 							
+						}
+					}
 				}
 			}
-		
-		}finally {
-			//개인채팅들 다 나가기
-			for(ChattingOne a : PCHAT.values()) {
+
+		} finally {
+			// 개인채팅들 다 나가기
+			for (ChattingOne a : PCHAT.values()) {
 				a.FexitChat();
 			}
 			PCHAT.clear();
-			
-			//멀티채팅들도 다 나가기
-			for(ChattingMulti a : MCHAT.values()) {
+
+			// 멀티채팅들도 다 나가기
+			for (ChattingMulti a : MCHAT.values()) {
 				int rnum = a.roomnumber;
 				MCHAT.remove(rnum);
 				out.println("MCHAT`|OUTCHAT`|" + rnum + "`|" + ID);
@@ -783,4 +817,108 @@ public class Client {
 		}
 	}
 }
+	
+	
+	//file을 처리해주는 쓰레드 (보내는거 따로, 받는거 따로)
+	public static class filesenderThread implements Runnable{
+
+		int pnum;
+		String FID = null;
+		
+		public filesenderThread(int portnum, String FID) {
+			pnum = portnum;
+			this.FID = FID;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				Socket sendersoc = new Socket(ip, pnum);
+				
+	            OutputStream out =sendersoc.getOutputStream();   //서버에 바이트단위로 데이터를 보내는 스트림을 개통합니다.
+	            DataOutputStream dout = new DataOutputStream(out); //OutputStream을 이용해 데이터 단위로 보내는 스트림을 개통합니다.            
+	            
+	            /* 보내는 Client 입장의 코드 */
+            	String filename = FileMatch.get(FID);
+            	FileMatch.remove(FID, filename);            	
+            	
+                FileInputStream fin = new FileInputStream(new File(filename)); //FileInputStream - 파일에서 입력받는 스트림을 개통합니다.
+                byte[] buffer = new byte[1024];        //바이트단위로 임시저장하는 버퍼를 생성합니다.        
+                int len;                               //전송할 데이터의 길이를 측정하는 변수입니다. 
+                int data=0;                            //전송횟수, 용량을 측정하는 변수입니다.
+                while((len = fin.read(buffer))>0){     //FileInputStream을 통해 파일에서 입력받은 데이터를 버퍼에 임시저장하고 그 길이를 측정합니다.
+                   data++;                        //데이터의 양을 측정합니다.
+                }        
+                int datas = data;                      //아래 for문을 통해 data가 0이되기때문에 임시저장한다.
+                fin.close();
+                fin = new FileInputStream(filename);   //FileInputStream이 만료되었으니 새롭게 개통합니다.
+       
+                dout.writeInt(data);                   //데이터 전송횟수를 서버에 전송하고, 
+                dout.writeUTF("c_"+filename);               //"c_파일의 이름"을 서버에 전송합니다.
+        
+                len = 0;      
+                for(;data>0;data--){              //데이터를 읽어올 횟수만큼 FileInputStream에서 파일의 내용을 읽어옵니다.
+                   len = fin.read(buffer);        //FileInputStream을 통해 파일에서 입력받은 데이터를 버퍼에 임시저장하고 그 길이를 측정합니다.
+                   out.write(buffer,0,len);       //서버에게 파일의 정보(1kbyte만큼보내고, 그 길이를 보냅니다.
+                }
+                
+                
+                System.out.println("보내기 완료!");
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+		}
+	}
+	
+	public static class filereceiverThread implements Runnable{
+
+		int pnum;
+		public filereceiverThread(int portnum) {
+			pnum = portnum;
+		}
+		
+		@Override
+		public void run() {
+
+			try {
+				Socket sendersoc = new Socket(ip, pnum);
+
+				InputStream in = null;
+				FileOutputStream outt = null;
+				in = sendersoc.getInputStream(); // 클라이언트로 부터 바이트 단위로 입력을 받는 InputStream을 얻어와 개통합니다.
+				DataInputStream din = new DataInputStream(in); // InputStream을 이용해 데이터 단위로 입력을 받는 DataInputStream을
+																// 개통합니다.
+
+				int data = din.readInt(); // Int형 데이터를 전송받습니다.
+				String filename = din.readUTF();            //String형 데이터를 전송받아 filename(파일의 이름으로 쓰일)에 저장합니다.      
+
+
+				//파일 경로를 설정합니다.
+				filename = MainScreen.returnPath() + filename;
+				
+
+				File file = new File(filename); // 입력받은 File의 이름으로 복사하여 생성합니다.
+				outt = new FileOutputStream(file); // 생성한 파일을 클라이언트로부터 전송받아 완성시키는 FileOutputStream을 개통합니다.
+				byte[] buffer = new byte[1024]; // 바이트단위로 임시저장하는 버퍼를 생성합니다.
+
+				int len = 0; // 전송할 데이터의 길이를 측정하는 변수입니다.
+				for (; data > 0; data--) { // 전송받은 data의 횟수만큼 전송받아서 FileOutputStream을 이용하여 File을 완성시킵니다.
+					len = in.read(buffer);
+					outt.write(buffer, 0, len);
+				}
+
+				outt.close();
+				sendersoc.close();
+				MainScreen.successFileReceive();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+	}
 }

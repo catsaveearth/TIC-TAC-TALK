@@ -38,11 +38,14 @@ public class MainServer {
 	private static AtomicInteger messageCK = new AtomicInteger(1);
 
 	static ExecutorService messagepool = Executors.newFixedThreadPool(500);
+	static ExecutorService filepool = Executors.newFixedThreadPool(50);
 
+	
 	//메세지의 경우 여러 쓰레드들이 동시에 접근이 가능해야함 -> hashMap! (room number가 밖에서 체크 가능하도록)
 
 	final private static int portnum = 6789;
 	private static int forroomnumber = 1;
+	private static int fileportnum = 33333;
 		
 	public static String getCurrentTime() {
 		Date date_now = new Date(System.currentTimeMillis()); // 현재시간을 가져와 Date형으로 저장한다
@@ -216,7 +219,7 @@ public class MainServer {
 //프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는다! / client -> server)
 				while (true) {
 					System.out.println("빙글뱅글!");
-
+					
 					String line = in.nextLine();
 					System.out.println(line);
 					
@@ -492,7 +495,6 @@ public class MainServer {
 						
 	
 					}
-
 					
 					
 /**채팅방 관련 (1:1) personal chat ========================================*/
@@ -539,11 +541,6 @@ public class MainServer {
 							//PCHAT`|outCHAT`|" + 채팅보낸자ID
 							client.get(info[2]).println("PCHAT`|OUTCHAT`|" + ID);
 						}
-						
-
-						
-						
-						
 					}
 				
 					
@@ -572,7 +569,6 @@ public class MainServer {
 							//"MCHAT`|RoomNumber`|" + 방번호    //방 번호 보내주기 - 이건 연속된 스텝으로 가야할듯??? 즉, 방이름 저기서 기다려야 하는 부분임.
 							out.println("MCHAT`|RoomNumber`|" + rn);
 						}
-						
 						
 						//"MCHAT`|RESPONCHAT`|" + 방번호+ 내 ID?? + Y // 채팅할거냐고 물어봣을때 채팅 할건지 말건지 답변
 						else if(info[1].compareTo("RESPONCHAT") == 0) {
@@ -608,13 +604,46 @@ public class MainServer {
 							Message m = new Message(Integer.parseInt(info[2]), 5, ID, info[3], "0");
 							messageSet.get(Integer.parseInt(info[2])).add(m);
 						}
-						
 						messageCK.set(1);
-					}					
+					}
+					
+/**file 전송 관련 (A - sender, B - receiver) ========================================*/
+					else if (line.startsWith("FILES")) {
+						String info[] = line.split("\\`\\|");
+						// >> 여기서는 파일을 주고받을지 결정하는 연락들이 오고가고, 파일을 주고 받는건 새로운 thread에서 새로 socket을 열어서 진행
+						
+						//A가 B에게 파일을 보내고 싶다고 연락이 왔어요 => FILES ASK 상대ID
+						if(info[1].compareTo("ASK") == 0) {
+							//상대를 찾아서 보내는 API에 맞춰서 보내줌 (FILES ASK A아이디 이름(별명)
+							HashMap<String, String> map = query.bringINFO(ID);
+							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+
+							client.get(info[2]).println("FILES`|ASK`|" + ID + "`|" + senderInfo);
+						}
+												
+						//B에게 A가 보내는 파일을 받을지 말지 여부를 결정하는 연락이 왔어요 => FILES ANS 상대ID, Y/N
+						else if(info[1].compareTo("ANS") == 0) {
+							
+							//파일 전송을 받는다고 한다면?
+							if(info[3].equals("Y")) {
+								//둘 사이를 이어줄 thread를 만들어 줍니다.
+								filepool.execute(new filemanage(fileportnum)); // socket연결요청이 오면 accept하고 thread를 생성하며 socket을 넘겨줌
+
+								//보내는 사람이 받는 사람보다 1 더 큰 portnum을 가진다.
+								out.println("FILES`|PNUM`|" + fileportnum );
+								fileportnum+=1;
+								client.get(info[2]).println("FILES`|ANS`|" + ID + "`|" + "Y" + "`|" + fileportnum);
+								fileportnum+=1;
+							}
+							else { //안받는다고 하면? => A에게 안줘도 된다고 알리기
+								client.get(info[2]).println("FILES`|ANS`|" + ID + "`|" + "N" );
+							}
+						}						
+					}						
 				}
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} finally {
 				// Client가 종료하면, 흔적들을 다 정리해준다.
@@ -647,6 +676,99 @@ public class MainServer {
 	}
 
 
+	public static class filemanage implements Runnable{
+
+		private ServerSocket soc;
+		private ServerSocket soc1;
+		static Socket sender = new Socket(); 
+		static Socket receiver = new Socket(); 
+
+
+		public filemanage (int pnum) throws IOException {
+	    	soc = new ServerSocket(pnum);  //받는 사람 소켓
+	    	soc1 = new ServerSocket(pnum + 1);  //보내는 사람 소켓.
+		}
+		
+		@Override
+		public void run() {
+
+			try {
+				sender = soc1.accept();
+				receiver = soc.accept();
+
+				// 보내는 사람으로부터 파일을 받기!
+				InputStream in = null; // A로 부터 읽어오기위함
+				FileOutputStream out = null; // 서버에서의 파일생성을 위해 생성
+				in = sender.getInputStream(); // 클라이언트로 부터 바이트 단위로 입력을 받는 InputStream을 얻어와 개통합니다.
+				DataInputStream din = new DataInputStream(in); // InputStream을 이용해 데이터 단위로 입력을 받는 DataInputStream 개통.
+			
+				
+				/* sender -> receiver*/
+				int data = din.readInt(); // (Int형 데이터)받을 파일의 byte 읽어오기
+				String filename = din.readUTF(); // String형 데이터를 전송받아 filename(파일의 이름으로 쓰일)에 저장합니다.
+				String[] flist = filename.split("\\\\");
+				filename = flist[flist.length-1];
+
+				File file = new File(filename); // 입력받은 File의 이름으로 복사하여 생성합니다.
+
+				out = new FileOutputStream(file); // 생성한 파일을 클라이언트로부터 전송받아 완성시키는 FileOutputStream을 개통합니다.
+				int datas = data; // 전송횟수, 용량을 측정하는 변수입니다.
+				byte[] buffer = new byte[1024]; // 바이트단위로 임시저장하는 버퍼를 생성합니다.
+
+				int len; // 전송할 데이터의 길이를 측정하는 변수입니다.
+				for (; data > 0; data--) { // 전송받은 data의 횟수만큼 전송받아서 FileOutputStream을 이용하여 File을 완성시킵니다.
+					len = in.read(buffer);
+					out.write(buffer, 0, len);
+				}
+
+				System.out.println("파일 받기 완료");
+
+				
+				/* server -> receiver */
+				FileInputStream fin = new FileInputStream(new File(filename)); // FileInputStream - 파일에서 입력받는 스트림
+				OutputStream outt = receiver.getOutputStream(); // 클라이언트에게 보내기 위함
+				DataOutputStream dout = new DataOutputStream(outt); // OutputStream을 이용해 데이터 단위로 보내는 스트림을 개통합니다
+				buffer = new byte[1024]; //임시저장 버퍼
+				len = 0; //길이
+				data = 0; // 전송횟수
+				
+				// FileInputStream을 통해 파일에서 입력받은 데이터를 버퍼에 임시저장하고 그 길이를 측정합니다.
+				while ((len = fin.read(buffer)) > 0) { 
+					data++;
+				}
+				datas = data; // 아래 for문을 통해 data가 0이되기때문에 임시저장한다.
+				fin.close();
+
+				fin = new FileInputStream(filename); // FileInputStream이 만료되었으니 새롭게 개통합니다.
+
+				dout.writeInt(data); // 데이터 전송횟수를 서버에 전송하고,
+				dout.writeUTF(filename); // 파일의 이름을 서버에 전송합니다.
+
+				len = 0;
+				for (; data > 0; data--) { // 데이터를 읽어올 횟수만큼 FileInputStream에서 파일의 내용을 읽어옵니다.
+					len = fin.read(buffer); // FileInputStream을 통해 파일에서 입력받은 데이터를 버퍼에 임시저장하고 그 길이를 측정합니다.
+					outt.write(buffer, 0, len); // 서버에게 파일의 정보(1kbyte만큼보내고, 그 길이를 보냅니다.
+				}
+				System.out.println("파일 보내기 완료");
+
+				out.close(); // client에게 보낸 후 파일을 지우기 위해서 필수!!
+				fin.close(); // client에게 보낸 후 파일을 지우기 위해서 필수!!
+
+				if (file.exists()) { // 보낸 파일 삭제
+					if (file.delete()) {
+						System.out.println("파일삭제 성공");
+					} else {
+						System.out.println("파일삭제 실패");
+					}
+				} else {
+					System.out.println("파일이 존재하지 않습니다.");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} //다 끝나면 종료
+		}
+	}
+	
 	
 	// 멀티 채팅방 하나씩을 담당하는 thread 코드
 	public static class Chat implements Runnable {
