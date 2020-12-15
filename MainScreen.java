@@ -5,17 +5,31 @@ import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import javax.swing.table.*;
 import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.net.*;
 import java.text.*;
 
 import client.Client;
 
 public class MainScreen extends JFrame implements MouseListener, ActionListener {
+
+    private String path;
+    JLabel pathLabel;
+    String currentDirectory = System.getProperty("user.dir");
+    private JFileChooser c = new JFileChooser(currentDirectory);
+    String fileName;
+    
 	static JTable jTable;
 	static String columnNames[] = { "ID", "닉네임(이름)", "한줄메시지", "status" };
 	static Object rowData[][] = {}; // 친구목록 들어가야 될 자리!
@@ -26,7 +40,6 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 
 		public Class getColumnClass(int column) {
 			try {
-				System.out.println(column);
 				return getValueAt(0, column).getClass();
 			}
 			catch (Exception e) {
@@ -150,48 +163,136 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	      }
     	  return 0; //친구거절
 	}
+
+	//일댈채팅신청 팝업 보여주기
+	public static void showPCHAT(String fid, String nn, String name) {
+		String windowName = "채팅 신청";
+		String showMessage = nn + "(" + name + ") 님의 1대 1 채팅을 수락하시겠습니까?";
+			
+		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			System.out.println("1 => Yes");
+			Client.CHATANSWER(fid, true);
+			ChattingOne newchat = new ChattingOne(fid);
+			newchat.setoppenInfo(nn, name);
+			newchat.setTextFree();
+			Client.addPCHAT(fid, newchat);
+		} else {
+			Client.CHATANSWER(fid, false);
+		}
+	}
+	//멀티채팅신청 팝업 보여주기
+	public static void showMCHAT(int roomnumber, String roomname, String makerinfo) {
+		String windowName = "채팅 신청";
+		String showMessage = roomname + "(by " + makerinfo + ")방의 멀티 채팅을 수락하시겠습니까?";
+			
+		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			Client.MCHATANSWER(roomnumber, roomname, true);
+		} else {
+			Client.MCHATANSWER(roomnumber, roomname, false);
+		}
+	}
+		
+	public static void showInviteInOriginRoom(int rn) {
+		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
+	}
 	
-	public void actionPerformed(ActionEvent event) {
-        JMenuItem menu = (JMenuItem) event.getSource();
-        System.out.println(menu);
-    }
-   
-   public void mouseClicked(MouseEvent me) {
-      System.out.println(me);
-        if (me.getButton() == MouseEvent.BUTTON1) {
-           flag++;
-           System.out.println(flag);
-        }
-        if (me.getButton() == MouseEvent.BUTTON3) {
-           flag += 2;
-           System.out.println(flag);
-           if (flag == 3) {
-               JPopupMenu pm = new JPopupMenu();
-                JMenuItem pm_item1 = new JMenuItem("정보");
-                pm_item1.addActionListener(this);
-                System.out.println(this);
-                JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
-                pm_item2.addActionListener(this);
-                JMenuItem pm_item3 = new JMenuItem("친구삭제");
-                pm_item3.addActionListener(this);
-                pm.add(pm_item1);
-                pm.add(pm_item2);
-                pm.add(pm_item3);
-                pm.show(me.getComponent(), me.getX(), me.getY());
-           }
-           flag = 0;
-        }
-   }
-   
-   public void mouseEntered(MouseEvent e) {}
-   public void mouseExited(MouseEvent e) {}
-   public void mousePressed(MouseEvent e) {}
-   public void mouseReleased(MouseEvent e) {}
-   
+    public void mouseClicked(MouseEvent me) {
+        int row = jTable.getSelectedRow();
+        Object line = model.getValueAt(row, 0);
+        System.out.println("line2 = " + model.getValueAt(row, 3));
+        Object line2 = model.getValueAt(row, 3);
+        String FID = line.toString();
+        
+          if (me.getButton() == MouseEvent.BUTTON1) {
+             flag=1;
+             System.out.println(flag);
+          }
+          if (me.getButton() == MouseEvent.BUTTON3) {
+             flag += 2;
+             System.out.println(flag);
+             if (flag == 3) {
+                 JPopupMenu pm = new JPopupMenu();
+                  JMenuItem pm_item1 = new JMenuItem("정보");
+                  pm_item1.addActionListener(this);
+                  System.out.println(this);
+                  JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
+                  pm_item2.addActionListener(this);
+                  JMenuItem pm_item3 = new JMenuItem("파일전송");
+                  pm_item3.addActionListener(this);
+                  JMenuItem pm_item4 = new JMenuItem("게임하기");
+                  pm_item4.addActionListener(this);
+                  pm.add(pm_item1);
+                  pm.add(pm_item2);
+                  pm.add(pm_item3);
+                  pm.add(pm_item4);
+                  pm.show(me.getComponent(), me.getX(), me.getY());
+                  
+                  pm_item1.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           FriendInfo info = new FriendInfo(FID, 1);
+                        }
+                        
+                  });
+                  pm_item2.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                           if(Client.ckINPCHAT(FID) || !line2.equals(onlineIcon)) {
+                                 JOptionPane.showMessageDialog(null, "이미 채팅중이거나 상대가 오프라인입니다.");
+                              }
+                           else {
+                                 ChattingOne chatting = new ChattingOne(FID); //채팅방 키고
+                                 Client.addPCHAT(FID, chatting); //채팅중인 상대에 상대방을 더해주고
+                                 Client.ckANSWER(FID);
+                            }
+                        }
+                        
+                  });
+                  
+                  FileNameExtensionFilter filter = new FileNameExtensionFilter("txt 파일", "txt");
+                  pm_item3.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                            c.setFileFilter(filter);
+                                int rVal = c.showOpenDialog(null);
+                                if (rVal == c.APPROVE_OPTION) {
+                                 path = c.getSelectedFile().getAbsolutePath();
+                             }
+                           
+                        }
+                        
+                  });
+                  pm_item4.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                           //내 친구 찾기
+                           TicTacToe game = new TicTacToe();
+                        }
+                        
+                  });
+             }
+             flag = 0;
+          }
+     }
+	   
+	   public void mouseEntered(MouseEvent e) {}
+	   public void mouseExited(MouseEvent e) {}
+	   public void mousePressed(MouseEvent e) {}
+	   public void mouseReleased(MouseEvent e) {}
+	
+	   
+	   
 	public MainScreen() {
       JFrame frame = new JFrame();
       JPanel panel = new JPanel();
       panel.setBackground(new Color(0, 176, 80));
+
       // 버튼 있는 부분
       JPanel top = new JPanel();
       top.setPreferredSize(new Dimension(430, 40));
@@ -201,6 +302,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       top.add(topTitle);
       top.setBorder(null);
       top.setBackground(new Color(74, 210, 149));
+      
       // 버튼에 이미지 넣고 버튼 크기에 맞게 이미지 넣기
       ImageIcon icon = new ImageIcon("image/searching.png");
       Image searchImage = icon.getImage();
@@ -216,6 +318,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       ImageIcon settingChangeIcon = new ImageIcon(settingChangeImg);
 
       JButton searching = new JButton();
+      searching.setBorder(null);
       searching.setPreferredSize(new Dimension(30, 30));
       searching.setBounds(15, 10, 30, 30);
       searching.setIcon(searchChangeIcon);
@@ -254,15 +357,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
                    });                   
                 }
            }
-          
-          public void mouseEntered(MouseEvent e) {}
-          public void mouseExited(MouseEvent e) {}
-          public void mousePressed(MouseEvent e) {}
-          public void mouseReleased(MouseEvent e) {}
       });
       
       
       JButton chatting = new JButton();
+      chatting.setBorder(null);
       chatting.setBounds(360, 10, 30, 30);
       chatting.setIcon(chatChangingIcon);
       top.add(chatting);
@@ -272,17 +371,15 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       chatting.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-            InviteFriend invite = new InviteFriend();
+            InviteFriend invite = new InviteFriend(model);
          }
       });
-      
-      
-      
+            
       JButton setting = new JButton();
+      setting.setBorder(null);
       setting.setPreferredSize(new Dimension(30, 30));
       setting.setBounds(400, 10, 30, 30);
       setting.setIcon(settingChangeIcon);
-      
       
       //내정보 수정 버튼 액션 -> 끝! 건들지 마세요
       setting.addActionListener(new ActionListener() {
@@ -312,7 +409,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	  ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
 
       
-      myInfo.setPreferredSize(new Dimension(430, 60));
+	  myInfo.setPreferredSize(new Dimension(430, 60));
       myInfo.setBorder(null);
       myInfo.setBackground(new Color(255, 229, 110));
       blank.setBackground(new Color(255, 229, 110));
@@ -385,12 +482,12 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				}
 			}
 		}
-      
+    
       
       //왜 이거 선택이 안먹지?? 나중에물어보기
       jTable = new JTable(model);
       jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
-      //jTable.addMouseListener(this);
+      jTable.addMouseListener(this);
       jTable.setGridColor(new Color(0,128,0));
       jTable.setBackground(Color.white);
       jTable.setFillsViewportHeight(true);
@@ -589,7 +686,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       //////////////////////// 이미지 //////////////////////////
       JLabel skyTextLabel = new JLabel(SKYcode.get(data[1]));
       skyTextLabel.setForeground(Color.white);
-      skyTextLabel.setFont(new Font("고딕", Font.BOLD, 13));
+      skyTextLabel.setFont(new Font("고딕", Font.BOLD, 11));
       skyTextLabel.setPreferredSize(new Dimension(55, 30));
       skyTextLabel.setHorizontalAlignment(JLabel.CENTER);
       
@@ -599,13 +696,15 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       waterPanel.setBackground(new Color(0, 54, 78));
       
       String PTYstr = PTYcode.get(data[1]);
-      
+      System.out.println(PTYstr);
       if (PTYstr.contentEquals("강수량 없음")) {
     	  waterImgIcon = new ImageIcon("image/강수량없음.png");
       } else if (PTYstr.contentEquals("비")) {
     	  waterImgIcon = new ImageIcon("image/비.png");
       } else if (PTYstr.contentEquals("비/눈")) {
     	  waterImgIcon = new ImageIcon("image/비눈.png");
+      } else if (PTYstr.contentEquals("눈")) {
+    	  waterImgIcon = new ImageIcon("image/눈.png");
       } else if (PTYstr.contentEquals("소나기")) {
     	  waterImgIcon = new ImageIcon("image/소나기.png");
       } else if (PTYstr.contentEquals("빗방울")) {
@@ -661,8 +760,9 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       frame.getContentPane().add(setting);
       frame.getContentPane().add(panel);
       
+      frame.setTitle("TIC TAC_TALK");
       frame.setVisible(true);
-      frame.setSize(450, 600);
+      frame.setSize(450, 640);
       frame.setLocationRelativeTo(null);
       frame.setResizable(false);
       frame.addWindowListener(new WindowListener() {
@@ -688,9 +788,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       //모든 구축이 끝나면 socket풀어줌
       Client.freeSocket();
-      
-      String[] buttons = {"수락", "거절"};
-
    }
 
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 }
