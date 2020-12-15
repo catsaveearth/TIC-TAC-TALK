@@ -1,0 +1,1819 @@
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+
+public class query {
+	public static void main(String[] args) {
+
+		deleteEVERYWHERE("c");
+    }
+	
+	//11. FRIEND_PLUS목록에 있는지 확인
+	//매개변수: String S_id, String R_id
+	//return 없을 시, null 있을시, S_id(null이 아님) 
+		public static int checkPLUS(String Qid) {	
+			Connection conn = null;		 
+			Statement stmt = null;		
+			ResultSet rs = null;
+
+				 try{	
+					 Class.forName("com.mysql.jdbc.Driver");	    
+					 String url = "jdbc:mysql://localhost/network";		    
+					 conn = DriverManager.getConnection(url, "root", "12345");		    
+					 stmt = conn.createStatement();
+				 
+					 String sql = "SELECT receive_id"
+				            		+ " FROM FRIEND_PLUS"		     
+				            		+ " WHERE receive_id = '"+Qid+"';";
+					 
+					 rs = stmt.executeQuery(sql);
+				     
+					 while(rs.next()){		
+						 String id = rs.getString(1);		        
+						 System.out.println("id: "+id);		       
+						 
+						 return 1;
+					 }
+					 System.out.println();
+					 return 0;
+				 }
+				 catch( ClassNotFoundException e){
+					 System.out.println("����̹� �ε� ����");
+				 }
+				 catch( SQLException e){
+					 System.out.println("���� " + e);
+				 }
+				 finally{
+					 try{
+						 if( conn != null && !conn.isClosed()){
+							 conn.close();
+						 }
+						 if( stmt != null && !stmt.isClosed()){
+							 stmt.close(); 
+						 }
+						 if( rs != null && !rs.isClosed()){
+							 rs.close();
+						 }
+					 }
+					 catch( SQLException e){
+						 e.printStackTrace();
+					 }
+				 }
+				return 0;
+			 }
+
+	
+	
+	
+	//10. FRIEND 목록에 있는지 확인
+	//매개변수: String S_id, String R_id
+	//return 없을 시, null 있을시, S_id(null이 아님) 
+	public static String checkFRIEND(String S_id, String R_id) {	
+		Connection conn = null;		 
+		Statement stmt = null;		
+		ResultSet rs = null;
+		String str = "false" ;
+			 try{	
+				 Class.forName("com.mysql.jdbc.Driver");	    
+				 String url = "jdbc:mysql://localhost/network";		    
+				 conn = DriverManager.getConnection(url, "root", "12345");		    
+				 stmt = conn.createStatement();
+			 
+				 String sql = "SELECT my_id"
+			            		+ " FROM FRIEND"		     
+			            		+ " WHERE my_id = '"+S_id+"' AND"
+			            		+ " friend_id = '"+R_id+"';";
+
+				 rs = stmt.executeQuery(sql);
+			     
+				 while(rs.next()){		
+					 String id = rs.getString(1);		        
+					 System.out.println("id: "+id);		       
+					 
+					 str=id;
+				 }
+				 System.out.println();
+				 return str;
+			 }
+			 catch( ClassNotFoundException e){
+				 System.out.println("����̹� �ε� ����");
+			 }
+			 catch( SQLException e){
+				 System.out.println("���� " + e);
+			 }
+			 finally{
+				 try{
+					 if( conn != null && !conn.isClosed()){
+						 conn.close();
+					 }
+					 if( stmt != null && !stmt.isClosed()){
+						 stmt.close(); 
+					 }
+					 if( rs != null && !rs.isClosed()){
+						 rs.close();
+					 }
+				 }
+				 catch( SQLException e){
+					 e.printStackTrace();
+				 }
+			 }
+			return str;
+		 }
+	
+	//10. FRIEND_PLUS목록에 있는지 확인
+	//매개변수: String S_id, String R_id
+	//return 없을 시, null 있을시, S_id(null이 아님) 
+	public static String checkFRIEND_PLUS(String S_id, String R_id) {	
+		Connection conn = null;		 
+		Statement stmt = null;		
+		ResultSet rs = null;
+		String str = "false" ;
+			 try{	
+				 Class.forName("com.mysql.jdbc.Driver");	    
+				 String url = "jdbc:mysql://localhost/network";		    
+				 conn = DriverManager.getConnection(url, "root", "12345");		    
+				 stmt = conn.createStatement();
+			 
+				 String sql = "SELECT send_id"
+			            		+ " FROM FRIEND_PLUS"		     
+			            		+ " WHERE send_id = '"+S_id+"' AND"
+			            		+ " receive_id = '"+R_id+"';";
+
+				 rs = stmt.executeQuery(sql);
+			     
+				 while(rs.next()){		
+					 String id = rs.getString(1);		        
+					 System.out.println("id: "+id);		       
+					 
+					 str=id;
+				 }
+				 System.out.println();
+				 return str;
+			 }
+			 catch( ClassNotFoundException e){
+				 System.out.println("����̹� �ε� ����");
+			 }
+			 catch( SQLException e){
+				 System.out.println("���� " + e);
+			 }
+			 finally{
+				 try{
+					 if( conn != null && !conn.isClosed()){
+						 conn.close();
+					 }
+					 if( stmt != null && !stmt.isClosed()){
+						 stmt.close(); 
+					 }
+					 if( rs != null && !rs.isClosed()){
+						 rs.close();
+					 }
+				 }
+				 catch( SQLException e){
+					 e.printStackTrace();
+				 }
+			 }
+			return str;
+		 }
+
+	
+	
+	//0-1. 문자열을 포함하는 아이디찾기 (내친구o)
+	//매개변수: String id, String search
+	//return String[id]
+	 public static String[] searchMYFRIEND(String Qid, String search) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 String[] array = new String[20];
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT id"
+		            		+ " FROM USER"		     
+		            		+ " WHERE id != '"+Qid+"' AND"
+		            		+ " (id LIKE '%"+search+"%' OR"
+		            	    + " nickname LIKE '%"+search+"%') AND "
+		            	    + " id IN(select friend_id"
+		            	    + " from FRIEND"
+		            	    + " where my_id = '"+Qid+"');";
+		            	    	
+			 rs = stmt.executeQuery(sql);
+		     
+			 int i=0;
+			 while(rs.next()){		
+				 String id = rs.getString(1);		        
+				 
+				// System.out.println("id: "+id);		       
+				 
+				 array[i]=id;
+				 i++;
+			 }
+			 System.out.println();
+			 return array;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("���� " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return array;
+	 }
+	 
+	 
+	 
+		//0-2. 문자열을 포함하는 아이디찾기 (내친구x)
+		//매개변수: String id, String search
+		//return String[id]
+		 public static String[] searchOTHERFRIEND(String Qid, String search) {	
+			 Connection conn = null;		 
+			 Statement stmt = null;		
+			 ResultSet rs = null;
+			 String[] array = new String[20];
+			 try{	
+				 Class.forName("com.mysql.jdbc.Driver");	    
+				 String url = "jdbc:mysql://localhost/network";		    
+				 conn = DriverManager.getConnection(url, "root", "12345");		    
+				 stmt = conn.createStatement();
+			 
+				 String sql = "SELECT id"
+			            		+ " FROM USER"		     
+			            		+ " WHERE id != '"+Qid+"' AND"
+			            		+ " (id LIKE '%"+search+"%' OR"
+			            	    + " nickname LIKE '%"+search+"%') AND "
+			            	    + " id NOT IN(select friend_id"
+			            	    + " from FRIEND"
+			            	    + " where my_id = '"+Qid+"');";
+			            	    	
+				 rs = stmt.executeQuery(sql);
+			     
+				 int i=0;
+				 while(rs.next()){		
+					 String id = rs.getString(1);		        
+					 
+					 //System.out.println("id: "+id);		       
+					 
+					 array[i]=id;
+					 i++;
+				 }
+				 return array;
+			 }
+			 catch( ClassNotFoundException e){
+				 System.out.println("����̹� �ε� ����");
+			 }
+			 catch( SQLException e){
+				 System.out.println("���� " + e);
+			 }
+			 finally{
+				 try{
+					 if( conn != null && !conn.isClosed()){
+						 conn.close();
+					 }
+					 if( stmt != null && !stmt.isClosed()){
+						 stmt.close(); 
+					 }
+					 if( rs != null && !rs.isClosed()){
+						 rs.close();
+					 }
+				 }
+				 catch( SQLException e){
+					 e.printStackTrace();
+				 }
+			 }
+			return array;
+		 }
+		
+	
+	/* [�α���] */
+	
+	//1. id, password�� �ް� �´°��� ckeck
+	//�Ű�����: String id, String password
+	//������ return 1 : Ʋ���� return -1(or 0)
+	public static int selectLOGIN(String Qid, String Qpassword) {
+			Connection conn = null;
+		    Statement stmt = null;
+		    ResultSet rs = null;
+
+		    try{
+		        Class.forName("com.mysql.jdbc.Driver");
+		        String url = "jdbc:mysql://localhost/network";
+		        conn = DriverManager.getConnection(url, "root", "12345");
+		        stmt = conn.createStatement();
+
+		        String sql = "SELECT id, password"
+		            		+ " FROM user"
+		            		+ " WHERE id='"+Qid+"'";
+		        
+		        rs = stmt.executeQuery(sql);
+		        
+		        while(rs.next()){
+		            String id = rs.getString(1);
+		            String password = rs.getString(2);
+		            
+		            System.out.println("id: "+ id);
+		            System.out.println("password: "+ password);
+		            System.out.println();     
+		            if(Qpassword.equals(password)) {
+		            	return 1;
+		            }
+		        }
+		        return -1;
+		    }
+		    catch( ClassNotFoundException e){
+		        System.out.println("����̹� �ε� ����");
+		    }
+		    catch( SQLException e){
+		        System.out.println("���� " + e);
+		    }
+		    finally{
+		        try{
+		            if( conn != null && !conn.isClosed()){
+		                conn.close();
+		            }
+		            if( stmt != null && !stmt.isClosed()){
+		                stmt.close();
+		            }
+		            if( rs != null && !rs.isClosed()){
+		                rs.close();
+		            }
+		        }
+		        catch( SQLException e){
+		            e.printStackTrace();
+		        }
+		    }
+			return 0;
+		}
+
+	/* [ȸ������] */
+	
+	//2. id�� ���� �ߺ�üũ
+	//�Ű��м�: String id
+	//��� �����ϸ� return 1 : �ߺ��̸�  return -1
+	public static int selectID(String Qid) {
+		Connection conn = null;
+	    Statement stmt = null;
+	    ResultSet rs = null;
+
+	    try{
+	        Class.forName("com.mysql.jdbc.Driver");
+	        String url = "jdbc:mysql://localhost/network";
+	        conn = DriverManager.getConnection(url, "root", "12345");
+	        stmt = conn.createStatement();
+
+	        String sql = "SELECT id"
+	            		+ " FROM user;";
+
+	        rs = stmt.executeQuery(sql);
+	        while(rs.next()){
+	            String id = rs.getString(1);
+	            System.out.println("id: "+ id);
+	            System.out.println();                
+	            if(id.equals(Qid)) {
+	            	return -1;
+	            }
+	        }
+	        return 1;
+	    }
+	    catch( ClassNotFoundException e){
+	        System.out.println("����̹� �ε� ����");
+	    }
+	    catch( SQLException e){
+	        System.out.println("���� " + e);
+	    }
+	    finally{
+	        try{
+	            if( conn != null && !conn.isClosed()){
+	                conn.close();
+	            }
+	            if( stmt != null && !stmt.isClosed()){
+	                stmt.close();
+	            }
+	            if( rs != null && !rs.isClosed()){
+	                rs.close();
+	            }
+	        }
+	        catch( SQLException e){
+	            e.printStackTrace();
+	        }
+	    }
+		return 0;
+	}
+
+
+	//3. nickname�� ���� �ߺ�üũ
+	//�Ű�����: String nickname
+	//��� �����ϸ� return 1 : Ʋ���� return -1
+	public static int selectNICKNAME(String Qnickname) {
+		Connection conn = null;
+	    Statement stmt = null;
+	    ResultSet rs = null;
+
+	    try{
+	        Class.forName("com.mysql.jdbc.Driver");
+	        String url = "jdbc:mysql://localhost/network";
+	        conn = DriverManager.getConnection(url, "root", "12345");
+	        stmt = conn.createStatement();
+
+	        String sql = "SELECT nickname"
+	            		+ " FROM user;";
+
+	        rs = stmt.executeQuery(sql);
+	        while(rs.next()){
+	            String nickname = rs.getString(1);
+	            System.out.println("nickname: "+ nickname);
+	            System.out.println();                
+	            if(nickname.equals(Qnickname)) {
+	            	return -1;
+	            }
+	        }
+	        return 1;
+	    }
+	    catch( ClassNotFoundException e){
+	        System.out.println("����̹� �ε� ����");
+	    }
+	    catch( SQLException e){
+	        System.out.println("���� " + e);
+	    }
+	    finally{
+	        try{
+	            if( conn != null && !conn.isClosed()){
+	                conn.close();
+	            }
+	            if( stmt != null && !stmt.isClosed()){
+	                stmt.close();
+	            }
+	            if( rs != null && !rs.isClosed()){
+	                rs.close();
+	            }
+	        }
+	        catch( SQLException e){
+	            e.printStackTrace();
+	        }
+	    }
+		return 0;
+	}
+
+	
+	//4. ���ο� user�� ���� record���� ��� (�ʼ�������)
+	//�Ű����� HashMap<String,String>map=(id, password, name, nickname, phone, email, birth (,github))
+	public static void insertUSER(HashMap<String,String>map){
+	  
+		Connection conn = null; 
+		PreparedStatement pstmt = null;
+	   
+		try{
+			Class.forName("com.mysql.jdbc.Driver");
+			String url = "jdbc:mysql://localhost/network";
+			conn = DriverManager.getConnection(url, "root", "12345");
+ 
+			String sql = "INSERT INTO USER VALUES (?,?,?,?,?,?,?,?,?,?)";		
+			pstmt = conn.prepareStatement(sql);
+	     
+			pstmt.setString(1, map.get("ID")); 
+			pstmt.setString(2, map.get("PASSWORD"));
+			pstmt.setString(3, map.get("NAME"));
+			pstmt.setString(4, map.get("NICKNAME"));
+			pstmt.setString(5, map.get("PHONE")); 
+			pstmt.setString(6, map.get("EMAIL"));   
+			pstmt.setString(7, map.get("BIRTH"));
+			if(map.containsKey("GITHUB")) {  
+				pstmt.setString(8, map.get("GITHUB"));   
+			}
+			else {
+				pstmt.setString(8, null);
+			}
+			pstmt.setString(9, null);
+			pstmt.setString(10, null);
+			
+			
+			int count = pstmt.executeUpdate();   
+			if( count == 0 ){  
+				System.out.println("������ �Է� ����");   
+			}    
+			else{    
+				System.out.println("������ �Է� ����");   
+			}  
+		}   
+		catch( ClassNotFoundException e){
+			System.out.println("����̹� �ε� ����"); 
+		}
+		catch( SQLException e){
+			System.out.println("���� " + e);
+		}
+		finally{
+			try{
+				if( conn != null && !conn.isClosed()){
+					conn.close();
+				}
+				if( pstmt != null && !pstmt.isClosed()){
+                   pstmt.close();
+				}
+			}
+			catch( SQLException e){
+				e.printStackTrace(); 
+			}  
+		}
+	}
+	 
+	   
+     /* [���������� �ε�] */
+	 
+	 //5. ������ �̸�, nickname, ���ٸ޼��� �޾ƿ���	
+	 //�Ű�����: String id
+	 //return HashMap<String,String>map=(name, nickname, state_message)
+	 public static HashMap selectNAME_NICKNAME_STATE(String Qid) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 HashMap<String,String> map = new HashMap<String,String>();
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT id, name, nickname, state_message"
+		            		+ " FROM user"		     
+		            		+ " WHERE id='"+Qid+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 while(rs.next()){		     
+				 String id = rs.getString(1);		        
+				 String name = rs.getString(2);		       
+				 String nickname = rs.getString(3);		       
+				 String state_message = rs.getString(4);
+				 System.out.println("id: "+ id);		   
+				 System.out.println("name: "+ name);
+				 System.out.println("nickname: "+ nickname);		       
+				 System.out.println("state_message: "+ state_message);
+				 System.out.println();           
+				 
+				 map.put("NAME",name); 
+				 map.put("NICKNAME",nickname);
+				 map.put("STATE_MESSAGE",state_message);
+			 }
+			 return map;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("���� " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return map;
+	 }
+		
+		
+	 //6. ģ����� �޾ƿ��� => �̸�, �г���, ���ӿ���
+	 //�Ű�����: String id
+	 //return String[][name, nickname, last_connection]
+	 public static String[][] slectFRIEND(String Qid) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;	
+		 Statement stmt2 = null;	
+		 ResultSet rs = null;
+		 ResultSet sr = null;
+
+		 String[][] info = new String[20][3];
+		 int i=0;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+			 stmt2 = conn.createStatement();
+			 
+			 String sql = "SELECT friend_id"		
+					 + " FROM FRIEND"		     
+					 + " WHERE my_id='"+Qid+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 while(rs.next()){		     
+				 String friend_id = rs.getString(1);	
+				 System.out.println("friend_id: "+ friend_id);		 
+				 System.out.println();                
+				 
+				 
+				 String sql2 = "SELECT id, name, nickname, last_connection"		
+						 + " FROM USER"		     
+						 + " WHERE id='"+friend_id+"';";
+				 sr = stmt2.executeQuery(sql2);
+				 while(sr.next()){		     
+					 String id = sr.getString(1);		        			       		     
+					 String name = sr.getString(2);
+					 String nickname = sr.getString(3);
+					 String last_connection = sr.getString(4);
+					 
+					 System.out.println("friend_id: "+ friend_id);		 
+					 System.out.println("name: "+ name);
+					 System.out.println("nickname: "+ nickname);
+					 System.out.println("last_connection: "+ last_connection);
+					 System.out.println();       
+			
+					 info[i][0]=name;
+					 info[i][1]=nickname;
+					 info[i][2]=last_connection;
+					 i++;
+				 }
+				 
+			 } 
+			 return info;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("���� " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return info;
+	 }
+	 
+	 
+	 // 7. ģ����û ��� �޾ƿ��� (�ڽſ��� ģ�� ��û�� �� client�� id�� �޾ƿ�)
+	 //�Ű�����: String id
+	 //return String[send_id1,. . ., send_id20]
+	 public static String[] bringFRIEND_PLUS(String Qid) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 String[] array = new String[20];
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT send_id, receive_id"
+		            		+ " FROM friend_plus"		     
+		            		+ " WHERE receive_id = '"+Qid+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 int i=0;
+			 while(rs.next()){		
+				 String send_id = rs.getString(1);		        
+				 String receive_id = rs.getString(2);			
+				 
+				 System.out.println("send_id: "+ send_id);		       
+				 System.out.println("receive_id: "+ receive_id);		 
+				 System.out.println();  
+				 
+				 array[i]=send_id;
+				 i++;
+			 }
+			 return array;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("���� " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return array;
+	 }
+	 
+	 
+	 /* [���������� ����] */ 
+	 
+	 //8. ������ �޾ƿ��� - �̸���, ��ȭ��ȣ ����....
+	 //�Ű�����: String id
+	 //return HashMap<String,String>map=(phone, email, birth, github, state_message, last_connection)
+	 public static HashMap bringINFO(String Qid) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 HashMap<String,String> map = new HashMap<String,String>();
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT id, password, name, nickname, phone, email, birth, github, state_message, last_connection"
+		            		+ " FROM user"		     
+		            		+ " WHERE id='"+Qid+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 while(rs.next()){		     
+				 String id = rs.getString(1);		        
+				 String password = rs.getString(2);		     
+				 String name = rs.getString(3);		     
+				 String nickname = rs.getString(4);		     
+				 String phone = rs.getString(5);		       
+				 String email = rs.getString(6);		       
+				 String birth = rs.getString(7);
+				 String github = rs.getString(8);
+				 String state_message = rs.getString(9);
+				 String last_connection = rs.getString(10);
+				 
+				 System.out.println("id: "+ id);		   
+				 System.out.println("password: "+ password);	
+				 System.out.println("name: "+ name);	
+				 System.out.println("nickname: "+ nickname);	
+				 System.out.println("phone: "+ phone);		   
+				 System.out.println("email: "+ email);		   
+				 System.out.println("birth: "+ birth);		   
+				 System.out.println("github: "+ github);		   
+				 System.out.println("state_message: "+ state_message);		
+				 System.out.println("last_connection: "+ last_connection);
+				 System.out.println();           
+
+				 map.put("ID",id); 
+				 map.put("PASSWORD",password); 
+				 map.put("NAME",name); 
+				 map.put("NICKNAME",nickname); 
+				 map.put("PHONE",phone);  
+				 map.put("EMAIL",email);
+				 map.put("BIRTH",birth);
+				 map.put("GITHUB",github);
+				 map.put("STATE_MESSAGE",state_message);
+				 map.put("LAST_CONNECTION",last_connection);				 
+			 }
+			 return map;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return map;
+	 }
+	 
+	 //9. ������ ���� - �г���, github, ���� �޼���, �ֱ� ���� �ð�
+	 //�Ű������ҋ� �������� 8�� query ����ؼ� �������� ������ �״�� �����ּ���
+	 //void ��ȯx
+	 
+	 //password ����
+	 public static void updatePASSWORD(String Qid, String Qpassword) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " password = '"+Qpassword+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	 
+	 
+	 //�̸� ����
+	 public static void updateNAME(String Qid, String Qname) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " name = '"+Qname+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 //���� ����
+	 public static void updateNICKNAME(String Qid, String Qnickname) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " nickname = '"+Qnickname+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 //����ȣ ����
+	 public static void updatePHONE(String Qid, String Qphone) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " phone = '"+Qphone+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 //�̸��� ����
+	 public static void updateEMAIL(String Qid, String Qemail) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " email = '"+Qemail+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 
+	 //��� ����
+	 public static void updateBIRTH(String Qid, String Qbirth) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " birth = '"+Qbirth+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 //����� ����
+	 public static void updateGITHUB(String Qid, String Qgithub) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " github = '"+Qgithub+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+	 //���� �޼��� ����
+	 public static void updateSTATE_MESSAGE(String Qid, String Qstate_message) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " state_message = '"+Qstate_message+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+	 
+
+	 //�ֱ� ���� �ð� ����
+	 public static void updateLAST_CONNECTION(String Qid, String Qlast_connection) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+	
+			 String sql = "update user set"
+			 		+ " last_connection = '"+Qlast_connection+"'"
+	            	+ " WHERE id='"+Qid+"';";
+			 
+			 stmt = conn.prepareStatement(sql);
+			 stmt.executeUpdate(sql);
+			 
+		 } catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();  
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close();  
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close(); 
+				 }  
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+	 }	
+
+	 
+	 //10. password�� �´��� Ȯ���ϱ�
+	 //�Ű�����: String id, String password
+   	 //������ return 1 : Ʋ���� return -1(or 0)
+	 public static int checkPASSWORD(String Qid, String Qpassword) {
+			Connection conn = null;
+		    Statement stmt = null;
+		    ResultSet rs = null;
+
+		    try{
+		        Class.forName("com.mysql.jdbc.Driver");
+		        String url = "jdbc:mysql://localhost/network";
+		        conn = DriverManager.getConnection(url, "root", "12345");
+		        stmt = conn.createStatement();
+
+		        String sql = "SELECT id, password"
+		            		+ " FROM user"
+		            		+ " WHERE id='"+Qid+"'";
+		        
+		        rs = stmt.executeQuery(sql);
+		        
+		        while(rs.next()){
+		            String id = rs.getString(1);
+		            String password = rs.getString(2);
+		            
+		            System.out.println("id: "+ id);
+		            System.out.println("password: "+ password);
+		            System.out.println();     
+		            if(Qpassword.equals(password)) {
+		            	return 1;
+		            }
+		        }
+		        return -1;
+		    }
+		    catch( ClassNotFoundException e){
+		        System.out.println("����̹� �ε� ����");
+		    }
+		    catch( SQLException e){
+		        System.out.println("Error: " + e);
+		    }
+		    finally{
+		        try{
+		            if( conn != null && !conn.isClosed()){
+		                conn.close();
+		            }
+		            if( stmt != null && !stmt.isClosed()){
+		                stmt.close();
+		            }
+		            if( rs != null && !rs.isClosed()){
+		                rs.close();
+		            }
+		        }
+		        catch( SQLException e){
+		            e.printStackTrace();
+		        }
+		    }
+			return 0;
+		}
+	 
+    	//�̰� 8���� �����ؼ� �׳� 8�� ���ø� �˴ϴ�.
+	 //11. Ư�� id�� ģ���� ���� �޾ƿ��� (�̸���, ��ȭ��ȣ, �������ӽð� ���) 
+	 //�Ű�����: String id
+	 //return HashMap<String,String>map=(id, email, birth, github, state_message, last_connection)
+	 /*
+	  
+	     public static HashMap PbringINFO(String Qid) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 HashMap<String,String> map = new HashMap<String,String>();
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT id, name, nickname, phone, email, birth, github, state_message, last_connection"
+		            		+ " FROM user"		     
+		            		+ " WHERE id='"+Qid+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 while(rs.next()){		     
+				 String id = rs.getString(1);
+				 String name = rs.getString(2);		        
+				 String nickname = rs.getString(3);			  
+				 String phone = rs.getString(4);		       
+				 String email = rs.getString(5);		       
+				 String birth = rs.getString(6);
+				 String github = rs.getString(7);
+				 String state_message = rs.getString(8);
+				 String last_connection = rs.getString(9);
+				 
+				 System.out.println("id: "+ id);		   
+				 System.out.println("name: "+ name);		  
+				 System.out.println("nickname: "+ nickname);		  		  
+				 System.out.println("phone: "+ phone);		   
+				 System.out.println("email: "+ email);		   
+				 System.out.println("birth: "+ birth);		   
+				 System.out.println("github: "+ github);		   
+				 System.out.println("state_message: "+ state_message);		   
+				 System.out.println("last_connection: "+ last_connection);
+				 System.out.println();           
+				 
+				 map.put("ID",id);
+				 map.put("NAME",name);
+				 map.put("NICKNAME",nickname);
+				 map.put("PHONE",phone); 
+				 map.put("EMAIL",email);
+				 map.put("BIRTH",birth);
+				 map.put("GITHUB",github);
+				 map.put("STATE_MESSAGE",state_message);				 
+				 map.put("LAST_CONNECTION",last_connection);				 
+			 }
+			 return map;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return map;
+	 }
+	 */
+	 
+	 
+	 //12. ģ����û�ϱ� => ģ����û ���̺� ������Ʈ
+	 //�Ű�����: String send_id, String Receive_id
+	 // void(��ȯx)
+	 public static void insertFRIEND_PLUS(String Sid, String Rid){		  
+			Connection conn = null; 
+			PreparedStatement pstmt = null;
+		   
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "INSERT INTO FRIEND_PLUS VALUES (?,?)";		
+				pstmt = conn.prepareStatement(sql);
+		     
+				pstmt.setString(1, Sid); 
+				pstmt.setString(2, Rid);
+				
+				int count = pstmt.executeUpdate();   
+				if( count == 0 ){  
+					System.out.println("������ �Է� ����");   
+				}    
+				else{    
+					System.out.println("������ �Է� ����");   
+				}  
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+		 
+	 
+
+	 //13-1. ģ�� ���� ��, ģ�� ���̺� �־��ֱ�
+	 public static void insertFRIEND(String Sid, String Rid){		  
+			Connection conn = null; 
+			PreparedStatement pstmt = null;
+		   
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "INSERT INTO FRIEND VALUES (?,?)";		
+				pstmt = conn.prepareStatement(sql);
+		     
+				pstmt.setString(1, Sid); 
+				pstmt.setString(2, Rid);
+				
+				int count = pstmt.executeUpdate();   
+				if( count == 0 ){  
+					System.out.println("������ �Է� ����");   
+				}    
+				else{    
+					System.out.println("������ �Է� ����");   
+				}
+				
+				
+				pstmt = conn.prepareStatement(sql);
+			     
+				pstmt.setString(1, Rid); 
+				pstmt.setString(2, Sid);
+				
+				count = pstmt.executeUpdate();   
+				if( count == 0 ){  
+					System.out.println("������ �Է� ����");   
+				}    
+				else{    
+					System.out.println("������ �Է� ����");   
+				}
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+
+	 
+	 
+	 //13-2. ģ�� ���� ��, ģ�� ��û ���̺��� ���ֱ�
+	 //�Ű�����: String send_id, String receive_id  - ���� �������.
+	 //void - ��ȯ x
+	 public static void deleteFRIEND_PLUS(String Sid, String Rid) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "DELETE FROM FRIEND_PLUS"
+						+ " where (send_id='"+Sid+"' and receive_id='"+Rid+"') or (send_id='"+Rid+"' and receive_id='"+Sid+"'); ;";		
+
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+		
+				System.out.println("����� �����Ǿ����ϴ�.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+
+
+	 /* [ä�ð���] */
+	 
+	 //14. ä�ù� ���
+	 //�Ű�����: String chat_id, String maker_id
+	 //void ��ȯx
+	 public static void insertCHAT(String Qchat_id, String Qmaker_id){
+			Connection conn = null; 
+			PreparedStatement pstmt = null;
+		   
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "INSERT INTO CHAT VALUES (?,?)";		
+				pstmt = conn.prepareStatement(sql);
+		     
+				pstmt.setString(1, Qchat_id); 
+				pstmt.setString(2, Qmaker_id);
+				
+				int count = pstmt.executeUpdate();   
+				if( count == 0 ){  
+					System.out.println("������ �Է� ����");   
+				}    
+				else{    
+					System.out.println("������ �Է� ����");   
+				}  
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+	 
+	 
+	 //15. �� ä�ù濡 ���� ��� ä�� ���� ���� (in CHATTING table)
+	 //�Ű�����: String chat_id
+	 //void - ��ȯ x
+	 public static void deleteCHATTING(String Qchat_id) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "DELETE FROM CHATTING"
+						+ " where (chat_id='"+Qchat_id+"');";		
+
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+		
+				System.out.println("����� �����Ǿ����ϴ�.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+	 //15-2. �� ä�ù� ���� ���� (in CHAT table)
+	 //�Ű�����: String chat_id
+	 //void - ��ȯ x
+	 public static void deleteCHAT(String Qchat_id) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "DELETE FROM CHAT"
+						+ " where (chat_id='"+Qchat_id+"');";		
+
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+		
+				System.out.println("����� �����Ǿ����ϴ�.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+
+	 
+	 
+	 //16. �� ä�ù濡 ���� ��� ä�� ���� �ҷ�����
+	 //�Ű�����: String chat_id
+	 //return array[][time, sender, content]
+	 public static String[][] bringCHATTING(String Qchat_id) {	
+		 Connection conn = null;		 
+		 Statement stmt = null;		
+		 ResultSet rs = null;
+		 String[][] array = new String[100][3];
+		 try{	
+			 Class.forName("com.mysql.jdbc.Driver");	    
+			 String url = "jdbc:mysql://localhost/network";		    
+			 conn = DriverManager.getConnection(url, "root", "12345");		    
+			 stmt = conn.createStatement();
+		 
+			 String sql = "SELECT time, sender, content"
+		            		+ " FROM CHATTING"		     
+		            		+ " WHERE chat_id = '"+Qchat_id+"';";
+			 rs = stmt.executeQuery(sql);
+		     
+			 int i=0;
+			 while(rs.next()){		
+				 String time = rs.getString(1);		        
+				 String sender = rs.getString(2);			
+				 String content = rs.getString(3);
+				 
+				 System.out.println("time: "+ time);		       
+				 System.out.println("sender: "+ sender);	
+	 	   	     System.out.println("content: "+ content);
+				 System.out.println();  
+				 
+				 array[i][0]=time;
+				 array[i][1]=sender;
+				 array[i][2]=content;
+				 i++;
+			 }
+			 return array;
+		 }
+		 catch( ClassNotFoundException e){
+			 System.out.println("����̹� �ε� ����");
+		 }
+		 catch( SQLException e){
+			 System.out.println("Error: " + e);
+		 }
+		 finally{
+			 try{
+				 if( conn != null && !conn.isClosed()){
+					 conn.close();
+				 }
+				 if( stmt != null && !stmt.isClosed()){
+					 stmt.close(); 
+				 }
+				 if( rs != null && !rs.isClosed()){
+					 rs.close();
+				 }
+			 }
+			 catch( SQLException e){
+				 e.printStackTrace();
+			 }
+		 }
+		return array;
+	 }
+	 
+	 
+	 //17. ä�� ���� ��� ���
+	 //�Ű�����: String chat_id, String time, String sender_id, String content
+	 //void ��ȯx
+	 public static void insertCHATTING(String Qchat_id, String Qtime, String Qsender, String Qcontent){
+			Connection conn = null; 
+			PreparedStatement pstmt = null;
+		   
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "INSERT INTO CHATTING VALUES (?,?,?,?)";		
+				pstmt = conn.prepareStatement(sql);
+		     
+				pstmt.setString(1, Qchat_id); 
+				pstmt.setString(2, Qtime);
+				pstmt.setString(3, Qsender);
+				pstmt.setString(4, Qcontent);
+				
+				int count = pstmt.executeUpdate();   
+				if( count == 0 ){  
+					System.out.println("������ �Է� ����");   
+				}    
+				else{    
+					System.out.println("������ �Է� ����");   
+				}  
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("����̹� �ε� ����"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error: " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+		 
+	 
+	 
+
+	 //14. 회원탈퇴
+	 //매개변수: String id
+	 //void - 반환 x
+	 public static void deleteEVERYWHERE(String Qid) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+		 PreparedStatement pstmt2 = null;
+		 PreparedStatement pstmt3 = null;
+
+			try{
+				Class.forName("com.mysql.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network";
+				conn = DriverManager.getConnection(url, "root", "12345");
+	 
+				String sql = "DELETE FROM user"
+						 + " where id = '"+Qid+"';";		
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+				
+				sql = "DELETE FROM friend"
+						 + " where my_id = '"+Qid+"' or"
+						 + " friend_id = '"+Qid+"';"; 
+				pstmt2 = conn.prepareStatement(sql);		
+				pstmt2.execute();
+				
+				sql = "DELETE FROM friend_plus"
+						 + " where send_id = '"+Qid+"' or"
+						 + " receive_id = '"+Qid+"';"; 
+				pstmt3 = conn.prepareStatement(sql);		
+				pstmt3.execute();
+		
+				
+				System.out.println("완료되었습니다.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("Error"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error:  " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+	 
+	 
+}
