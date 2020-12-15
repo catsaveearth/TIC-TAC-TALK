@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import client.Client.input;
 import Variable.Message;
+import Variable.TMessage;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,16 +37,21 @@ public class MainServer {
 	// 접속중인 client의 정보를 관리한다. - 로그인에 성공해야 여기에 들어올 수 있음
 	public static HashMap<String, PrintWriter> client = new HashMap<>();
 	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>();
+	public static HashMap<Integer, Queue<TMessage>> TTTSet = new HashMap<>();
+
 	private static AtomicInteger messageCK = new AtomicInteger(1);
+	private static AtomicInteger TTTCK = new AtomicInteger(1);
+
 
 	static ExecutorService messagepool = Executors.newFixedThreadPool(500);
 	static ExecutorService filepool = Executors.newFixedThreadPool(50);
+	static ExecutorService TTTpool = Executors.newFixedThreadPool(50);
 
-	
+
 	//메세지의 경우 여러 쓰레드들이 동시에 접근이 가능해야함 -> hashMap! (room number가 밖에서 체크 가능하도록)
-
 	final private static int portnum = 6789;
 	private static int forroomnumber = 1;
+	private static int TTTnumber = 1;
 	private static int fileportnum = 33333;
 		
 	public static String getCurrentTime() {
@@ -639,11 +646,73 @@ public class MainServer {
 								client.get(info[2]).println("FILES`|ANS`|" + ID + "`|" + "N" );
 							}
 						}						
-					}						
-				}
+					}
+					
+/**TTT 관련  ========================================*/
+					else if (line.startsWith("TTT")) {
+						String info[] = line.split("\\`\\|");
+						
+						while (TTTCK.get() == 0) {};
+						TTTCK.set(0);
+						
+						//A가 B에게 대결을 신청 (TTT ASK 상대ID)
+						if(info[1].compareTo("ASK") == 0) {
+							// 상대를 찾아서 보내는 API에 맞춰서 보내줌 (TTT ASK A아이디 이름(별명)
+							HashMap<String, String> map = query.bringINFO(ID);
+							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
 
+							client.get(info[2]).println("TTT`|ASK`|" + ID + "`|" + senderInfo);
+						}
+												
+						//B에게 A가 보내는 파일을 받을지 말지 여부를 결정하는 연락이 왔어요 => FILES ANS 상대ID, Y/N
+						else if(info[1].compareTo("ANS") == 0) {
+							//게임을 한다고 하면?
+							if(info[3].equals("Y")) {
+								int rn = TTTnumber++;
+								
+								//선 정하기
+								double dValue = Math.random();
+								int order = ((int) (dValue * 10))%2;
+								int Aorder = 0;
+								int Border = 0;
+								
+								//0이면 A선, 1이면 B가 선.
+								if(order == 0) Aorder = 1;
+								else Border = 1;
+								
+								//TTT게임을 수행할 thread를 만들어 줍니다.
+								TTTpool.execute(new TTT(rn, info[2] ,ID)); //게임을 건 상대가 A
+								Queue<TMessage> m = new LinkedList();
+								TTTSet.put(rn, m);
+								
+								HashMap<String, String> map = query.bringINFO(info[2]);
+								String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+								
+								HashMap<String, String> map2 = query.bringINFO(ID);
+								String senderInfo2 = map2.get("NICKNAME") + "(" + map2.get("NAME") + ")";
+
+								//받는 쪽으로 다시 정보를 보내준다 (TTT INFO MNN FNN ROOMNUMBER ORDER) => 이거 받고 GUI구축
+								out.println("TTT`|INFO`|" + senderInfo2 + "`|" + senderInfo + "`|" + rn + "`|" + Border);
+
+								//게임 건 사람에게도 정보를 보내줌 (TTT INFO MNN FNN ROOMNUMBER ORDER) => 이거 받고 GUI 구축
+								client.get(info[2]).println("TTT`|INFO`|" + senderInfo + "`|" + senderInfo2 + "`|" + rn + "`|" + Aorder);
+								
+							}
+							else { //안받는다고 하면? => A에게 거절했다고 알리기
+								client.get(info[2]).println("TTT`|ANS`|" + ID + "`|" + "N" );
+							}
+						}		
+						
+						//게임 도중 주고받는 정보들 (TTT ING RoonNumber X Y)
+						else if(info[1].compareTo("ING") == 0) {
+							// Tmessage queue에 넣어준다. => 그럼 그 thread에서 상대에게 내 정보를 알려주던가 할 것.
+							TMessage m = new TMessage(Integer.parseInt(info[3]), Integer.parseInt(info[4]), ID);
+							TTTSet.get(Integer.parseInt(info[2])).add(m);
+						}
+						TTTCK.set(1);
+					}
+				}
 			} catch (IOException e) {
-				
 				e.printStackTrace();
 			} finally {
 				// Client가 종료하면, 흔적들을 다 정리해준다.
@@ -935,6 +1004,111 @@ public class MainServer {
 		}
 	}
 
+	//TTT thread 코드
+	public static class TTT implements Runnable{
+		private int room_num;
+		private String AID;
+		private String BID;
+		private int gameboard[][]= {{0,0,0},{0,0,0},{0,0,0}};
+		private int count=0;
+		
+		public TTT(int room_num, String A, String B) {
+			//order가 1이면 A가 선, 0이면 B가 선.
+			
+			this.room_num = room_num;
+			this.AID = A; //O역할
+			this.BID = B; //X역할
+			
+		}
+
+		//승패가 났는지 확인하는 코드. (누가 승자인지 확인하는 코드 (1이면 A, 2이면 B)), -1이면 무승부, 0이면 더 할수 있다는 뜻 
+		public int checkIfWinner() {
+			for(int i=0;i<gameboard.length;i++) {
+				if (((gameboard[i][0]==1)||(gameboard[i][0]==2)) && (gameboard[i][0] == gameboard[i][1]) && (gameboard[i][0] == gameboard[i][2])) {
+					if(gameboard[i][0]==1) return 1;
+					else return 2;
+				}
+				else if (((gameboard[0][i]==1)||(gameboard[0][i]==2)) && (gameboard[0][i] == gameboard[1][i]) && (gameboard[0][i] == gameboard[2][i])) {
+					if(gameboard[0][i]==1) return 1;
+					else return 2;
+				}			
+			}
+			
+			if (((gameboard[0][0]==1)||(gameboard[0][0]==2)) && (gameboard[0][0] == gameboard[1][1]) && (gameboard[0][0] == gameboard[2][2])) {
+				if(gameboard[0][0]==1) return 1;
+				else return 2;
+			}	
+			
+			else if (((gameboard[0][2]==1)||(gameboard[0][2]==2)) && (gameboard[0][2] == gameboard[1][1]) && (gameboard[0][2] == gameboard[2][0])) {
+				if(gameboard[0][2]==1) return 1;
+				else return 2;
+			}	
+			
+			if(count==9) {//무승부1
+				return -1;
+			}
+			return 0;
+		}
+		
+		@Override
+		public void run() {
+			boolean flag = true;
+
+			while (flag) {
+				if (!TTTSet.get(room_num).isEmpty()){
+					TMessage m = TTTSet.get(room_num).poll();
+					
+					if (m.equals(null))
+						continue;
+					
+					int ck;
+					if(m.getSender_id().equals(AID)) ck = 1;
+					else ck = 2;
+					
+					gameboard[m.getx()][m.gety()] = ck;
+					client.get(BID).println(gameboard[0][0]+ "|" + gameboard[0][1]+ "|" + gameboard[0][2]+ "\n" + gameboard[1][0] + "|" +  gameboard[1][1]+ "|" +  gameboard[1][2]
+							+ "\n" + gameboard[2][0]+ "|" + gameboard[2][1] + "|" + gameboard[2][2]);
+					client.get(BID).println(m.getx()+ "|" +m.gety());
+
+					
+					//상대가 어디에 수를 뒀는지 알리기
+					if(m.getSender_id().equals(AID)) 
+						client.get(BID).println("TTT`|NOTI`|" + room_num + "`|" + m.getx() + "`|" + m.gety());
+					else
+						client.get(AID).println("TTT`|NOTI`|" + room_num + "`|" + m.getx() + "`|" + m.gety());
+					
+					int ckwinner = checkIfWinner();
+					
+					if(ckwinner == 1) { //승자가 A라면~
+						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "WIN");
+						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "LOSE");
+						flag = false;
+						
+					} else if (ckwinner == 2) { // 승자가 B라면~~
+						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "LOSE");
+						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "WIN");
+						flag = false;
+
+					} else if (checkIfWinner() == -1) {// 무승부!
+						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "SAME");
+						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "SAME");
+
+						flag = false;
+					}
+					
+				} else {
+					System.out.println("+");
+				}
+			}
+			TTTSet.remove(room_num);
+			for(int i=0;i<3;i++) {
+				for(int j=0;j<3;j++) {
+					System.out.print(gameboard[i][j]);
+				}
+				System.out.println("");
+			}
+		}
+	}
 	
 	// 실시간으로 친구 신청 감시하는 얘
 	public static class RealTimeUpdater implements Runnable {

@@ -1,6 +1,4 @@
 package Variable;
-import java.time.LocalTime;
-import java.util.ArrayList;
 
 public class Message {
 	private int room_id;

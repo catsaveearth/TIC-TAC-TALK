@@ -196,6 +196,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		}
 	}
 
+	//멀티채팅 초대
 	public static void showInviteInOriginRoom(int rn) {
 		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
 	}
@@ -232,13 +233,38 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		return fname;
 	}
 
-	// 파일전송에서 상대방에게 물어보는 부분
+	// 파일저장 성공했다고 메세지
 	public static void successFileReceive() {
 		String windowName = "file 저장";
 		String showMessage = "파일 저장 성공";
 		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	
+	//TTT신청 요청 메세지
+	public static void TTTrequset(String FID, String info) {
+		String windowName = "TTT 신청";
+		String showMessage = info + "의 게임 신청을 수락하시겠습니까?";
+			
+		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			Client.ANSTTT(FID, "Y");
+		} else {
+			Client.ANSTTT(FID, "N");
+		}
+	}
+	
+	// TTT 거절당했다고 메세지
+	public static void RejectTTT() {
+		String windowName = "TTT 거절";
+		String showMessage = "게임 신청을 거절당했습니다.";
+		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	
+	
+	
 	public void mouseClicked(MouseEvent me) {
 		int row = jTable.getSelectedRow();
 		Object line = model.getValueAt(row, 0);
@@ -311,11 +337,9 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 						if (!line2.equals(onlineIcon)) {
 							JOptionPane.showMessageDialog(null, "상대가 오프라인입니다.");
 						} else {
-							
-							
-							//틱택토
+							//틱택토 신청
+							Client.startTTT(FID);
 						}
-
 					}
 
 				});

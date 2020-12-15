@@ -41,6 +41,7 @@ public class Client {
 	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 	private static HashMap<Integer, ChattingMulti> MCHAT = new HashMap<Integer, ChattingMulti>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 	private static HashMap<String, String> FileMatch = new HashMap<String, String>(); //누구에게 뭔파일 보낼지 저장해둠
+	private static HashMap<Integer, TTTGAME> TTTPOCKET = new HashMap<Integer, TTTGAME>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 
 	static ExecutorService filepool = Executors.newFixedThreadPool(50);
 
@@ -484,6 +485,29 @@ public class Client {
 	
 	
 	
+	//틱택토 게임==============================
+	//게임 신청
+	protected static void startTTT(String FID) {
+		out.println("TTT`|ASK`|" + FID);
+	}
+	
+	//게임 신청에 대한 답장 => FILES ANS 상대ID, Y/N
+	protected static void ANSTTT(String FID, String ANS) {
+		//ANS => "Y" or "N"
+		out.println("TTT`|ANS`|" + FID + "`|" + ANS);
+	}
+	
+	
+	//게임 도중 내가 선택한 말 넘기기=> FILES ANS 상대ID, Y/N
+	protected static void MYSELECTinTTT(int rn, int x, int y) {
+		//(TTT ING RoonNumber X Y)
+		out.println("TTT`|ING`|"+ rn + "`|" + x + "`|" + y);
+	}
+	
+	
+	
+	
+	
 	public static void main(String[] args) {
 		String file = "serverinfo.dat";
 		int port = 0;
@@ -768,11 +792,8 @@ public class Client {
 						}
 
 						MCHAT.get(Integer.parseInt(info[2])).PrereceiveChat(Integer.parseInt(info[3]), ulist); ;
-
 					}
-
 				}
-				
 
 				//파일 전송 관련
 				else if (line.startsWith("FILES")) {
@@ -796,6 +817,52 @@ public class Client {
 						if(info[3].equals("Y")) {
 							filepool.execute(new filesenderThread(Integer.parseInt(info[4]), info[2])); 							
 						}
+					}
+				}
+				
+				//TTT 전송 관련
+				else if (line.startsWith("TTT")) {
+					String info[] = line.split("\\`\\|");
+
+					//누군가 게임요청을 보내왔다
+					if(info[1].compareTo("ASK") == 0) {
+						//(TTT ASK A아이디 이름(별명)
+						MainScreen.TTTrequset(info[2], info[3]);
+					}
+					
+					//상대가 안한다고 하면?
+					else if(info[1].compareTo("ANS") == 0) {
+						MainScreen.RejectTTT();
+					}
+					
+					//게임 할꺼니까 준비하라는 신호 => TTT INFO MNN FNN ROOMNUMBER ORDER)
+					else if(info[1].compareTo("INFO") == 0) {
+						TTTGAME t = new TTTGAME(Integer.parseInt(info[4]), Integer.parseInt(info[5]), info[2], info[3]);
+						TTTPOCKET.put(Integer.parseInt(info[4]), t);
+					}
+					
+					//상대가 둔 수를 표시하라는 신호 => TTT NOTI rn x y
+					else if(info[1].compareTo("NOTI") == 0) {
+						int x = Integer.parseInt(info[3]);
+						int y = Integer.parseInt(info[4]);
+						TTTPOCKET.get(Integer.parseInt(info[2])).checkOPPNblock(x, y);
+					}
+					
+					//결과를 확인하는 부분 => TTT RESULT rn 결과
+					else if(info[1].compareTo("RESULT") == 0) {
+						if(info[3].equals("WIN")) {
+							TTTPOCKET.get(Integer.parseInt(info[2])).Winner(1);
+						}
+						else if(info[3].equals("LOSE")) {
+							TTTPOCKET.get(Integer.parseInt(info[2])).Winner(0);
+						}
+						else {
+							TTTPOCKET.get(Integer.parseInt(info[2])).Winner(-1);
+						}
+						
+						//결과를 본 뒤에는 더이상의 통신은 없음
+						TTTPOCKET.remove(Integer.parseInt(info[2]));
+
 					}
 				}
 			}
