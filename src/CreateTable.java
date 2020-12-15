@@ -58,13 +58,6 @@ public class CreateTable {
 			  System.out.println("\"FRIEND_PLUS\" Table이 생성되었습니다.");
 
 			  
-			  stmt.executeUpdate("create table CHAT ("
-	                     +"chat_id varchar(20), "
-	                     +"maker_id varchar(20) "
- 		                 + ");");
-			  System.out.println("\"CHAT\" Table이 생성되었습니다.");
-
-			  
 			  stmt.executeUpdate("create table CHATTING ("
 	                     +"chat_id varchar(20),"
 		                 +"time varchar(20), "

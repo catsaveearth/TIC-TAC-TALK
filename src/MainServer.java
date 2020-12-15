@@ -6,10 +6,8 @@ room manage를 돌리면서 채팅방을 관리한다. => 클라이언트 -> 서버로 채팅 연락이 올
 
 client로부터 accept연결 요청을 받으면 client를 다루는 thread를 생성해서 socket을 넘겨준다. (그 thread는 EchoServer에 존재)
 
-
 modifier: Kim Su hyeon.
 E-mail Address: tpfbdpf@naver.com
-Last Changed: Nov 13, 2020.
 */
 
 import java.io.*;
@@ -17,43 +15,32 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import client.Client.input;
 import Variable.Message;
 import Variable.TMessage;
-
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 
 
 public class MainServer {
 
-	// 접속중인 client의 정보를 관리한다. - 로그인에 성공해야 여기에 들어올 수 있음
-	public static HashMap<String, PrintWriter> client = new HashMap<>();
-	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>();
-	public static HashMap<Integer, Queue<TMessage>> TTTSet = new HashMap<>();
+	public static HashMap<String, PrintWriter> client = new HashMap<>(); //접속중인 client관리
+	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>(); //chat thread와의 공유메모리
+	public static HashMap<Integer, Queue<TMessage>> TTTSet = new HashMap<>(); //TTT thread와의 공유메모리
 
-	private static AtomicInteger messageCK = new AtomicInteger(1);
+	//공유메모리를 사용할 때 원자성 보장
+	private static AtomicInteger messageCK = new AtomicInteger(1); 
 	private static AtomicInteger TTTCK = new AtomicInteger(1);
 
+	//thread들을 관리하는 thread pool
+	private static ExecutorService messagepool = Executors.newFixedThreadPool(500);
+	private static ExecutorService filepool = Executors.newFixedThreadPool(50);
+	private static ExecutorService TTTpool = Executors.newFixedThreadPool(50);
 
-	static ExecutorService messagepool = Executors.newFixedThreadPool(500);
-	static ExecutorService filepool = Executors.newFixedThreadPool(50);
-	static ExecutorService TTTpool = Executors.newFixedThreadPool(50);
-
-
-	//메세지의 경우 여러 쓰레드들이 동시에 접근이 가능해야함 -> hashMap! (room number가 밖에서 체크 가능하도록)
 	final private static int portnum = 6789;
 	private static int forroomnumber = 1;
 	private static int TTTnumber = 1;
 	private static int fileportnum = 33333;
-		
+	
+	//현재 시간을 가져옴
 	public static String getCurrentTime() {
 		Date date_now = new Date(System.currentTimeMillis()); // 현재시간을 가져와 Date형으로 저장한다
 		
@@ -63,6 +50,7 @@ public class MainServer {
 		return date_format.format(date_now).toString();
 	}
 
+	
 	public static void main(String[] args) throws Exception {
 		// client와 소통하는 thread를 관리할 pool생성 (최대 500명까지 가능)
 		ExecutorService pool = Executors.newFixedThreadPool(500);
@@ -74,9 +62,11 @@ public class MainServer {
 			}
 		}
 	}
-
 	
-	/** client thread 코드. - 이제 client와 관련된 일은 모두 여기서 처리한다. */
+	/** client thread 코드. - 이제 client와 관련된 일은 모두 여기서 처리한다. 
+	 * client가 연결 될 때 마다 Handler thread가 하나 씩 생겨나서 client에서의 입력을 전담 마크한다.
+	 * Handler thread는 client hashmap에서 관리된다.
+	 * */
 	public static class Handler implements Runnable {
 		// 연결 socket과 stream
 		private Socket socket;
@@ -98,8 +88,8 @@ public class MainServer {
 				in = new Scanner(socket.getInputStream());
 			    out = new PrintWriter(socket.getOutputStream(), true);
 
-//메인 화면 뜰 떄 까지 돌아가는 것				
-				while (true) { // 처음에 로그인 과정 + 회원가입 => 로그인을 해야지 while을 넘어간다
+			    //메인 화면 뜰 떄 까지 돌아가는 것				
+				while (true) { // 처음에 로그인 과정 + 회원가입 => 로그인을 해야지 이 while을 넘어간다
 					String line = in.nextLine();
 					System.out.println(line);
 
@@ -168,12 +158,12 @@ public class MainServer {
 						query.updateLAST_CONNECTION(info[3], getCurrentTime()); //지금 시간 넣어주기
 					}
 				}
-
+				//로그인 성공시 여기서 시작
 							
+				// 첫 시작시 기본 정보들을 client에게 전부 보내준다 JDBC를 이용해야함
 			    HashMap<String,String> binfo = new HashMap<String,String>();
 			    binfo = query.selectNAME_NICKNAME_STATE(ID);
 				
-				// 기본 정보들을 client에게 전부 보내준다 JDBC를 이용해야함
 				out.println("BASICINFO`|name`|" + binfo.get("NAME"));
 				out.println("BASICINFO`|nickname`|" + binfo.get("NICKNAME"));
 				out.println("BASICINFO`|state_message`|" + binfo.get("STATE_MESSAGE"));
@@ -203,7 +193,7 @@ public class MainServer {
 				out.println("BFEND"); //이제 넘기는거 종료라는 뜻!
 
 				
-				//다른 사람들에게 내가 들어왔다고 알린다!
+				//다른 사람들에게 내가 들어왔다고 알린다! (접속상태 변경)
 				for (PrintWriter output : client.values()) {
 					if(output.equals(out)) continue;
 					//모두에게 보내면 client에서 알아서 걸러서 들을것임
@@ -212,18 +202,16 @@ public class MainServer {
 				}
 				
 				
-				//===============================>> 여기 위까지 구현 완료 (로그인 & 회원가입 & 기본 정보 보내주기) <<==================================
+				//여기까지가 (로그인 & 회원가입 & 기본 정보 보내주기) <<==================================
 
 				//이제 친구신청을 감지하는 Thread와 아래의 while이 동시에 돌아가게 됩니다
 				RealTimeUpdater runnable = new RealTimeUpdater(ID, out);
 				thread = new Thread(runnable);
 
-				thread.start();
-				//친구신청 확인 thread돌아갑니다~
-				
+				thread.start();	//친구신청 확인 thread 작동 시작
 				System.out.println("돌기시작합니다!");
 
-//프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는다! / client -> server)
+//프로그램이 돌아가는 동안 소통이 이루어지는 부분 (클라이언트로부터 입력을 받는부분! / client -> server)
 				while (true) {
 					System.out.println("빙글뱅글!");
 					
@@ -259,7 +247,6 @@ public class MainServer {
 								client.get(info[2]).println("FRIEND`|APND`|" + mapp.get("ID") + "`|" + mapp.get("NAME") + "`|" + mapp.get("NICKNAME") + "`|"
 										+ mapp.get("LAST_CONNECTION") + "`|"+ mapp.get("STATE_MESSAGE"));
 							}
-							
 						}
 						
 						//친구 거절 => FRIEND NO [FID]
@@ -297,10 +284,8 @@ public class MainServer {
 							if(ck.compareTo("true") == 0) {
 								out.println("FRIEND`|FCK`|T");
 							}
-							else out.println("FRIEND`|FCK`|F");
-							
+							else out.println("FRIEND`|FCK`|F");	
 						}
-
 					}
 					
 /**검색 관련 처리========================================*/
@@ -365,7 +350,6 @@ public class MainServer {
 									ck++;
 								}
 								System.out.println(list);
-
 							}
 
 							//값을 보내줘야함
@@ -762,7 +746,9 @@ public class MainServer {
 		}
 	}
 
-
+	/** file 전송 thread 코드
+	 * : file을 전송할 때, 두 client와 새로운 socket을 열어서 기존 Socket과는 파일을 독립적으로 전송한다.
+	 * */
 	public static class filemanage implements Runnable{
 
 		private ServerSocket soc;
@@ -856,8 +842,9 @@ public class MainServer {
 		}
 	}
 	
-	
-	// 멀티 채팅방 하나씩을 담당하는 thread 코드
+	/** multi-Chat thread 코드
+	 * 여러 client끼리 단체 채팅을 할 때, 그 채팅의 모든것을 담당한다.
+	 * */
 	public static class Chat implements Runnable {
 		int room_num;
 		String room_name;
@@ -1022,7 +1009,9 @@ public class MainServer {
 		}
 	}
 
-	//TTT thread 코드
+	/** 틱택톡 thread 코드
+	 * 두 client끼리 틱택톡 게임을 할 때, 게임의 모든것을 담당!
+	 * */
 	public static class TTT implements Runnable{
 		private int room_num;
 		private String AID;
@@ -1128,18 +1117,18 @@ public class MainServer {
 		}
 	}
 	
-	// 실시간으로 친구 신청 감시하는 얘
+	/** 친구신청 감시 thread 코드
+	 * 하나의 handler thread가 실행될 떄, 같이 붙어서 실행되며 실시간으로 친구신청을 감지한다.
+	 * */
 	public static class RealTimeUpdater implements Runnable {
 		// 사용자 정보 저장
 		private String ID = null;
 		private PrintWriter out;
 
-		// constructor -> stream 연결작업
 		public RealTimeUpdater(String id, PrintWriter out) throws IOException {
 			ID = id;
 			this.out = out;
 		}
-
 
 		@Override
 		public void run() {

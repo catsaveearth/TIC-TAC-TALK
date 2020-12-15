@@ -75,8 +75,8 @@ public class ChattingMulti {
     }
     
  
-    public ChattingMulti(int roomnumber, String roomname) {
-    	this.roomnumber = roomnumber;
+    public ChattingMulti(int rn, String roomname) {
+    	this.roomnumber = rn;
     	this.room_name = roomname;
     	frame.setTitle(roomname);
     	

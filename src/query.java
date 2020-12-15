@@ -1,4 +1,11 @@
-
+/**
+ * query.java
+ * : JDBC를 이용해서 Server에 존재하는 DB와 소통한다.
+ *   MainServer.java에서 가져다가 사용하는 method뜰의 모음.
+ * 
+ * creator : 신현호
+ * modifier : 김수현
+ * */
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,10 +15,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 public class query {
-	
-
 	/* [로그인] */
-
 	// 1. id, password를 받고 맞는건지 ckeck
 	// 매개변수: String id, String password
 	// 맞으면 return 1 : 틀리면 return -1(or 0)
@@ -61,6 +65,9 @@ public class query {
 		return 0;
 	}
 
+	// 2. pw 암호화에 필요한 Salt를 ID에 맞게 가져옴.
+	// 매개변수: String id
+	// Return : salt
 	public static String bringSALT(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
@@ -105,8 +112,7 @@ public class query {
 	}
 
 	/* [회원가입] */
-
-	// 2. id에 대한 중복체크
+	// 3. id에 대한 중복체크
 	// 매개분수: String id
 	// 사용 가능하면 return 1 : 중복이면 return -1
 	public static int selectID(String Qid) {
@@ -153,7 +159,7 @@ public class query {
 		return 0;
 	}
 
-	// 3. nickname에 대한 중복체크
+	// 4. nickname에 대한 중복체크
 	// 매개변수: String nickname
 	// 사용 가능하면 return 1 : 틀리면 return -1
 	public static int selectNICKNAME(String Qnickname) {
@@ -200,7 +206,7 @@ public class query {
 		return 0;
 	}
 
-	// 4. 새로운 user에 대한 record정보 기록 (필수정보들)
+	// 5. 새로운 user에 대한 record정보 기록 (필수정보들)
 	// 매개변수 HashMap<String,String>map=(id, password, name, nickname, phone, email,
 	// birth (,github), SALT)
 	public static void insertUSER(HashMap<String, String> map) {
@@ -257,8 +263,7 @@ public class query {
 	}
 
 	/* [메인페이지 로딩] */
-
-	// 5. 본인의 이름, nickname, 한줄메세지 받아오기
+	// 6. 본인의 이름, nickname, 한줄메세지 받아오기
 	// 매개변수: String id
 	// return HashMap<String,String>map=(name, nickname, state_message)
 	public static HashMap selectNAME_NICKNAME_STATE(String Qid) {
@@ -308,7 +313,7 @@ public class query {
 		return map;
 	}
 
-	// 6. 친구목록 받아오기 => ID, 이름, 닉네임, 접속여부, 상메
+	// 7. 친구목록 받아오기 => ID, 이름, 닉네임, 접속여부, 상메
 	// 매개변수: String id
 	// return String[][ID, name, nickname, last_connection, 상메]
 	public static String[][] selectFRIEND(String Qid) {
@@ -382,10 +387,9 @@ public class query {
 		return info;
 	}
 
-	// 7. 친구요청 목록 받아오기 => 이름, 닉네임, 접속여부, 상메
+	// 8. 친구요청 목록 받아오기 => 이름, 닉네임, 접속여부, 상메
 	// 매개변수: String id
 	// return String[][name, nickname, last_connection, 상메, id]			
-
 	public static String[][] bringFRIEND_PLUS(String Qid){
 		Connection conn = null;
 		Statement stmt = null;
@@ -456,8 +460,7 @@ public class query {
 	}
 
 	/* [메인페이지 조작] */
-
-	// 8. 내정보 받아오기 - 이메일, 전화번호 등등등....
+	// 9. 내정보 받아오기 - 이메일, 전화번호 등등등....
 	// 매개변수: String id
 	// return HashMap<String,String>map=(phone, email, birth, github, state_message,
 	// last_connection)
@@ -523,10 +526,9 @@ public class query {
 		return map;
 	}
 
-	// 9. 내정보 수정 - 닉네임, github, 한줄 메세지, 최근 접속 시간
+	// 10. 내정보 수정 - 닉네임, github, 한줄 메세지, 최근 접속 시간
 	// 매개변수할떄 서버에서 8번 query 사용해서 변경하지 않은건 그대로 보내주세요
 	// void 반환x
-
 	// password 수정
 	public static void updatePASSWORD(String Qid, String Qpassword, String Salt) {
 		Connection conn = null;
@@ -862,7 +864,7 @@ public class query {
 		}
 	}
 
-	// 10. password가 맞는지 확인하기
+	// 11. password가 맞는지 확인하기
 	// 매개변수: String id, String password
 	// 맞으면 return 1 : 틀리면 return -1(or 0)
 	public static int checkPASSWORD(String Qid, String Qpassword) {
@@ -954,7 +956,7 @@ public class query {
 		}
 	}
 
-	// 13-1. 친구 수락 시, 친구 테이블에 넣어주기
+	// 13. 친구 수락 시, 친구 테이블에 넣어주기
 	public static void insertFRIEND(String Sid, String Rid) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -1007,7 +1009,7 @@ public class query {
 		}
 	}
 
-	// 13-2. 친구 수락 시, 친구 요청 테이블에서 없애기
+	// 14. 친구 수락 시, 친구 요청 테이블에서 없애기
 	// 매개변수: String send_id, String receive_id - 순서 상관없음.
 	// void - 반환 x
 	public static void deleteFRIEND_PLUS(String Sid, String Rid) {
@@ -1045,49 +1047,6 @@ public class query {
 	}
 
 	/* [채팅관련] */
-
-	// 14. 채팅방 등록
-	// 매개변수: String chat_id, String maker_id
-	// void 반환x
-	public static void insertCHAT(String Qchat_id, String Qmaker_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "root", "12345");
-
-			String sql = "INSERT INTO CHAT VALUES (?,?)";
-			pstmt = conn.prepareStatement(sql);
-
-			pstmt.setString(1, Qchat_id);
-			pstmt.setString(2, Qmaker_id);
-
-			int count = pstmt.executeUpdate();
-			if (count == 0) {
-				System.out.println("데이터 입력 실패");
-			} else {
-				System.out.println("데이터 입력 성공");
-			}
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로딩 실패");
-		} catch (SQLException e) {
-			System.out.println("에러 " + e);
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-				if (pstmt != null && !pstmt.isClosed()) {
-					pstmt.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	// 15. 한 채팅방에 대한 모든 채팅 내용 삭제 (in CHATTING table)
 	// 매개변수: String chat_id
 	// void - 반환 x
@@ -1101,42 +1060,6 @@ public class query {
 			conn = DriverManager.getConnection(url, "root", "12345");
 
 			String sql = "DELETE FROM CHATTING" + " where (chat_id='" + Qchat_id + "');";
-
-			pstmt = conn.prepareStatement(sql);
-			pstmt.execute();
-
-
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로딩 실패");
-		} catch (SQLException e) {
-			System.out.println("에러 " + e);
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-				if (pstmt != null && !pstmt.isClosed()) {
-					pstmt.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	// 15-2. 한 채팅방 완전 삭제 (in CHAT table)
-	// 매개변수: String chat_id
-	// void - 반환 x
-	public static void deleteCHAT(String Qchat_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "root", "12345");
-
-			String sql = "DELETE FROM CHAT" + " where (chat_id='" + Qchat_id + "');";
 
 			pstmt = conn.prepareStatement(sql);
 			pstmt.execute();
@@ -1379,7 +1302,6 @@ public class query {
 		return array;
 	}
 
-	
 	// 20. FRIEND 목록에 있는지 확인
 	// 매개변수: String S_id, String R_id
 	// return 없을 시, null 있을시, S_id(null이 아님)
@@ -1578,5 +1500,5 @@ public class query {
 				}  
 			}
 		}
-	
+
 }
