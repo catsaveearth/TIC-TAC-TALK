@@ -501,6 +501,24 @@ public class MainServer {
 						}
 						
 	
+						//회원탈퇴=> SETTING BYE
+						else if(info[1].compareTo("BYE") == 0) {
+							
+							//친구들의 ID가 접속중이라면 탈퇴햇다고 알려주기
+							String[][] f_list2 = query.selectFRIEND(ID);
+							int plag = 1;
+							for(String[] l : f_list2) {
+								if(plag == 1) {
+									plag++;
+									continue;
+								}
+								if(client.containsKey(l[4])) {
+									client.get(l[4]).println("UPDATE`|FBYE`|" + ID );
+								}
+							}
+							query.deleteEVERYWHERE(ID);	
+
+						}
 					}
 					
 					

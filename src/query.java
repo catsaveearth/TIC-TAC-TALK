@@ -1523,4 +1523,60 @@ public class query {
 		return 0;
 	}
 	
+	 //23. 회원탈퇴
+	 //매개변수: String id
+	 //void - 반환 x
+	public static void deleteEVERYWHERE(String Qid) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+		 PreparedStatement pstmt2 = null;
+		 PreparedStatement pstmt3 = null;
+
+			try{
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+				conn = DriverManager.getConnection(url, "root", "12345");
+
+				String sql = "DELETE FROM user"
+						 + " where id = '"+Qid+"';";		
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+				
+				sql = "DELETE FROM friend"
+						 + " where my_id = '"+Qid+"' or"
+						 + " friend_id = '"+Qid+"';"; 
+				pstmt2 = conn.prepareStatement(sql);		
+				pstmt2.execute();
+				
+				sql = "DELETE FROM friend_plus"
+						 + " where send_id = '"+Qid+"' or"
+						 + " receive_id = '"+Qid+"';"; 
+				pstmt3 = conn.prepareStatement(sql);		
+				pstmt3.execute();
+		
+				
+				System.out.println("완료되었습니다.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("Error"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error:  " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
+	
 }

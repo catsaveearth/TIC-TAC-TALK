@@ -30,6 +30,9 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
     private JFileChooser c = new JFileChooser(currentDirectory);
     String fileName;
     
+    static JFrame frame = new JFrame();
+    static JPanel panel = new JPanel();
+    
 	static JTable jTable;
 	static String columnNames[] = { "ID", "닉네임(이름)", "한줄메시지", "status" };
 	static Object rowData[][] = {}; // 친구목록 들어가야 될 자리!
@@ -148,6 +151,26 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		friendnum++;
 	}
 	
+	//친구 탈퇴시 리스트 업데이트
+	public static void changeFriendOUT(String FID) { // 친구가 추가될 시 list update
+		// ID
+		
+		int row = -1;
+
+		//먼저 친구를 찾습니다
+  	  	for(int i=0;i<friendnum;i++) {
+  			Object line = model.getValueAt(i, 0);
+  			if(line.toString().compareTo(FID) == 0) row = i;
+  	  	}
+
+  	  	if(row == -1) return;
+		
+		model.removeRow(row);
+		friendnum++;
+
+	}
+	
+	
 	//친구신청 팝업 보여주기
 	public static int showFriendPlus(String nn, String name) {
 		String[] buttons = {"Yes", "No"};
@@ -163,7 +186,8 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	      }
     	  return 0; //친구거절
 	}
-
+	
+	
 	//일댈채팅신청 팝업 보여주기
 	public static void showPCHAT(String fid, String nn, String name) {
 		String windowName = "채팅 신청";
@@ -262,7 +286,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
-	
+	public static void clostMainScreen() {
+		Client.stopclient();
+		frame.dispose();
+	}
 	
 	
 	public void mouseClicked(MouseEvent me) {
@@ -361,8 +388,6 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	}
 
 	public MainScreen() {
-      JFrame frame = new JFrame();
-      JPanel panel = new JPanel();
       panel.setBackground(new Color(0, 176, 80));
 
       // 버튼 있는 부분
@@ -847,6 +872,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
           	String[] buttons = {"YES", "NO"};
     		int result = JOptionPane.showOptionDialog(null, "종료하시겠습니까?", "종료", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "두번째값");
     		if (result == 0) {
+    			Client.stopclient();
     			System.exit(0);
     		} else if (result == 1) {
     		      frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

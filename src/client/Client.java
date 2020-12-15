@@ -35,6 +35,7 @@ public class Client {
 	private static Scanner in;
 	private static String salt = null;
 	private static String ID = null;
+	private static boolean flag = true;
 	private static AtomicInteger readSocket = new AtomicInteger(1);
 	private static AtomicInteger writeSocket = new AtomicInteger(1);
 	// socket에 값을 넣고 빼는걸 제어할 친구! 초기값은 1 : 1일때는 사용가능, 0일때는 사용 불가능!
@@ -43,7 +44,9 @@ public class Client {
 	private static HashMap<String, String> FileMatch = new HashMap<String, String>(); //누구에게 뭔파일 보낼지 저장해둠
 	private static HashMap<Integer, TTTGAME> TTTPOCKET = new HashMap<Integer, TTTGAME>(); //누구랑 일댈중인지 저장하는 친구. 친구의 ID가 저장됨.
 
-	static ExecutorService filepool = Executors.newFixedThreadPool(50);
+	private static ExecutorService filepool = Executors.newFixedThreadPool(50);
+	// input이랑 Basic받을 얘
+	private static ExecutorService b_pool = Executors.newFixedThreadPool(2);
 
 	
 	public static String getCurrentTime() {
@@ -57,19 +60,19 @@ public class Client {
 	
 	
 	// thread들과 소통하기 위한 변수 부분!!!
-	static boolean PWck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
-	static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
-	static boolean settingInfock = false; //settingInfo의 값 업데이트 확인
-	static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
-	static boolean fsl[] = {false, false}; //{친구내검색 업데이트, 외부친구검색 업데이트)
-	static String[][] fslInfo = new String[21][4]; //친구검색한 결과리스트 (ID, name, nickname, last_connection)
-	static boolean friendInfock = false; 
-	static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
-	static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
-	static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
-	static String lefsfe;
-	static int roomNum = 0;
-	static boolean ckroomNum = false; 
+	private static boolean PWck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
+	private static boolean NNck[] = {false, false}; //초기상태! {값 업데이트 확인, 실제 값}
+	private static boolean settingInfock = false; //settingInfo의 값 업데이트 확인
+	private static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+	private static boolean fsl[] = {false, false}; //{친구내검색 업데이트, 외부친구검색 업데이트)
+	private static String[][] fslInfo = new String[21][4]; //친구검색한 결과리스트 (ID, name, nickname, last_connection)
+	private static boolean friendInfock = false; 
+	private static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+	private static boolean friend_dbck[] = {false, false}; //서버에서 정보왔는지 확인하는 얘 (PCK, FCK)
+	private static boolean friend_result[] = {true, true}; //값이 있는지 없는지 알려줌(PCK, FCK)
+	private static String lefsfe;
+	private static int roomNum = 0;
+	private static boolean ckroomNum = false; 
 	//boolean변수들을 True로 해놓으면 MainScreen에서 정보를 빼가고 false로 돌려놓을 것.
 
 	
@@ -235,9 +238,8 @@ public class Client {
 		writeSocket.set(1);
 	}
 
-	// ========================================이제 여기 위는 건들지마라
-
-	
+	// ========================================이제 여기 위는 건들지말자!
+	//=================설정 관련 함수
 	// 정보수정할때 pw맞는지 확인하는 함수
 	protected static boolean pwcheck(char[] pw) {
 
@@ -315,7 +317,7 @@ public class Client {
 		fsl[1] = false;
 		return fslInfo;
 	}
-	
+		
 	//친구 내 검색 리스트를 보내주는 함수
 	protected static String[][] FriendSearchList(String kw) {
 		// String[][name, nickname, last_connection]
@@ -373,6 +375,14 @@ public class Client {
 		return 0;
 	}
 	
+	//회원탈퇴....잘가....
+	protected static void byebye() {
+		out.println("SETTING`|BYE");
+		MainScreen.clostMainScreen();
+		flag = false;
+	}
+	
+	
 	//==================채팅 기능 관련 함수	
 	// <일대일 채팅>
 	//상대방이랑 일대일 채팅중인지 확인
@@ -414,6 +424,7 @@ public class Client {
 		out.println("PCHAT`|sendCHAT`|" + FID + "`|" + chat);
 	}
 		
+	
 	// <멀티챗>==========================================
 	//서버에게 룸만든다고 요청
 	protected static void makeMultiRoom(String roomname, String showpre, String flist) {
@@ -504,9 +515,10 @@ public class Client {
 		out.println("TTT`|ING`|"+ rn + "`|" + x + "`|" + y);
 	}
 	
-	
-	
-	
+	protected static void stopclient() {
+		flag = false;
+	}
+
 	
 	public static void main(String[] args) {
 		String file = "serverinfo.dat";
@@ -540,8 +552,7 @@ public class Client {
 		// => 이때부터 thread에서 입출력가능
 		// 이제부터는 동적 이벤트 뿐! 즉, server에서 연락이 오던지, client가 먼저 작동하던지 둘 중 하나다.
 
-		// input이랑 Basic받을 얘
-		ExecutorService b_pool = Executors.newFixedThreadPool(2);
+
 
 		b_pool.execute(new input());
 
@@ -558,7 +569,7 @@ public class Client {
 			// 연락 받는건 무조건 이 thread에서 처리!
 
 			try {
-			while (true) {
+			while (flag) {
 				System.out.println("뱅뱅");
 				String line = in.nextLine();
 				System.out.println(line);
@@ -597,6 +608,11 @@ public class Client {
 						MainScreen.changeFriendstate(info[2], info[3]);
 					}
 					
+					
+					//친구가 탈퇴햇대요 ; UPDATE FBYE F_ID
+					else if(info[1].compareTo("FBYE") == 0) {
+						MainScreen.changeFriendOUT(info[2]);
+					}
 				}
 				
 				// 친구 관련

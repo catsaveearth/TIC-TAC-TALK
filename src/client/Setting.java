@@ -112,6 +112,31 @@ public class Setting extends JFrame {
 		JButton SettingBtn = new JButton("SAVE");
 		SettingBtn.setBackground(new Color(0, 54, 78));
 		SettingBtn.setForeground(Color.white);
+
+		JButton back = new JButton("BACK");
+		back.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.dispose();
+			}			
+		});
+		back.setBackground(new Color(0, 54, 78));
+		back.setForeground(Color.white);
+		
+		JButton remove = new JButton("SIGN-OUT");
+		remove.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int signOut = JOptionPane.showConfirmDialog(null, "회원을 탈퇴하시겠습니까?", "type", JOptionPane.YES_NO_OPTION);
+				
+				if(signOut == 0) {
+					Client.byebye();
+					frame.dispose();
+				}
+			}			
+		});
+		remove.setBackground(new Color(0, 54, 78));
+		remove.setForeground(Color.white);
 		
 		panel.add(label);
 		panel1.add(option);
@@ -135,7 +160,9 @@ public class Setting extends JFrame {
 		GithubPanel.add(github);
 		messagePanel.add(labelMessage);
 		messagePanel.add(smessage);
-		panelBtn.add(SettingBtn, BorderLayout.SOUTH);
+		panelBtn.add(back);
+		panelBtn.add(SettingBtn);
+		panelBtn.add(remove);
 		
 		
 		//정보 불러오기!![ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
@@ -171,7 +198,6 @@ public class Setting extends JFrame {
 		if(infoo[7].compareTo("null") != 0) 
 			smessage.setText(infoo[7]);
 
-		
 		
 		
 		//setting save 버튼 액션!
@@ -250,41 +276,35 @@ public class Setting extends JFrame {
 				
 
 				if(tf == 0) {
-					JOptionPane.showMessageDialog(null, "SUCCESS!!");
 					frame.dispose();
+					JOptionPane.showMessageDialog(null, "SUCCESS!!");
 				}
 				else if(tf == 1) {
 					//뭐 아이디가 중복된다, 그런거 알려줘야 하나???
-					JOptionPane.showMessageDialog(null, "닉네임 중복!!");
+					JOptionPane.showMessageDialog(null, "아이디 중복!!");
 				}			
 			}
 		});
-		
-		JButton back = new JButton("BACK");
-		back.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
-			}			
-		});
 			
-		frame.add(blank);
-		frame.add(label);
-		frame.add(panel1);
-		frame.add(IDPanel);
-		frame.add(NickNamePanel);
-		frame.add(PWPanel);
-		frame.add(NamePanel);
-		frame.add(PNPanel);
-		frame.add(EmailPanel);
-		frame.add(BirthPanel);
-		frame.add(GithubPanel);
-		frame.add(messagePanel);
-		frame.add(panelBtn);
-		frame.add(blank1);
-		frame.add(blank2);
-		frame.add(blank3);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(panel1);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(NickNamePanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(NamePanel);
+		frame.getContentPane().add(PNPanel);
+		frame.getContentPane().add(EmailPanel);
+		frame.getContentPane().add(BirthPanel);
+		frame.getContentPane().add(GithubPanel);
+		frame.getContentPane().add(messagePanel);
+		frame.getContentPane().add(panelBtn);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
+		frame.getContentPane().add(blank3);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
 		
+		frame.setTitle("Setting");
 		frame.setVisible(true);
 		frame.setSize(450, 600);
 		frame.setLocationRelativeTo(null);
