@@ -14,7 +14,8 @@
 
 ## Prerequisites / 선행 조건
 Using CreateTable.java, make DB in server's mysql.<br>
-(CREATE DATABASE network; -> run createTable.java)
+(CREATE DATABASE network; -> run createTable.java)<br>
+check serverinfo.dat's path in client
 <br><br>
 
 ## Getting Started / 어떻게 시작하나요?
