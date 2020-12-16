@@ -7,7 +7,7 @@
 ## Built With
 * [kim su hyeon](@catsaveearth) : design overall program schema, make and implement overall server-client protocol&code.
 * [ko jimin](@) : make overall GUI using Swing, wether service using open data.
-* [Sin hyeon ho](@) : design DB schema, make DB&query using JDBC, provide tictactoe backborn code 
+* [Sin hyeon ho](@) : design DB schema, make DB&query using JDBC, provide tictactoe backborn code, design file send basic code.
 <br><br>
 
 ## Prerequisites / 선행 조건
