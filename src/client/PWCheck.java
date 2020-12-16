@@ -1,58 +1,91 @@
 package client;
-import java.awt.BorderLayout;
+
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 
 /**
- * ∞¯ªÁ ≥°
+ * Í≥µÏÇ¨ ÎÅù
  * */
 
 
+@SuppressWarnings("serial")
 public class PWCheck extends JFrame {
 	
 	public PWCheck() {
-		JPanel panel = new JPanel();
-		JLabel label = new JLabel("                   Write your password!!");
-		label.setFont(new Font("∏º¿∫ ∞ÌµÒ(∫ªπÆ)", Font.BOLD, 15));
-		label.setPreferredSize(new Dimension(300, 50));
-		JPasswordField passward = new JPasswordField(15);
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(5, 2));
+		
+		JPanel blank = new JPanel();
+		blank.setBackground(new Color(74, 210, 149));
+		blank.setBorder(null);
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		blank1.setBorder(null);
+		
+		
+		ImageIcon icon = new ImageIcon("image/passwardcheck.png");
+	    Image titleImage = icon.getImage();
+	    Image titleChangeImg = titleImage.getScaledInstance(300, 50, Image.SCALE_SMOOTH);
+	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+	    JButton label = new JButton();
+	    label.setPreferredSize(new Dimension(100, 30));
+	    label.setBounds(5, 5, 15, 15);
+	    label.setIcon(titleChangeIcon);
+	    label.setBorder(null);
+	    label.addActionListener(new ActionListener() {
+	     @Override
+	     	public void actionPerformed(ActionEvent e) {
+	        }
+	    });
+		
+	    
+	    JPanel pwPanel = new JPanel();
+	    pwPanel.setBackground(new Color(74, 210, 149));
+		JPasswordField passward = new JPasswordField(18);
+	    
 		JPanel btnPanel = new JPanel();
-		JButton checkBtn = new JButton("»Æ¿Œ");
-			
-		panel.add(label);
-		panel.add(passward);
-		btnPanel.add(checkBtn);
-		panel.add(btnPanel, BorderLayout.SOUTH);
+		btnPanel.setBackground(new Color(74, 210, 149));
+		
+		JButton checkBtn = new JButton("ÌôïÏù∏");
+		checkBtn.setBounds(10, 10, 10, 10);
+		checkBtn.setBackground(new Color(0, 54, 78));
+		checkBtn.setForeground(Color.white);
 
 		checkBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			public void actionPerformed(ActionEvent e) {
 				if (Client.pwcheck(passward.getPassword())) {
-					dispose();
+					frame.dispose();
 					Setting setting = new Setting();
 				} else {
 					JOptionPane.showMessageDialog(null,  "Wrong!!");
 				}
 			}
 		});
+
+		pwPanel.add(passward);
+		btnPanel.add(checkBtn);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(pwPanel);
+		frame.getContentPane().add(btnPanel);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
 		
-		add(panel);
-		
-		setVisible(true);
-		setSize(300, 200);
-		setLocationRelativeTo(null);
-		setResizable(false);
+		frame.setTitle("Passward Check");
+		frame.setVisible(true);
+		frame.setSize(300, 200);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
 }

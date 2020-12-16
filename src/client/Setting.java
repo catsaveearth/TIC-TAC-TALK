@@ -1,26 +1,67 @@
 package client;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class Setting extends JFrame {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Setting() {
-		super.setLayout(new GridLayout(16, 2));
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(16, 2));
+		frame.setBackground(new Color(74, 210, 149));
+
+		JPanel blank = new JPanel();
+		blank.setBackground(new Color(74, 210, 149));
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		JPanel blank2 = new JPanel();
+		blank2.setBackground(new Color(74, 210, 149));
+		JPanel blank3 = new JPanel();
+		blank3.setBackground(new Color(74, 210, 149));
+		
 		JPanel panel = new JPanel();
 		JPanel panel1 = new JPanel();
+		panel1.setBackground(new Color(74, 210, 149));
 		JPanel IDPanel = new JPanel();
+		IDPanel.setBackground(new Color(74, 210, 149));
 		JPanel NickNamePanel = new JPanel();
+		NickNamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PWPanel = new JPanel();
+		PWPanel.setBackground(new Color(74, 210, 149));
 		JPanel NamePanel = new JPanel();
+		NamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PNPanel = new JPanel();
+		PNPanel.setBackground(new Color(74, 210, 149));
 		JPanel EmailPanel = new JPanel();
+		EmailPanel.setBackground(new Color(74, 210, 149));
 		JPanel BirthPanel = new JPanel();
+		BirthPanel.setBackground(new Color(74, 210, 149));
 		JPanel GithubPanel = new JPanel();
+		GithubPanel.setBackground(new Color(74, 210, 149));
 		JPanel messagePanel = new JPanel();
-		JLabel label = new JLabel("Please modify your information!");
-		JLabel label1 = new JLabel("ºñ¹Ğ¹øÈ£¸¦ º¯°æÇÏÁö ¾Ê´Â´Ù¸é ºñ¹Ğ¹øÈ£ Ä­À» ºñ¿öµÎ¼¼¿ä");
-
+		messagePanel.setBackground(new Color(74, 210, 149));
+		
+		ImageIcon icon = new ImageIcon("image/modifyInfo.png");
+	    Image titleImage = icon.getImage();
+	    Image titleChangeImg = titleImage.getScaledInstance(600, 40, Image.SCALE_SMOOTH);
+	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+	    JButton label = new JButton();
+	    label.setPreferredSize(new Dimension(100, 30));
+	    label.setBounds(5, 5, 15, 15);
+	    label.setIcon(titleChangeIcon);
+	    label.setBorder(null);
+	    label.addActionListener(new ActionListener() {
+	     @Override
+	     	public void actionPerformed(ActionEvent e) {
+	        }
+	    });
+		
+		JLabel option = new JLabel("ë¹„ë°€ë²ˆí˜¸ë¥¼ ë³€ê²½í•˜ì§€ ì•ŠëŠ”ë‹¤ë©´ ë¹„ë°€ë²ˆí˜¸ ì¹¸ì„ ë¹„ì›Œë‘ì„¸ìš”");
+		option.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 14));
+		
 		JLabel labelID = new JLabel("ID                           : ");
 		JLabel labelNickName = new JLabel("NickName           : ");
 		JLabel labelPW = new JLabel("Password           : ");
@@ -43,7 +84,6 @@ public class Setting extends JFrame {
 		
 		
 		String[] year = new String[71];
-		String yearSelect = "";
 		int yearStart = 1950;
 		for (int i = 0; i <= 70; i++) {
 			year[i] = "  " + Integer.toString(yearStart);
@@ -68,10 +108,38 @@ public class Setting extends JFrame {
 		add(dayCombo);	
 		
 		JPanel panelBtn = new JPanel();
+		panelBtn.setBackground(new Color(74, 210, 149));
 		JButton SettingBtn = new JButton("SAVE");
+		SettingBtn.setBackground(new Color(0, 54, 78));
+		SettingBtn.setForeground(Color.white);
+
+		JButton back = new JButton("BACK");
+		back.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.dispose();
+			}			
+		});
+		back.setBackground(new Color(0, 54, 78));
+		back.setForeground(Color.white);
+		
+		JButton remove = new JButton("SIGN-OUT");
+		remove.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int signOut = JOptionPane.showConfirmDialog(null, "íšŒì›ì„ íƒˆí‡´í•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "type", JOptionPane.YES_NO_OPTION);
+				
+				if(signOut == 0) {
+					Client.byebye();
+					frame.dispose();
+				}
+			}			
+		});
+		remove.setBackground(new Color(0, 54, 78));
+		remove.setForeground(Color.white);
 		
 		panel.add(label);
-		panel1.add(label1);
+		panel1.add(option);
 		IDPanel.add(labelID);
 		IDPanel.add(ID);
 		NickNamePanel.add(labelNickName);
@@ -92,10 +160,12 @@ public class Setting extends JFrame {
 		GithubPanel.add(github);
 		messagePanel.add(labelMessage);
 		messagePanel.add(smessage);
-		panelBtn.add(SettingBtn, BorderLayout.SOUTH);
+		panelBtn.add(back);
+		panelBtn.add(SettingBtn);
+		panelBtn.add(remove);
 		
 		
-		//Á¤º¸ ºÒ·¯¿À±â!![ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+		//ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°!![ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
 		String[] infoo = Client.settinginfo();
 		for(String k : infoo) {
 			System.out.println(k);
@@ -129,36 +199,32 @@ public class Setting extends JFrame {
 			smessage.setText(infoo[7]);
 
 		
-		
-		
-		//setting save ¹öÆ° ¾×¼Ç!
+		//setting save ë²„íŠ¼ ì•¡ì…˜!
 		SettingBtn.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				String git = "0";
-				
+			public void actionPerformed(ActionEvent e) {			
 				if(NickName.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "NickNameÀ» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "NickNameì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 
 				if(name.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 				
 				if(phoneNumber.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "ÀüÈ­¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "ì „í™”ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 				
 				if(email.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "emailÀ» ÀÔ·ÂÇÏ¼¼¿ä");
+					JOptionPane.showMessageDialog(null, "emailì„ ì…ë ¥í•˜ì„¸ìš”");
 					return;
 				}
 
 			
-				//¸ğµç Á¶°ÇÀ» Åë°úÇÏ¸é ±×Á¦¾ß ÁØ´Ù
+				//ëª¨ë“  ì¡°ê±´ì„ í†µê³¼í•˜ë©´ ê·¸ì œì•¼ ì¤€ë‹¤
 				String message = NickName.getText() + "`|" + name.getText() 
 				                 + "`|" + phoneNumber.getText() + "`|"
 								+ email.getText() + "`|";
@@ -176,72 +242,66 @@ public class Setting extends JFrame {
 
 				String Git = null;
 				String state_m = null;
-				//»ıÀÏ, ±êÇé, »ó¸Ş ´õÇØÁÖ±â
+				//ìƒì¼, ê¹ƒí—™, ìƒë©” ë”í•´ì£¼ê¸°
 				if (github.getText().equals("")) {
-					Git = "";
+					Git = "null";
 				}
 				else Git = github.getText();
 				
 				if (smessage.getText().equals("")) {
-					state_m = "";
+					state_m = "null";
 				}
 				else state_m = smessage.getText();
 				
-				message = message + year + m + d + "`|" + Git + "`|" + smessage.getText();
+				message = message + year + m + d + "`|" + Git + "`|" + state_m + "`|" ;
 
-
-				//pwÀÔ·Â‰ç´ÂÁö È®ÀÎ
-				//+ " " + String.valueOf(txtPass.getPassword())
 				if(String.valueOf(txtPass.getPassword()).equals("")) {
-					System.out.println("pw°¡ ÇöÀç nullÀÔ´Ï´Ù.");
+					System.out.println("pwê°€ í˜„ì¬ nullì…ë‹ˆë‹¤.");
 					message = "0`|" + message;
 				}
 				else {
-					System.out.println("pw°¡ ÇöÀç °ªÀÌ ÀÖ½À´Ï´Ù.");
+					System.out.println("pwê°€ í˜„ì¬ ê°’ì´ ìˆìŠµë‹ˆë‹¤.");
 					message = "1`|" + String.valueOf(txtPass.getPassword()) + "`|" + message;
 				}
 				
-				//ÀÌÁ¦ client¿¡¼­ update!!
+				//ì´ì œ clientì—ì„œ update!!
+				System.out.println(message);
 				int tf = Client.modifyInfo(message);
 				
 
 				if(tf == 0) {
+					frame.dispose();
 					JOptionPane.showMessageDialog(null, "SUCCESS!!");
 				}
 				else if(tf == 1) {
-					//¹¹ ¾ÆÀÌµğ°¡ Áßº¹µÈ´Ù, ±×·±°Å ¾Ë·ÁÁà¾ß ÇÏ³ª???
-					JOptionPane.showMessageDialog(null, "¾ÆÀÌµğ Áßº¹!!");
+					//ë­ ì•„ì´ë””ê°€ ì¤‘ë³µëœë‹¤, ê·¸ëŸ°ê±° ì•Œë ¤ì¤˜ì•¼ í•˜ë‚˜???
+					JOptionPane.showMessageDialog(null, "ì•„ì´ë”” ì¤‘ë³µ!!");
 				}			
-				dispose();
 			}
 		});
-		
-		JButton back = new JButton("BACK");
-		back.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}			
-		});
 			
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(panel1);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(NickNamePanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(NamePanel);
+		frame.getContentPane().add(PNPanel);
+		frame.getContentPane().add(EmailPanel);
+		frame.getContentPane().add(BirthPanel);
+		frame.getContentPane().add(GithubPanel);
+		frame.getContentPane().add(messagePanel);
+		frame.getContentPane().add(panelBtn);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
+		frame.getContentPane().add(blank3);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
 		
-		add(panel);
-		add(panel1);
-		add(IDPanel);
-		add(NickNamePanel);
-		add(PWPanel);
-		add(NamePanel);
-		add(PNPanel);
-		add(EmailPanel);
-		add(BirthPanel);
-		add(GithubPanel);
-		add(messagePanel);
-		add(panelBtn);
-		
-		setVisible(true);
-		setSize(450, 600);
-		setLocationRelativeTo(null);
-		setResizable(false);
+		frame.setTitle("Setting");
+		frame.setVisible(true);
+		frame.setSize(450, 600);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
-	
 }

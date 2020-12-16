@@ -1,88 +1,136 @@
 package client;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashSet;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class InviteFriend extends JFrame implements MouseListener {
 	JTable jTable;
 	DefaultTableModel model;
+	HashSet<Integer> selectnum = new HashSet<Integer>();
+    JLabel flist = new JLabel("ì¹œêµ¬ë¥¼ ì„ íƒí•˜ì„¸ìš”");
+    JPanel listPanel = new JPanel();
+
 	
+//getSelectedRows ()
 	public void mouseClicked(MouseEvent me) {
-		String[] buttons = {"YES", "NO"};
-		int result = JOptionPane.showOptionDialog(null, "ÃÊ´ëÇÏ½Ã°Ú½À´Ï±î?", "ÃÊ´ë", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
-		if (result == 0) {
-			// Ä£±¸ÃÊ´ë
-		} else if (result == 1) {
-			dispose();
+		int row = jTable.getSelectedRow();
+		//jTable.
+		if(selectnum.contains(row)) {//ì„ íƒí•´ì œ
+			selectnum.remove(row);
+		}
+		else { //ì„ íƒ
+			selectnum.add(row);
+		}
+		
+		if(selectnum.isEmpty()) {
+			flist.setText("ì¹œêµ¬ë¥¼ ì„ íƒí•˜ì„¸ìš”");	
+		}
+		else {
+			flist.setText(selectnum.toString());
 		}
 	}
 	
-	public InviteFriend() {
+	
+	public InviteFriend(DefaultTableModel m) {
+		model = m;
 		JFrame frame = new JFrame();
+		frame.setBackground(Color.yellow);
 		JPanel friend = new JPanel();
-		
-	    JLabel friend2 = new JLabel("Ä£±¸ÃÊ´ë");
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
-	    //friend2.setPreferredSize(new Dimension(430, 13));
+		friend.setPreferredSize(new Dimension(250, 100));
+	    JButton makeroom = new JButton();
+	    makeroom.setBackground(new Color(74, 210, 149));
+	    makeroom.setPreferredSize(new Dimension(180, 25));
+		makeroom.setText("ë°©ë§Œë“¤ê¸°");
+		makeroom.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 10));
+		flist.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 18));
+		flist.setForeground(Color.white);
+
+		//ë©€í‹° ë£¸ ë§Œë“¤ê¸°
+		makeroom.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!selectnum.isEmpty()) {
+					String roomname = JOptionPane.showInputDialog(null, "room name", "ë°© ì´ë¦„ì„ ì„¤ì •í•˜ì„¸ìš”", JOptionPane.OK_CANCEL_OPTION);
+					//ë°© ì´ë¦„ ì‹ ì²­ ë°›ìŒ
+					int preck = JOptionPane.showConfirmDialog(null, "ì¤‘ê°„ì— ì´ˆëŒ€ë°›ì€ ì‚¬ëŒë„ ì²˜ìŒë¶€í„° ë©”ì„¸ì§€ë¥¼ ë³´ê²Œ í• ê¹Œìš”?", "Set type", JOptionPane.YES_NO_OPTION);
+					String showpre = null;
+
+					if(preck == 0) showpre = "1";
+					else showpre = "0";
+					
+					//IDë¥¼ êµ´ë¹„ì—®ê¸°
+					String IDs = "";
+					int first = 0;
+					for(int i : selectnum) {
+						if (first++ == 0) IDs = (String) model.getValueAt(i, 0);
+						else IDs = IDs + "^" + model.getValueAt(i, 0);
+					}
+					
+				   //ë©€í‹° ì±„íŒ…ì„ ì‹ ì²­í•œë‹¤ (ì‚¬ëŒ ë¦¬ìŠ¤íŠ¸ë‘ ë°© ì´ë¦„ì„ ë³´ëƒ„)
+				   Client.makeMultiRoom(roomname, showpre, IDs);
+				   frame.dispose();
+				}
+			}
+		});
+
+		JPanel title = new JPanel();
+		title.setPreferredSize(new Dimension(250, 30));
+		title.setBackground(new Color(74, 210, 149));
+	    JLabel friend2 = new JLabel("ì¹œêµ¬ì´ˆëŒ€");
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
 	    friend.setPreferredSize(new Dimension(430, 380));
 	    
-	    ImageIcon onlineImgIcon = new ImageIcon("image/online.png");
-	    Image online = onlineImgIcon.getImage();
-	    Image onlineImg = online.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon onlineIcon = new ImageIcon(onlineImg);
-	    
-	    ImageIcon offlineImgIcon = new ImageIcon("image/offline.png");
-	    Image offline = offlineImgIcon.getImage();
-	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-	    Icon status = new ImageIcon();
-	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
-	    String columnNames[] = { "´Ğ³×ÀÓ(ÀÌ¸§)", "status" };
-	    Object rowData[][] = // Ä£±¸¸ñ·Ï µé¾î°¡¾ß µÉ ÀÚ¸®!
-	       {
-	       { "´Ğ³×ÀÓ1(ÀÌ¸§)", onlineIcon},
-	       { "´Ğ³×ÀÓ2(ÀÌ¸§)", offlineIcon},
-	       { "´Ğ³×ÀÓ3(ÀÌ¸§)", status},
-	       };
-	    
-	    model = new DefaultTableModel(rowData, columnNames) {
-	       public boolean isCellEditable(int i, int c) {
-	          return false;
-	       }
-	       
-	       public Class getColumnClass(int column) {
-	          return getValueAt(0, column).getClass();
-	       }
-	    };
-	
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
 	    jTable.addMouseListener(this);
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
 	    
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setWidth(0);
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setMinWidth(0);
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setMaxWidth(0);
+	    
+	    jTable.getTableHeader().setReorderingAllowed(false);
+	    jTable.getTableHeader().setResizingAllowed(false);
+	   
+	    jTable.setRowSelectionAllowed(true);
+	    jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+	    
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    tcm.getColumn(0).setCellRenderer(dtcr);
+	    tcm.getColumn(1).setCellRenderer(dtcr);
+	    
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
 	    
-	    friend.add(friend2);
-	    friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
-	    frame.add(friend);
+
+	    listPanel.setPreferredSize(new Dimension(230, 20));
+	    listPanel.add(flist);
 	    
+	    title.add(friend2);
+	    jScollPane.setPreferredSize(new Dimension(230, 230));
+	    JPanel table = new JPanel();
+	    table.setPreferredSize(new Dimension(250, 280));
+	    table.setBackground(new Color(0, 54, 78));
+	    table.add(jScollPane, "Left");
+	    table.add(flist);
+	    frame.add(title, BorderLayout.NORTH);
+	    frame.add(table);
+	    frame.add(makeroom, BorderLayout.SOUTH);
+	    
+	    frame.setTitle("Invite Friend");
 	    frame.setVisible(true);
-        frame.setSize(200, 300);
-        //frame.setResizable(false);
+        frame.setSize(250, 350);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
 	}
 
 	@Override
@@ -93,10 +141,4 @@ public class InviteFriend extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
-	public static void main(String[] args) {
-	      InviteFriend main = new InviteFriend();
-	}
 }
-
-

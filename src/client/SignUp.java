@@ -1,31 +1,70 @@
 package client;
 
+
 /**
- * ∞¯ªÁ ≥°
+ * Í≥µÏÇ¨ ÎÅù
  * */
 
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
+@SuppressWarnings("serial")
 public class SignUp extends JFrame {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public SignUp() {
-		super.setLayout(new GridLayout(15, 2));
-		JPanel panel = new JPanel();
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(15, 2));
+		frame.setBackground(new Color(74, 210, 149));
+		
+		JPanel blank = new JPanel();
+		blank.setBackground(new Color(74, 210, 149));
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		JPanel blank2 = new JPanel();
+		blank2.setBackground(new Color(74, 210, 149));
+		JPanel blank3 = new JPanel();
+		blank3.setBackground(new Color(74, 210, 149));
+		JPanel blank4 = new JPanel();
+		blank4.setBackground(new Color(74, 210, 149));
+		
 		JPanel infoPanel = new JPanel();
+		infoPanel.setBackground(new Color(74, 210, 149));
 		JPanel IDPanel = new JPanel();
+		IDPanel.setBackground(new Color(74, 210, 149));
 		JPanel NickNamePanel = new JPanel();
+		NickNamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PWPanel = new JPanel();
+		PWPanel.setBackground(new Color(74, 210, 149));
 		JPanel NamePanel = new JPanel();
+		NamePanel.setBackground(new Color(74, 210, 149));
 		JPanel PNPanel = new JPanel();
+		PNPanel.setBackground(new Color(74, 210, 149));
 		JPanel EmailPanel = new JPanel();
+		EmailPanel.setBackground(new Color(74, 210, 149));
 		JPanel BirthPanel = new JPanel();
+		BirthPanel.setBackground(new Color(74, 210, 149));
 		JPanel GithubPanel = new JPanel();
-		JLabel label = new JLabel("Please write your information!");
+		GithubPanel.setBackground(new Color(74, 210, 149));
+		
+		ImageIcon icon = new ImageIcon("image/signupTitle.png");
+	    Image titleImage = icon.getImage();
+	    Image titleChangeImg = titleImage.getScaledInstance(600, 40, Image.SCALE_SMOOTH);
+	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+	    JButton label = new JButton();
+	    label.setPreferredSize(new Dimension(100, 30));
+	    label.setBounds(5, 5, 15, 15);
+	    label.setIcon(titleChangeIcon);
+	    //setting.setForeground(Color.red);
+	    label.setBorder(null);
+	    label.addActionListener(new ActionListener() {
+	     @Override
+	     	public void actionPerformed(ActionEvent e) {
+	        }
+	    });
+		
 		JLabel labelID = new JLabel("ID                           : ");
 		JLabel labelNickName = new JLabel("NickName           : ");
 		JLabel labelPW = new JLabel("Password           : ");
@@ -35,7 +74,6 @@ public class SignUp extends JFrame {
 		JLabel labelBirth = new JLabel("Birth                     : ");
 		
 		String[] year = new String[71];
-		String yearSelect = "";
 		int yearStart = 1950;
 		for (int i = 0; i <= 70; i++) {
 			year[i] = "  " + Integer.toString(yearStart);
@@ -47,13 +85,11 @@ public class SignUp extends JFrame {
 		add(yearCombo);
 
 		String[] month = { "  1", "  2", "  3", "  4", "  5", "  6", "  7", "  8", "  9", "  10", "  11", "  12" };
-		String monthSelect = "";
 		setLayout(new FlowLayout());
 		JComboBox monthCombo = new JComboBox(month); 
 		add(monthCombo);
 		
 		String[] day = new String[31];
-		String daySelect = "";
 		int dayStart = 1;
 		for (int i = 0; i < 31; i++) {
 			day[i] = "  " + Integer.toString(dayStart);
@@ -63,10 +99,7 @@ public class SignUp extends JFrame {
 		setLayout(new FlowLayout());
 		JComboBox dayCombo = new JComboBox(day); 
 		add(dayCombo);
-		
 
-		
-		
 		JLabel labelGit = new JLabel("GitHub                  : ");
 		JTextField ID = new JTextField(15);
 		JTextField NickName = new JTextField(15);
@@ -75,11 +108,16 @@ public class SignUp extends JFrame {
 		JTextField phoneNumber = new JTextField(15);
 		JTextField email = new JTextField(15);
 		JTextField github = new JTextField(15);
-		JPanel panelBtn = new JPanel();
-		JButton backBtn = new JButton("BACK");
-		JButton signUpBtn = new JButton("SIGN UP");
 		
-		panel.add(label, BorderLayout.NORTH);
+		JPanel panelBtn = new JPanel();
+		panelBtn.setBackground(new Color(74, 210, 149));
+		JButton backBtn = new JButton("BACK");
+		backBtn.setBackground(new Color(0, 54, 78));
+		backBtn.setForeground(Color.white);
+		JButton signUpBtn = new JButton("SIGN UP");
+		signUpBtn.setForeground(Color.white);
+		signUpBtn.setBackground(new Color(0, 54, 78));
+		
 		IDPanel.add(labelID);
 		IDPanel.add(ID);
 		NickNamePanel.add(labelNickName);
@@ -102,51 +140,53 @@ public class SignUp extends JFrame {
 		panelBtn.add(signUpBtn);
 		
 		backBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 				LogIn check = new LogIn();
-				// ¡ﬂ∫π √º≈© «ÿ¡÷±‚!!
+				// Ï§ëÎ≥µ Ï≤¥ÌÅ¨ Ìï¥Ï£ºÍ∏∞!!
 			}
 		});
 		
 		signUpBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String git = "0";
 				
 				if(ID.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "ID∏¶ ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "IDÎ•º ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 				
 				if(NickName.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "NickName¿ª ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "NickNameÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 				
 				if(String.valueOf(txtPass.getPassword()).equals("")) {
-					JOptionPane.showMessageDialog(null, "∫Òπ–π¯»£∏¶ ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "ÎπÑÎ∞ÄÎ≤àÌò∏Î•º ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 				
 				if(name.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "¿Ã∏ß¿ª ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "Ïù¥Î¶ÑÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 				
 				if(phoneNumber.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "¿¸»≠π¯»£∏¶ ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "Ï†ÑÌôîÎ≤àÌò∏Î•º ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 				
 				if(email.getText().equals("")) {
-					JOptionPane.showMessageDialog(null, "email¿ª ¿‘∑¬«œººø‰");
+					JOptionPane.showMessageDialog(null, "emailÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî");
 					return;
 				}
 
 			
-				//∏µÁ ¡∂∞«¿ª ≈Î∞˙«œ∏È ±◊¡¶æﬂ ¡ÿ¥Ÿ
+				//Î™®Îì† Ï°∞Í±¥ÏùÑ ÌÜµÍ≥ºÌïòÎ©¥ Í∑∏Ï†úÏïº Ï§ÄÎã§
 				String message = ID.getText() + "`|" + NickName.getText()
 								+ "`|" + String.valueOf(txtPass.getPassword()) + "`|"
 								+ name.getText() + "`|" + phoneNumber.getText() + "`|"
@@ -170,22 +210,22 @@ public class SignUp extends JFrame {
 					message = message + "`|" + github.getText();
 				}
 
-				//¿Ã¡¶ clientø°º≠ «‘ºˆ ∫“∑Øº≠ ServerøÕ º“≈Î«ÿº≠ Check
+				//Ïù¥Ï†ú clientÏóêÏÑú Ìï®Ïàò Î∂àÎü¨ÏÑú ServerÏôÄ ÏÜåÌÜµÌï¥ÏÑú Check
 				int tf = Client.register(git, message);
 				
 
 				if(tf == 0) {
 					JOptionPane.showMessageDialog(null, "SUCCESS!!");
-					dispose();
+					frame.dispose();
 					LogIn check = new LogIn();
 				}
 				else if(tf == 1) {
-					//ππ æ∆¿Ãµ∞° ¡ﬂ∫πµ»¥Ÿ, ±◊∑±∞≈ æÀ∑¡¡‡æﬂ «œ≥™???
-					JOptionPane.showMessageDialog(null, "æ∆¿Ãµ ¡ﬂ∫π!!");
+					//Î≠ê ÏïÑÏù¥ÎîîÍ∞Ä Ï§ëÎ≥µÎêúÎã§, Í∑∏Îü∞Í±∞ ÏïåÎ†§Ï§òÏïº ÌïòÎÇò???
+					JOptionPane.showMessageDialog(null, "ÏïÑÏù¥Îîî Ï§ëÎ≥µ!!");
 			
 				}
 				else if(tf == 2) {
-					JOptionPane.showMessageDialog(null, "¥–≥◊¿” ¡ﬂ∫π!!");
+					JOptionPane.showMessageDialog(null, "ÎãâÎÑ§ÏûÑ Ï§ëÎ≥µ!!");
 
 				}
 				else if(tf == 3) {
@@ -195,23 +235,29 @@ public class SignUp extends JFrame {
 		});
 		
 
-		add(panel);
-		add(IDPanel);
-		add(NickNamePanel);
-		add(PWPanel);
-		add(NamePanel);
-		add(PNPanel);
-		add(EmailPanel);
-		add(BirthPanel);
-		add(GithubPanel);
-		add(panelBtn);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(NickNamePanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(NamePanel);
+		frame.getContentPane().add(PNPanel);
+		frame.getContentPane().add(EmailPanel);
+		frame.getContentPane().add(BirthPanel);
+		frame.getContentPane().add(GithubPanel);
+		frame.getContentPane().add(panelBtn);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
+		frame.getContentPane().add(blank3);
+		frame.getContentPane().add(blank4);
 		
-		setVisible(true);
-		setSize(450, 600);
-		setLocationRelativeTo(null);
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("Sign-Up");
+		frame.setVisible(true);
+		frame.setSize(450, 550);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
-
 }

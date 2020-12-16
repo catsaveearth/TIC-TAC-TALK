@@ -1,133 +1,178 @@
 package client;
+
 import java.awt.event.*;
-import java.io.*;
-import java.net.Socket;
-import java.util.Scanner;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
 
-public class ChattingOne {
-    static int port;
-	String serverAddress;
-    Scanner in;
-    PrintWriter out;
+public class ChattingOne{
+	private String FID;
+    private String nm;
+    private String sender;
+    
     JFrame frame = new JFrame("Chatter");
     JPanel panel = new JPanel();
-    JTextField textField = new JTextField(25);
+    JTextField textField = new JTextField(23);
     JTextArea messageArea = new JTextArea(16, 50);
     JButton button = new JButton("SEND");
+    JPanel topLine = new JPanel();
     JPanel leftLine = new JPanel();
     JPanel rightLine = new JPanel();
+    JPanel bottomLine = new JPanel();
     JPanel top = new JPanel();
+    JPanel bottom = new JPanel();
+    JPanel name = new JPanel();
     JLabel label = new JLabel("CHATTING ROOM");
 
-    public ChattingOne() {
-        label.setFont(new Font("°íµñ", Font.BOLD, 30));
-        label.setForeground(Color.WHITE);
-        
-    	ImageIcon icon = new ImageIcon("image/add.png");
-    	Image addImage = icon.getImage();
-	    Image addChangingImg = addImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
-	    ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
-	     
-	    ImageIcon icon3 = new ImageIcon("image/user.png");
-	    Image userImage = icon3.getImage();
-	    Image userChangeImg = userImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
-	    ImageIcon userChangeIcon = new ImageIcon(userChangeImg);
 
-	    JButton add = new JButton();
-	    add.setBounds(10, 10, 30, 30);
-	    add.setIcon(addChangeIcon);
+    //ìƒëŒ€ë°©ì˜ ë°˜ì‘ì— ë”°ë¥¸ ê²°ì •
+    public void checkAnswer(String YN, String nn, String name) {
+    	if(YN.equals("N")) {
+			JOptionPane.showMessageDialog(null, "ìƒëŒ€ë°©ì´ ì±„íŒ…ì„ ê±°ì ˆí•˜ì…¨ìŠµë‹ˆë‹¤.");
+			Client.delPCHAT(FID);
+	        frame.dispose();
+    	}
+    	else {
+    		setoppenInfo(nn, name);
+    		frame.setTitle("1:1 chat with " + sender);
+    		messageArea.append("ìƒëŒ€ë°©ì´ ì…ì¥í•˜ì…¨ìŠµë‹ˆë‹¤. \n");
 
-	    add.addActionListener(new ActionListener() {
-	       @Override
-	       public void actionPerformed(ActionEvent e) {
-	      	 System.out.println("add");
-	      	 InviteFriend invite = new InviteFriend();
-	          // ¸¸¾à ºñ¹Ğ¹øÈ£°¡ ¸ÂÀ¸¸é Setting setting = new Setting();
-	          // Æ²¸®¸é JOptionPane.showMessageDialog(null,  "Wrong!!");
-	       }
-	    });
-	      
-	    JButton user = new JButton();
-	    user.setBounds(354, 10, 30, 30);
-	    user.setIcon(userChangeIcon);
-	      
-	    user.addActionListener(new ActionListener() {
-	       @Override
-	       public void actionPerformed(ActionEvent e) {
-	    	   ChattingOnlinePeople people = new ChattingOnlinePeople();
-	       }
-	    });
-	      
-
-        frame.getContentPane().add(add);
-        frame.getContentPane().add(user);
-        top.add(label);
-        leftLine.setBackground(new Color(0, 78, 150));
-        rightLine.setBackground(new Color(0, 78, 150));
+    		//ì±„íŒ… í™œì„±í™”
+            textField.setEditable(true);
+    	}
+    }
+    
+    public void setoppenInfo(String nn, String name) {
+		this.nm = name;
+		sender = nn + "(" + nm + ")";
+    }
+    
+    public void setTextFree() {
         textField.setEditable(true);
-        Font font = new Font("°íµñ", Font.PLAIN, 14);
+    }
+
+    public void endchat() {
+		messageArea.append("ìƒëŒ€ë°©ì´ ë‚˜ê°€ì…¨ìŠµë‹ˆë‹¤. \n");
+        textField.setEditable(false);
+		button.setEnabled(false);
+    }
+    
+	//ë©”ì„¸ì§€ ì¶”ê°€
+    public void receiveChat(String content) {
+    	messageArea.append(sender + ": "+ content + "\n");
+    }
+    
+    //ë©”ì„¸ì§€ ë³´ë‚´ê¸°
+    public void sendChat() {
+		String getTxt = textField.getText();
+		if(getTxt.equals("")) return;
+		Client.sendPCHAT(FID, getTxt); //ì´ê²Œ í•µì‹¬!
+		
+		messageArea.append("ë‚˜ : " + getTxt + "\n");
+		textField.setText("");
+    }
+     
+    public void exitChat() { //ì±„íŒ… ì¢…ë£Œí•˜ê¸°
+    	//ì¢…ë£Œí• ê±°ëƒê³  í•œ ë²ˆ ë” ë¬¼ì–´ë³´ê¸°
+		int reply = JOptionPane.showConfirmDialog(null, "ì±„íŒ…ì„ ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì±„íŒ…ì•Œë¦¼", JOptionPane.YES_NO_OPTION);
+
+		if (reply == JOptionPane.YES_OPTION) {
+			Client.delPCHAT(FID);
+	        frame.dispose();
+		}	
+    }
+    
+    public void FexitChat() { //ì±„íŒ… ì¢…ë£Œí•˜ê¸°
+    	Client.delPCHAT(FID);
+        frame.dispose();
+    }
+    
+    public ChattingOne(String FID) {
+    	this.FID = FID;
+    	
+    	frame.addWindowListener(new WindowListener() {
+            public void windowOpened(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {}
+            public void windowDeactivated(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+            	exitChat();
+            }
+            public void windowClosed(WindowEvent e) {
+            	
+            }
+            public void windowActivated(WindowEvent e) {}
+        }); 
+    	
+    	name.setPreferredSize(new Dimension(300, 30));
+    	name.add(label);
+    	label.setHorizontalAlignment(JLabel.CENTER);
+    	label.setPreferredSize(new Dimension(220, 30));
+        label.setFont(new Font("ê³ ë”•", Font.BOLD, 23));
+        label.setForeground(Color.black);
+        
+        
+      
+        topLine.setPreferredSize(new Dimension(600, 10));
+        topLine.setBackground(new Color(255, 229, 110));
+        leftLine.setBackground(new Color(255, 229, 110));
+        rightLine.setBackground(new Color(255, 229, 110));
+        bottomLine.setPreferredSize(new Dimension(600, 1));
+        bottomLine.setBackground(new Color(255, 229, 110));
+        textField.setEditable(true);
+        Font font = new Font("ê³ ë”•", Font.PLAIN, 14);
         messageArea.setFont(font);
-        messageArea.setEditable(false); // ±âÁ¸¿¡ ÀÔ·ÂÇÑ ¹®ÀÚ¸¦ ¼öÁ¤ÇÒ ¼ö ¾øµµ·Ï ÇÑ´Ù.
-        messageArea.setBackground(new Color(143, 226, 255));
+        messageArea.setLineWrap(true);
+        messageArea.setBorder(null);
+        messageArea.setEditable(false);
+        messageArea.setBackground(new Color(0, 54, 78));
         button.setPreferredSize(new Dimension(58, 22));
-        button.setFont(new Font("°íµñ", Font.BOLD, 13));
-        button.setBackground(Color.yellow);
+        button.setFont(new Font("ê³ ë”•", Font.BOLD, 13));
+        button.setBackground(new Color(255, 229, 110));
         button.setBorder(null);
-        top.setBackground(new Color(0, 78, 150));
+        top.setBackground(new Color(74, 210, 149));
         top.setPreferredSize(new Dimension(400, 50));
-        panel.add(textField, BorderLayout.SOUTH);
-        panel.add(button, BorderLayout.EAST);
-        panel.setBackground(Color.WHITE);
-        panel.setBackground(new Color(0, 78, 150));
-        frame.add(leftLine, BorderLayout.EAST);
-        frame.add(rightLine, BorderLayout.WEST);
-        frame.getContentPane().add(new JScrollPane(messageArea), BorderLayout.CENTER);
-        frame.add(top, BorderLayout.NORTH);
+        top.add(label);
+        top.add(topLine);
+        bottom.setPreferredSize(new Dimension(400, 60));
+        bottom.setBackground(new Color(74, 210, 149));
+        bottom.add(textField);
+        bottom.add(button);
+        panel.setBackground(new Color(74, 210, 149));
+        panel.setPreferredSize(new Dimension(400, 50));
+        panel.add(bottomLine);
+        panel.add(bottom);
+        panel.setBackground(new Color(255, 229, 110));
+        panel.setPreferredSize(new Dimension(350, 45));
+        frame.getContentPane().add(leftLine, BorderLayout.EAST);
+        frame.getContentPane().add(rightLine, BorderLayout.WEST);
+        JScrollPane scrollPane = new JScrollPane(messageArea);
+        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+        frame.getContentPane().add(top, BorderLayout.NORTH);
         frame.getContentPane().add(panel, BorderLayout.SOUTH);
         frame.pack();
         
+        messageArea.setForeground(Color.white);
+   
+        //ë²„íŠ¼ ëˆŒëŸ¬ë„, ì—”í„°ë¥¼ ì³ë„ ê°™ì€ ë™ì‘!
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                out.println(textField.getText());
-                textField.setText("");
-                //textField.setHorizontalAlignment(RIGHT);
+            	sendChat();
             }
         });
         
+        
         button.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		String getTxt = textField.getText();
-        		
-        		if (getTxt.contentEquals("a")) {
-        			messageArea.setForeground(Color.blue);  //txt1ÀÇ ±ÛÀÚ»ö»óÀ» ÆÄ¶õ»öÀ¸·Î ÁöÁ¤ÇÕ´Ï´Ù.
-        		}
-        		
-        		
-        		messageArea.append(getTxt + "\n");
-        		textField.setText("");
+        		if(textField.isEnabled())
+        		sendChat();
 	        }
         });
 
 
         frame.setVisible(true);
-        frame.setSize(400, 600);
+        frame.setSize(350, 550);
         frame.setResizable(false);
-    }
-	
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE );
 
-    private String getName() {
-        return JOptionPane.showInputDialog(
-            frame,
-            "Choose a your nickname",
-            "Nickname selection",
-            JOptionPane.PLAIN_MESSAGE
-        );
-    }
-
-    public static void main(String[] args) throws Exception {
-        ChattingOne chatting = new ChattingOne();
     }
 }

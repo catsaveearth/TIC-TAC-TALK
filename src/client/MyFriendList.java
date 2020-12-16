@@ -1,32 +1,55 @@
 package client;
 
+
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class MyFriendList extends JFrame implements MouseListener {
+	JFrame frame = new JFrame();
+	JPanel friend = new JPanel();
 	JTable jTable;
 	DefaultTableModel model;
+	HashMap<String, String> idmatch = new HashMap<String, String>();
+	HashMap<String, String> statematch = new HashMap<String, String>();
+
 	
+	@SuppressWarnings("unused")
 	public void mouseClicked(MouseEvent me) {
-		String[] buttons = {"1:1√§∆√", "¡§∫∏∫∏±‚"};
-		int result = JOptionPane.showOptionDialog(null, "ø…º«¿ª º±≈√«œººø‰", "ø…º«", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µŒπ¯¬∞∞™");
+		int row = jTable.getSelectedRow();
+		Object line = model.getValueAt(row, 0);
+		String FID = idmatch.get(line.toString());
+		String state = statematch.get(line.toString());
+
+		String[] buttons = {"1:1Ï±ÑÌåÖ", "Ï†ïÎ≥¥Î≥¥Í∏∞"};
+		int result = JOptionPane.showOptionDialog(null, "ÏòµÏÖòÏùÑ ÏÑ†ÌÉùÌïòÏÑ∏Ïöî", "ÏòµÏÖò", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "ÎëêÎ≤àÏß∏Í∞í");
 		if (result == 0) {
-			// ƒ£±∏√ ¥Î
-			dispose();
-			ChattingOne chatting = new ChattingOne();
+	
+			// ÏùºÎåÄÏùºÏ±ÑÌåÖ Ïä§ÌÉÄÎòê! - Ï±ÑÌåÖÏ§ëÏù¥Î©¥ Ïù¥ÎØ∏ Ï±ÑÌåÖÏ§ëÏûÖÎãàÎã§
+			if(Client.ckINPCHAT(FID) || !state.equals("0")) {
+				JOptionPane.showMessageDialog(null, "Ïù¥ÎØ∏ Ï±ÑÌåÖÏ§ëÏù¥Í±∞ÎÇò ÏÉÅÎåÄÍ∞Ä Ïò§ÌîÑÎùºÏù∏ÏûÖÎãàÎã§.");
+			}
+			else {
+				frame.dispose();
+				ChattingOne chatting = new ChattingOne(FID); //Ï±ÑÌåÖÎ∞© ÌÇ§Í≥†
+				Client.addPCHAT(FID, chatting); //Ï±ÑÌåÖÏ§ëÏù∏ ÏÉÅÎåÄÏóê ÏÉÅÎåÄÎ∞©ÏùÑ ÎçîÌï¥Ï£ºÍ≥†
+		        Client.ckANSWER(FID);
+			}
 		} else if (result == 1) {
-			FriendInfo info = new FriendInfo();
+			FriendInfo info = new FriendInfo(FID.toString(), 1);
+			//Ï†ïÎ≥¥ÌôïÏù∏Ìï†Îïê Íµ≥Ïù¥ Ï∞Ω ÏïàÎã´ÏïÑÎèÑÎê®
 		}
 	}
 	
-	public MyFriendList() {
-		JFrame frame = new JFrame();
+	
+	public MyFriendList(String keyword) {
 		JPanel friend = new JPanel();
-		
-	    JLabel friend2 = new JLabel("ƒ£±∏∏ÆΩ∫∆Æ");
-	    friend2.setFont(new Font("≥™¥ÆπŸ∏•∆Ê", Font.PLAIN, 15));
+		friend.setPreferredSize(new Dimension());
+	    JLabel friend2 = new JLabel("ÏπúÍµ¨Î¶¨Ïä§Ìä∏");
+	    friend2.setFont(new Font("ÎÇòÎàîÎ∞îÎ•∏Ìéú", Font.PLAIN, 15));
 	    //friend2.setPreferredSize(new Dimension(430, 13));
 	    friend.setPreferredSize(new Dimension(430, 380));
 	    
@@ -39,52 +62,93 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    Image offline = offlineImgIcon.getImage();
 	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
 	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // online¿Œ¡ˆ offline¿Œ¡ˆ ¡§«œ¥¬ ∫Œ∫–
-	    Icon status = new ImageIcon();
 	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
+	    //ÏπúÍµ¨ Í≤ÄÏÉâÌïú Î™©Î°ù Î∂àÎü¨Ïò§Í∏∞!!!
+	    String[][] friendlist = Client.FriendSearchList(keyword);
+	    //ÏπúÍµ¨Í≤ÄÏÉâÌïú Í≤∞Í≥ºÎ¶¨Ïä§Ìä∏ (ID, name, nickname, last_connection)
 	    
-	    String columnNames[] = { "¥–≥◊¿”(¿Ã∏ß)", "status" };
-	    Object rowData[][] = // ƒ£±∏∏Ò∑œ µÈæÓ∞°æﬂ µ… ¿⁄∏Æ!
-	       {
-	       { "¥–≥◊¿”1(¿Ã∏ß)", onlineIcon},
-	       { "¥–≥◊¿”2(¿Ã∏ß)", offlineIcon},
-	       { "¥–≥◊¿”3(¿Ã∏ß)", status},
-	       };
-	    
+	    String columnNames[] = { "ÎãâÎÑ§ÏûÑ(Ïù¥Î¶Ñ)", "status" };
+	    Object rowData[][] =  { };// ÏπúÍµ¨Î™©Î°ù Îì§Ïñ¥Í∞ÄÏïº Îê† ÏûêÎ¶¨!
+	      
 	    model = new DefaultTableModel(rowData, columnNames) {
-	       public boolean isCellEditable(int i, int c) {
-	          return false;
-	       }
-	       
-	       public Class getColumnClass(int column) {
-	          return getValueAt(0, column).getClass();
-	       }
-	    };
-	
+			public boolean isCellEditable(int i, int c) {
+				return false;
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public Class getColumnClass(int column) {
+				return getValueAt(0, column).getClass();
+			}
+		};
+
+	    if(friendlist != null) {
+	    	  int idx = 0;
+	    	  int ck = Integer.parseInt(friendlist[0][0]) + 1;
+	    	  System.out.println("ck => " + ck);
+
+	          for(String[] fl : friendlist) {
+	        	  if(idx == ck) break;
+	        	  if(idx == 0) {idx++; continue;}
+	    		  idx++;
+	    		  
+	        	  String line = fl[2] + "(" + fl[1] + ")";
+	    		  idmatch.put(line, fl[0]); //line - ÏïÑÏù¥Îîî Ï†ÄÏû•
+	    		  statematch.put(line, fl[3]);
+	    		  
+	        	  if(fl[3].compareTo("0") == 0) {
+	        		  //IDÎäî Ïà®Í≤®ÏÑú Ï†ÄÏû•
+	            	  Object inData[] = {line, onlineIcon};
+	        		  model.addRow(inData);	
+	        	  }
+	        	  else {
+	            	  Object inData[] = {line, offlineIcon};
+	        		  model.addRow(inData);
+	        	  }
+	          } 
+	    }
+	     
+	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ¥‹¿œº±≈√
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// Îã®ÏùºÏÑ†ÌÉù
+	    jTable.setBackground(Color.white);
+	    jTable.setFillsViewportHeight(true);
 	    jTable.addMouseListener(this);
-	    jTable.getColumn("¥–≥◊¿”(¿Ã∏ß)").setPreferredWidth(100);
+	    jTable.setGridColor(new Color(0,128,0));
+	    jTable.getColumn("ÎãâÎÑ§ÏûÑ(Ïù¥Î¶Ñ)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
-	    jScollPane.setPreferredSize(new Dimension(180, 227));
+	    jScollPane.setPreferredSize(new Dimension(180, 210));
+	    jTable.getTableHeader().setReorderingAllowed(false);
+	    jTable.getTableHeader().setResizingAllowed(false);
 	    
-	    jTable.setShowGrid(false);
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    for(int i = 0; i < tcm.getColumnCount() - 1; i++){
+	    	tcm.getColumn(i).setCellRenderer(dtcr);
+	    }
+	      
 	    jTable.setRowHeight(30);
+	    jTable.setShowGrid(false);
+		jTable.setShowVerticalLines(false);
 	    
-	    friend.add(friend2);
-	    friend.add(jScollPane, "Left"); //JScrooPaneø° ¥„¿∫ JList∏¶ ≥™≈∏≥ª±‚ ¿ß«ÿ πËƒ°«—¥Ÿ.
+		JPanel panel = new JPanel();
+	    friend.add(panel);
+	    friend.setBackground(new Color(0, 54, 78));
+	    
+	    panel.add(friend2);
+	    panel.setBackground(new Color(74, 210, 149));
+	    panel.setPreferredSize(new Dimension(200, 35));
+	    friend2.setFont(new Font("ÎÇòÎàîÎ∞îÎ•∏Ìéú", Font.PLAIN, 15));
+	    friend.add(jScollPane, "Left"); //JScrooPaneÏóê Îã¥ÏùÄ JListÎ•º ÎÇòÌÉÄÎÇ¥Í∏∞ ÏúÑÌï¥ Î∞∞ÏπòÌïúÎã§.
+	    
 	    frame.add(friend);
 	    
+	    frame.setTitle("List");
 	    frame.setVisible(true);
         frame.setSize(200, 300);
-        //frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
 
 	@Override
@@ -95,9 +159,4 @@ public class MyFriendList extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
-	public static void main(String[] args) {
-		MyFriendList main = new MyFriendList();
-	}
-
 }

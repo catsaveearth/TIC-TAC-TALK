@@ -1,52 +1,91 @@
 package client;
 
+
 /**
- * ∞¯ªÁ ≥°
+ * Í≥µÏÇ¨ ÎÅù
  * */
 
-
-import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class LogIn extends JFrame {
 
 	public LogIn() {
-		super.setLayout(new GridLayout(5, 2));
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(6, 2));
+		frame.setBackground(new Color(74, 210, 149));
+		
 		JPanel blank = new JPanel();
+		blank.setBackground(new Color(74, 210, 149));
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		blank1.setBorder(null);
 		JPanel panel = new JPanel();
+		panel.setBackground(new Color(74, 210, 149));
+		
+		
+		ImageIcon icon = new ImageIcon("image/LogInTitle.png");
+		    Image titleImage = icon.getImage();
+		    Image titleChangeImg = titleImage.getScaledInstance(300, 34, Image.SCALE_SMOOTH);
+		    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+		    JButton titleBtn = new JButton();
+		    titleBtn.setPreferredSize(new Dimension(100, 30));
+		    titleBtn.setBounds(5, 5, 15, 15);
+		    titleBtn.setIcon(titleChangeIcon);
+		    //setting.setForeground(Color.red);
+		    titleBtn.setBorder(null);
+		    titleBtn.addActionListener(new ActionListener() {
+		     @Override
+		     	public void actionPerformed(ActionEvent e) {
+		        }
+		});
 		
 		JPanel IDPanel = new JPanel();
+		IDPanel.setBackground(new Color(74, 210, 149));
 		JLabel label = new JLabel("ID                 : ");
+		label.setFont(new Font("Í≥†Îîï", Font.BOLD, 12));
+		label.setForeground(Color.black);
 		JTextField txtID = new JTextField(10);
 		
 		JPanel PWPanel = new JPanel();
+		PWPanel.setBackground(new Color(74, 210, 149));
 		JLabel pswrd = new JLabel("Password : ");
+		pswrd.setFont(new Font("Í≥†Îîï", Font.BOLD, 12));
+		pswrd.setForeground(Color.black);
 		JPasswordField txtPass = new JPasswordField(10);
 		
 		JPanel BtnPanel = new JPanel();
-		JButton logBtn = new JButton("Log In");
-		JButton signUpBtn = new JButton("SIGN UP");
+		BtnPanel.setBackground(new Color(74, 210, 149));
+		JButton logBtn = new JButton("LOGIN");
+		logBtn.setForeground(Color.white);
+		JButton signUpBtn = new JButton("SIGN-UP");
+		signUpBtn.setForeground(Color.white);
 		
-		IDPanel.add(label);
-		IDPanel.add(txtID);
-		PWPanel.add(pswrd);
-		PWPanel.add(txtPass);
-		BtnPanel.add(logBtn);
-		BtnPanel.add(signUpBtn);
-		
+		logBtn.setBackground(new Color(0, 54, 78));
+		logBtn.setPreferredSize(new Dimension(80, 25));
+		logBtn.setBorder(null);
+		signUpBtn.setBackground(new Color(0, 54, 78));
+		signUpBtn.setPreferredSize(new Dimension(80, 25));
+		signUpBtn.setBorder(null);
+
 		logBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 				boolean log = Client.logincheck(txtID.getText(), txtPass.getPassword());
 						
-				if (log) {//∑Œ±◊¿Œ º∫∞¯«œ∏È
-					dispose();
-					MainScreen frame = new MainScreen(); //main¿∏∑Œ ∞Ì∞Ìæ≈~
+				if (log) {//Î°úÍ∑∏Ïù∏ ÏÑ±Í≥µÌïòÎ©¥
+					frame.dispose();
+					MainScreen frame = new MainScreen(); //mainÏúºÎ°ú Í≥†Í≥†ÏîΩ~
 					
 				} else {
 					JOptionPane.showMessageDialog(null,  "You failed to log in");
@@ -56,25 +95,35 @@ public class LogIn extends JFrame {
 		});
 		
 		signUpBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
+				frame.dispose();
 				SignUp frame = new SignUp();
 			}
-			
 		});
 		
+		IDPanel.add(label);
+		IDPanel.add(txtID);
+		PWPanel.add(pswrd);
+		PWPanel.add(txtPass);
+		BtnPanel.add(logBtn);
+		BtnPanel.add(signUpBtn);
 		
-		add(blank);
-		add(IDPanel);
-		add(PWPanel);
-		add(BtnPanel);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(titleBtn);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(BtnPanel);
+		frame.getContentPane().add(blank1);
 		
-		setVisible(true);
-		setSize(300, 220);
-		setLocationRelativeTo(null);
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("LogIn");
+		frame.setVisible(true);
+		frame.setSize(300, 220);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
 }

@@ -1,77 +1,66 @@
 package client;
+
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class ChattingOnlinePeople extends JFrame {
 	JTable jTable;
 	DefaultTableModel model;
 	
-	public ChattingOnlinePeople() {
+	public ChattingOnlinePeople(String[] ulist) {
 		JFrame frame = new JFrame();
 		JPanel friend = new JPanel();
 		
-	    JLabel friend2 = new JLabel("Âü¿©ÀÚ¸ñ·Ï");
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
+	    JLabel friend2 = new JLabel("ì°¸ì—¬ìëª©ë¡");
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
 	    //friend2.setPreferredSize(new Dimension(430, 13));
-	    friend.setPreferredSize(new Dimension(430, 380));
-	    
-	    ImageIcon onlineImgIcon = new ImageIcon("image/online.png");
-	    Image online = onlineImgIcon.getImage();
-	    Image onlineImg = online.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon onlineIcon = new ImageIcon(onlineImg);
-	    
-	    ImageIcon offlineImgIcon = new ImageIcon("image/offline.png");
-	    Image offline = offlineImgIcon.getImage();
-	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-	    Icon status = new ImageIcon();
-	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
-	    String columnNames[] = { "´Ğ³×ÀÓ(ÀÌ¸§)" };
-	    Object rowData[][] = // Ä£±¸¸ñ·Ï µé¾î°¡¾ß µÉ ÀÚ¸®!
-	       {
-	       { "´Ğ³×ÀÓ1(ÀÌ¸§)"},
-	       { "´Ğ³×ÀÓ2(ÀÌ¸§)"},
-	       { "´Ğ³×ÀÓ3(ÀÌ¸§)"},
-	       };
-	    
+	    friend.setPreferredSize(new Dimension(200, 30));
+	    friend.setBackground(new Color(74, 210, 149));
+
+	    String columnNames[] = { "ë‹‰ë„¤ì„(ì´ë¦„)" };
+	    Object rowData[][] = { };    
 	    model = new DefaultTableModel(rowData, columnNames) {
 	       public boolean isCellEditable(int i, int c) {
 	          return false;
 	       }
 	    };
 	
+	    for(String ul : ulist) {
+			Object inData[] = {ul};
+			model.addRow(inData);
+	    }
+	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
+	    
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
+	    JPanel table = new JPanel();
+	    table.setBackground(new Color(0, 54, 78));
+	    table.setPreferredSize(new Dimension(200, 200));
+
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    tcm.getColumn(0).setCellRenderer(dtcr);
 	    
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
 	    
 	    friend.add(friend2);
-	    friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
-	    frame.add(friend);
+	    table.add(jScollPane);
+	    //friend.add(jScollPane, "Left"); //JScrooPaneì— ë‹´ì€ JListë¥¼ ë‚˜íƒ€ë‚´ê¸° ìœ„í•´ ë°°ì¹˜í•œë‹¤.
+	    //frame.add(friend2);
+	    frame.add(friend, BorderLayout.NORTH);
+	    frame.add(table);
 	    
+	    frame.setTitle("Chatting Member");
 	    frame.setVisible(true);
         frame.setSize(200, 300);
-        //frame.setResizable(false);
-	}
-
-	public static void main(String[] args) {
-	      ChattingOnlinePeople main = new ChattingOnlinePeople();
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
 	}
 }
-
-

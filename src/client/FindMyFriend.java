@@ -4,82 +4,82 @@ package client;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
+@SuppressWarnings("serial")
 public class FindMyFriend extends JFrame {
 	String searchFriend = "";
 	
 	public FindMyFriend() {
-		super.setLayout(new GridLayout(6, 1));
-		//JFrame frame = new JFrame();
-		JPanel panel = new JPanel();
+		JFrame frame = new JFrame();
+		frame.setLayout(new GridLayout(6, 1));
+		
 		JPanel blank = new JPanel();
-		JLabel name = new JLabel("³» Ä£±¸ Ã£±â");
-		JPanel namePanel = new JPanel();
-		name.setFont(new Font("¸¼Àº°íµñ(º»¹®)", Font.BOLD, 15));
+		blank.setBackground(new Color(74, 210, 149));
+		blank.setBorder(null);
+		JPanel blank1 = new JPanel();
+		blank1.setBackground(new Color(74, 210, 149));
+		blank1.setBorder(null);
+		JPanel blank2 = new JPanel();
+		blank2.setBackground(new Color(74, 210, 149));
+		blank2.setBorder(null);
+		
+		ImageIcon icon = new ImageIcon("image/findMyFriend.png");
+	    Image titleImage = icon.getImage();
+	    Image titleChangeImg = titleImage.getScaledInstance(350, 35, Image.SCALE_SMOOTH);
+	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
+	    JButton name = new JButton();
+	    name.setPreferredSize(new Dimension(100, 30));
+	    name.setBounds(5, 5, 500, 15);
+	    name.setIcon(titleChangeIcon);
+	    //setting.setForeground(Color.red);
+	    name.setBorder(null);
+	    name.addActionListener(new ActionListener() {
+	     @Override
+	     	public void actionPerformed(ActionEvent e) {
+	        }
+	    });
+		
+		
 		JTextField find = new JTextField(15);
 		JPanel findPanel = new JPanel();
+		findPanel.setBackground(new Color(74, 210, 149));
+		
 		JButton search = new JButton("SEARCH");
+		search.setBackground(new Color(0, 54, 78));
+		search.setForeground(Color.white);
 		JPanel btnPanel = new JPanel();
+		btnPanel.setBackground(new Color(74, 210, 149));
 		search.setPreferredSize(new Dimension(90, 20));
 		
 		search.addActionListener(new ActionListener() {
-	         @Override
+	         @SuppressWarnings("unused")
+			@Override
 		     public void actionPerformed(ActionEvent e) {
-	        	 searchFriend = find.getText(); // Ã£À» Ä£±¸ÀÇ ÀÌ¸§À» stringÀ¸·Î ÀúÀå
-	        	 MyFriendList list = new MyFriendList();
-	        	 
-	        	 /*int result = 0;
-	        	 // Ä£±¸ ÀÖÀ»¶§
-	        	 result = JOptionPane.showConfirmDialog(null, "1:1 Ã¤ÆÃÀ» ÁøÇàÇÏ½Ã°Ú½À´Ï±î?");
-	        	 // 1:1Ã¤ÆÃÀ¸·Î ¹Ù·Î °¥Áö
-	        	 // Ä£±¸ Á¤º¸ º¸´Â°É·Î ÇÒÁö
-	        	 System.out.println(result);
-	        	 if (result == 0) {
-	        		 dispose();
-	        		 MyFriendSelect select = new MyFriendSelect();
-	        	 } else if (result == 1) {
-	        		 dispose();
-	        	 }*/
-	        	 // ÀÏºÎ ±ÛÀÚ¸¸ ½áµµ ³ª¿À°Ô ÇÒ°ÇÁö ÀüÃ¼ Ç® ³×ÀÓÃÄ¾ß ³ª¿À°Ô ÇÒ°ÇÁö ÀÇ³í
-	        	 // ¸¸¾à ÀÖ´Ù¸é ±× »ç¶÷ÀÇ Á¤º¸ ¶ç¿ì±â? È¤Àº Ä£±¸ ½ÅÃ» Ã¢ ¶ç¿ì±â?
-	        	 // ¾ø´Ù¸é ´Ù½Ã °Ë»ö
-	        	 // if (¾ø´Ù¸é) {
-	        	 // 	JOptionPane.showMessageDialog(null,  "Not Exist!!");
-	        	 // ´Ù½Ã °Ë»öÇÏ°Ô ÇÒ°ÇÁö Ã¢ Á¾·áÇÒ°ÇÁö
-	        	 // }
+	        	 searchFriend = find.getText(); // ì°¾ì„ ì¹œêµ¬ì˜ ì´ë¦„ì„ stringìœ¼ë¡œ ì €ì¥
+	        	 MyFriendList list = new MyFriendList(searchFriend);
+	        	 frame.dispose();
 		     }
 	    });
 		
-		namePanel.add(name);
+		//namePanel.add(name);
 		findPanel.add(find);
 		btnPanel.add(search);
 		
-		add(blank);
-		add(namePanel);
-		add(findPanel);
-		add(btnPanel);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(name);
+		frame.getContentPane().add(findPanel);
+		frame.getContentPane().add(btnPanel);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
 		
-		setVisible(true);
-		setSize(300, 200);
-		setLocationRelativeTo(null);
-		setResizable(false);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("Searching My Friend");
+		frame.setVisible(true);
+		frame.setSize(300, 200);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
 	}
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FindMyFriend frame = new FindMyFriend();
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 }

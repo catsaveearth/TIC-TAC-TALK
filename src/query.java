@@ -1,4 +1,11 @@
-
+/**
+ * query.java
+ * : JDBC를 이용해서 Server에 존재하는 DB와 소통한다.
+ *   MainServer.java에서 가져다가 사용하는 method뜰의 모음.
+ * 
+ * creator : 신현호
+ * modifier : 김수현
+ * */
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,9 +15,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 public class query {
-
 	/* [로그인] */
-
 	// 1. id, password를 받고 맞는건지 ckeck
 	// 매개변수: String id, String password
 	// 맞으면 return 1 : 틀리면 return -1(or 0)
@@ -30,14 +35,8 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String password = rs.getString(2);
 
-				System.out.println("id: " + id);
-				System.out.println("password: " + password);
-				System.out.println("password: " + Qpassword);
-
-				System.out.println();
 				if (Qpassword.equals(password)) {
 					return 1;
 				}
@@ -65,6 +64,9 @@ public class query {
 		return 0;
 	}
 
+	// 2. pw 암호화에 필요한 Salt를 ID에 맞게 가져옴.
+	// 매개변수: String id
+	// Return : salt
 	public static String bringSALT(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
@@ -80,10 +82,8 @@ public class query {
 			String sql = "SELECT salt" + " FROM USER" + " WHERE id = '" + Qid + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
 			while (rs.next()) {
 				salt = rs.getString(1);
-				i++;
 			}
 			return salt;
 		} catch (ClassNotFoundException e) {
@@ -109,8 +109,7 @@ public class query {
 	}
 
 	/* [회원가입] */
-
-	// 2. id에 대한 중복체크
+	// 3. id에 대한 중복체크
 	// 매개분수: String id
 	// 사용 가능하면 return 1 : 중복이면 return -1
 	public static int selectID(String Qid) {
@@ -129,8 +128,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String id = rs.getString(1);
-				System.out.println("id: " + id);
-				System.out.println();
 				if (id.equals(Qid)) {
 					return -1;
 				}
@@ -158,7 +155,7 @@ public class query {
 		return 0;
 	}
 
-	// 3. nickname에 대한 중복체크
+	// 4. nickname에 대한 중복체크
 	// 매개변수: String nickname
 	// 사용 가능하면 return 1 : 틀리면 return -1
 	public static int selectNICKNAME(String Qnickname) {
@@ -177,8 +174,7 @@ public class query {
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String nickname = rs.getString(1);
-				System.out.println("nickname: " + nickname);
-				System.out.println();
+
 				if (nickname.equals(Qnickname)) {
 					return -1;
 				}
@@ -206,7 +202,7 @@ public class query {
 		return 0;
 	}
 
-	// 4. 새로운 user에 대한 record정보 기록 (필수정보들)
+	// 5. 새로운 user에 대한 record정보 기록 (필수정보들)
 	// 매개변수 HashMap<String,String>map=(id, password, name, nickname, phone, email,
 	// birth (,github), SALT)
 	public static void insertUSER(HashMap<String, String> map) {
@@ -263,11 +259,10 @@ public class query {
 	}
 
 	/* [메인페이지 로딩] */
-
-	// 5. 본인의 이름, nickname, 한줄메세지 받아오기
+	// 6. 본인의 이름, nickname, 한줄메세지 받아오기
 	// 매개변수: String id
 	// return HashMap<String,String>map=(name, nickname, state_message)
-	public static HashMap selectNAME_NICKNAME_STATE(String Qid) {
+	public static HashMap<String, String> selectNAME_NICKNAME_STATE(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -282,15 +277,9 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String name = rs.getString(2);
 				String nickname = rs.getString(3);
 				String state_message = rs.getString(4);
-				System.out.println("id: " + id);
-				System.out.println("name: " + name);
-				System.out.println("nickname: " + nickname);
-				System.out.println("state_message: " + state_message);
-				System.out.println();
 
 				map.put("NAME", name);
 				map.put("NICKNAME", nickname);
@@ -319,9 +308,9 @@ public class query {
 		return map;
 	}
 
-	// 6. 친구목록 받아오기 => 이름, 닉네임, 접속여부, 상메
+	// 7. 친구목록 받아오기 => ID, 이름, 닉네임, 접속여부, 상메
 	// 매개변수: String id
-	// return String[][name, nickname, last_connection, 상메]
+	// return String[][ID, name, nickname, last_connection, 상메]
 	public static String[][] selectFRIEND(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
@@ -329,7 +318,7 @@ public class query {
 		ResultSet rs = null;
 		ResultSet sr = null;
 
-		String[][] info = new String[20][4];
+		String[][] info = new String[21][5];
 		info[0][0] = "test";
 		int i = 1;
 
@@ -345,8 +334,6 @@ public class query {
 
 			while (rs.next()) {
 				String friend_id = rs.getString(1);
-				System.out.println("friend_id: " + friend_id);
-				System.out.println();
 
 				String sql2 = "SELECT id, name, nickname, last_connection, state_message" + " FROM USER" + " WHERE id='" + friend_id
 						+ "';";
@@ -364,6 +351,7 @@ public class query {
 					info[i][1] = nickname;
 					info[i][2] = last_connection;
 					info[i][3] = state_message;
+					info[i][4] = id;
 
 					i++;
 				}
@@ -394,36 +382,55 @@ public class query {
 		return info;
 	}
 
-	// 7. 친구요청 목록 받아오기 (자신에게 친구 요청을 건 client의 id를 받아옴)
+	// 8. 친구요청 목록 받아오기 => 이름, 닉네임, 접속여부, 상메
 	// 매개변수: String id
-	// return String[send_id1,. . ., send_id20]
-	public static String[] bringFRIEND_PLUS(String Qid) {
+	// return String[][name, nickname, last_connection, 상메, id]			
+	public static String[][] bringFRIEND_PLUS(String Qid){
 		Connection conn = null;
 		Statement stmt = null;
+		Statement stmt2 = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		ResultSet sr = null;
+
+		String[][] info = new String[21][5];
+		int i = 0;
+
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
+			stmt2 = conn.createStatement();
 
 			String sql = "SELECT send_id, receive_id" + " FROM friend_plus" + " WHERE receive_id = '" + Qid + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
 			while (rs.next()) {
-				String send_id = rs.getString(1);
-				String receive_id = rs.getString(2);
+				String friend_id = rs.getString(1);
 
-				System.out.println("send_id: " + send_id);
-				System.out.println("receive_id: " + receive_id);
-				System.out.println();
 
-				array[i] = send_id;
-				i++;
+				String sql2 = "SELECT id, name, nickname, last_connection, state_message" + " FROM USER" + " WHERE id='" + friend_id
+						+ "';";
+				sr = stmt2.executeQuery(sql2);
+				while (sr.next()) {
+					String id = sr.getString(1);
+					String name = sr.getString(2);
+					String nickname = sr.getString(3);
+					String last_connection = sr.getString(4);
+					String state_message = sr.getString(5);
+
+					info[i][0] = name;
+					info[i][1] = nickname;
+					info[i][2] = last_connection;
+					info[i][3] = state_message;
+					info[i][4] = id;
+
+
+					i++;
+				}
+
 			}
-			return array;
+			return info;
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");
 		} catch (SQLException e) {
@@ -443,16 +450,16 @@ public class query {
 				e.printStackTrace();
 			}
 		}
-		return array;
+		info[0][1] = Integer.toString(i);
+		return info;
 	}
 
 	/* [메인페이지 조작] */
-
-	// 8. 내정보 받아오기 - 이메일, 전화번호 등등등....
+	// 9. 내정보 받아오기 - 이메일, 전화번호 등등등....
 	// 매개변수: String id
 	// return HashMap<String,String>map=(phone, email, birth, github, state_message,
 	// last_connection)
-	public static HashMap bringINFO(String Qid) {
+	public static HashMap<String, String> bringINFO(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -479,17 +486,6 @@ public class query {
 				String state_message = rs.getString(9);
 				String last_connection = rs.getString(10);
 
-				System.out.println("id: " + id);
-				System.out.println("password: " + password);
-				System.out.println("name: " + name);
-				System.out.println("nickname: " + nickname);
-				System.out.println("phone: " + phone);
-				System.out.println("email: " + email);
-				System.out.println("birth: " + birth);
-				System.out.println("github: " + github);
-				System.out.println("state_message: " + state_message);
-				System.out.println("last_connection: " + last_connection);
-				System.out.println();
 
 				map.put("ID", id);
 				map.put("PASSWORD", password);
@@ -525,10 +521,9 @@ public class query {
 		return map;
 	}
 
-	// 9. 내정보 수정 - 닉네임, github, 한줄 메세지, 최근 접속 시간
+	// 10. 내정보 수정 - 닉네임, github, 한줄 메세지, 최근 접속 시간
 	// 매개변수할떄 서버에서 8번 query 사용해서 변경하지 않은건 그대로 보내주세요
 	// void 반환x
-
 	// password 수정
 	public static void updatePASSWORD(String Qid, String Qpassword, String Salt) {
 		Connection conn = null;
@@ -864,7 +859,7 @@ public class query {
 		}
 	}
 
-	// 10. password가 맞는지 확인하기
+	// 11. password가 맞는지 확인하기
 	// 매개변수: String id, String password
 	// 맞으면 return 1 : 틀리면 return -1(or 0)
 	public static int checkPASSWORD(String Qid, String Qpassword) {
@@ -883,12 +878,7 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String password = rs.getString(2);
-
-				System.out.println("id: " + id);
-				System.out.println("password: " + password);
-				System.out.println();
 				if (Qpassword.equals(password)) {
 					return 1;
 				}
@@ -958,7 +948,8 @@ public class query {
 		}
 	}
 
-	// 13-1. 친구 수락 시, 친구 테이블에 넣어주기
+	// 13. 친구 수락 시, 친구 테이블에 넣어주기
+	@SuppressWarnings("resource")
 	public static void insertFRIEND(String Sid, String Rid) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -982,7 +973,6 @@ public class query {
 			}
 
 			pstmt = conn.prepareStatement(sql);
-
 			pstmt.setString(1, Rid);
 			pstmt.setString(2, Sid);
 
@@ -1011,7 +1001,7 @@ public class query {
 		}
 	}
 
-	// 13-2. 친구 수락 시, 친구 요청 테이블에서 없애기
+	// 14. 친구 수락 시, 친구 요청 테이블에서 없애기
 	// 매개변수: String send_id, String receive_id - 순서 상관없음.
 	// void - 반환 x
 	public static void deleteFRIEND_PLUS(String Sid, String Rid) {
@@ -1029,7 +1019,6 @@ public class query {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.execute();
 
-			System.out.println("제대로 삭제되었습니다.");
 
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");
@@ -1050,49 +1039,6 @@ public class query {
 	}
 
 	/* [채팅관련] */
-
-	// 14. 채팅방 등록
-	// 매개변수: String chat_id, String maker_id
-	// void 반환x
-	public static void insertCHAT(String Qchat_id, String Qmaker_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "root", "12345");
-
-			String sql = "INSERT INTO CHAT VALUES (?,?)";
-			pstmt = conn.prepareStatement(sql);
-
-			pstmt.setString(1, Qchat_id);
-			pstmt.setString(2, Qmaker_id);
-
-			int count = pstmt.executeUpdate();
-			if (count == 0) {
-				System.out.println("데이터 입력 실패");
-			} else {
-				System.out.println("데이터 입력 성공");
-			}
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로딩 실패");
-		} catch (SQLException e) {
-			System.out.println("에러 " + e);
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-				if (pstmt != null && !pstmt.isClosed()) {
-					pstmt.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	// 15. 한 채팅방에 대한 모든 채팅 내용 삭제 (in CHATTING table)
 	// 매개변수: String chat_id
 	// void - 반환 x
@@ -1110,44 +1056,6 @@ public class query {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.execute();
 
-			System.out.println("제대로 삭제되었습니다.");
-
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로딩 실패");
-		} catch (SQLException e) {
-			System.out.println("에러 " + e);
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-				if (pstmt != null && !pstmt.isClosed()) {
-					pstmt.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	// 15-2. 한 채팅방 완전 삭제 (in CHAT table)
-	// 매개변수: String chat_id
-	// void - 반환 x
-	public static void deleteCHAT(String Qchat_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "root", "12345");
-
-			String sql = "DELETE FROM CHAT" + " where (chat_id='" + Qchat_id + "');";
-
-			pstmt = conn.prepareStatement(sql);
-			pstmt.execute();
-
-			System.out.println("제대로 삭제되었습니다.");
 
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");
@@ -1184,7 +1092,7 @@ public class query {
 			String sql = "SELECT time, sender, content" + " FROM CHATTING" + " WHERE chat_id = '" + Qchat_id + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
+			int i = 1;
 			while (rs.next()) {
 				String time = rs.getString(1);
 				String sender = rs.getString(2);
@@ -1200,6 +1108,8 @@ public class query {
 				array[i][2] = content;
 				i++;
 			}
+			array[0][0] = Integer.toString(i - 1);
+
 			return array;
 		} catch (ClassNotFoundException e) {
 			System.out.println("드라이버 로딩 실패");
@@ -1267,21 +1177,21 @@ public class query {
 		}
 	}
 
-	// 0-1. 문자열을 포함하는 아이디찾기 (내친구o)
+	// 18. 문자열을 포함하는 아이디찾기 (내친구o)
 	// 매개변수: String id, String search
-	// return String[id]
-	public static String[] searchMYFRIEND(String Qid, String search) {
+	// return String[][id, nickname, name, last_connection]
+	public static String[][] searchMYFRIEND(String Qid, String search) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		String[][] array = new String[20][4];
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
 
-			String sql = "SELECT id" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
+			String sql = "SELECT id, name, nickname, last_connection" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
 					+ "%' OR" + " nickname LIKE '%" + search + "%') AND " + " id IN(select friend_id" + " from FRIEND"
 					+ " where my_id = '" + Qid + "');";
 
@@ -1290,13 +1200,17 @@ public class query {
 			int i = 0;
 			while (rs.next()) {
 				String id = rs.getString(1);
+				String name = rs.getString(2);
+				String nickname = rs.getString(3);
+				String last_connection = rs.getString(4);
 
-				// System.out.println("id: "+id);
+				array[i][0] = id;
+				array[i][1] = name;
+				array[i][2] = nickname;
+				array[i][3] = last_connection;
 
-				array[i] = id;
 				i++;
 			}
-			System.out.println();
 			return array;
 		} catch (ClassNotFoundException e) {
 			System.out.println("    ̹   ε      ");
@@ -1320,21 +1234,21 @@ public class query {
 		return array;
 	}
 
-	// 0-2. 문자열을 포함하는 아이디찾기 (내친구x)
+	// 19. 문자열을 포함하는 아이디찾기 (내친구x)
 	// 매개변수: String id, String search
-	// return String[id]
-	public static String[] searchOTHERFRIEND(String Qid, String search) {
+	// return String[][id, nickname, name, last_connection]
+	public static String[][] searchOTHERFRIEND(String Qid, String search) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String[] array = new String[20];
+		String[][] array = new String[20][4];
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
 			conn = DriverManager.getConnection(url, "root", "12345");
 			stmt = conn.createStatement();
 
-			String sql = "SELECT id" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
+			String sql = "SELECT id, name, nickname, last_connection" + " FROM USER" + " WHERE id != '" + Qid + "' AND" + " (id LIKE '%" + search
 					+ "%' OR" + " nickname LIKE '%" + search + "%') AND " + " id NOT IN(select friend_id"
 					+ " from FRIEND" + " where my_id = '" + Qid + "');";
 
@@ -1343,13 +1257,21 @@ public class query {
 			int i = 0;
 			while (rs.next()) {
 				String id = rs.getString(1);
+				String name = rs.getString(2);
+				String nickname = rs.getString(3);
+				String last_connection = rs.getString(4);
 
-				// System.out.println("id: "+id);
+				array[i][0] = id;
+				array[i][1] = name;
+				array[i][2] = nickname;
+				array[i][3] = last_connection;
 
-				array[i] = id;
 				i++;
 			}
+			if(i == 0) return null;
+			
 			return array;
+			
 		} catch (ClassNotFoundException e) {
 			System.out.println("    ̹   ε      ");
 		} catch (SQLException e) {
@@ -1372,4 +1294,196 @@ public class query {
 		return array;
 	}
 
+	// 20. FRIEND 목록에 있는지 확인
+	// 매개변수: String S_id, String R_id
+	// return 없을 시, null 있을시, S_id(null이 아님)
+	public static String checkFRIEND(String S_id, String R_id) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		String str = "false";
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+
+			conn = DriverManager.getConnection(url, "root", "12345");
+			stmt = conn.createStatement();
+
+			String sql = "SELECT my_id" + " FROM FRIEND" + " WHERE my_id = '" + S_id + "' AND" + " friend_id = '" + R_id
+					+ "';";
+
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+				str = "true";
+			}
+			System.out.println();
+			return str;
+		} catch (ClassNotFoundException e) {
+			System.out.println("    ̹   ε      ");
+		} catch (SQLException e) {
+			System.out.println("     " + e);
+		} finally {
+			try {
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
+				}
+				if (stmt != null && !stmt.isClosed()) {
+					stmt.close();
+				}
+				if (rs != null && !rs.isClosed()) {
+					rs.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return str;
+	}
+
+	// 21. FRIEND_PLUS목록에 있는지 확인
+	// 매개변수: String S_id, String R_id
+	// return 없을 시, null 있을시, S_id(null이 아님)
+	public static String checkFRIEND_PLUS(String S_id, String R_id) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		String str = "false";
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+
+			conn = DriverManager.getConnection(url, "root", "12345");
+			stmt = conn.createStatement();
+
+			String sql = "SELECT send_id" + " FROM FRIEND_PLUS" + " WHERE send_id = '" + S_id + "' AND"
+					+ " receive_id = '" + R_id + "';";
+
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+				str = "true";
+			}
+			return str;
+		} catch (ClassNotFoundException e) {
+			System.out.println("    ̹   ε      ");
+		} catch (SQLException e) {
+			System.out.println("     " + e);
+		} finally {
+			try {
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
+				}
+				if (stmt != null && !stmt.isClosed()) {
+					stmt.close();
+				}
+				if (rs != null && !rs.isClosed()) {
+					rs.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return str;
+	}
+
+	// 22. 내가 받은 친구 신청이 있는지 확인
+	// 매개변수: String Qid
+	// return 없을 시 0, 있을시 1
+	public static int checkPLUS(String Qid) {
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+			conn = DriverManager.getConnection(url, "root", "12345");
+			stmt = conn.createStatement();
+
+			String sql = "SELECT receive_id" + " FROM FRIEND_PLUS" + " WHERE receive_id = '" + Qid + "';";
+
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+				return 1;
+			}
+			return 0;
+		} catch (ClassNotFoundException e) {
+			System.out.println("    ̹   ε      ");
+		} catch (SQLException e) {
+			System.out.println("     " + e);
+		} finally {
+			try {
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
+				}
+				if (stmt != null && !stmt.isClosed()) {
+					stmt.close();
+				}
+				if (rs != null && !rs.isClosed()) {
+					rs.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return 0;
+	}
+	
+	 //23. 회원탈퇴
+	 //매개변수: String id
+	 //void - 반환 x
+	public static void deleteEVERYWHERE(String Qid) {
+		 Connection conn = null; 
+		 PreparedStatement pstmt = null;
+		 PreparedStatement pstmt2 = null;
+		 PreparedStatement pstmt3 = null;
+
+			try{
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				String url = "jdbc:mysql://localhost/network?characterEncoding=UTF-8&serverTimezone=UTC";
+				conn = DriverManager.getConnection(url, "root", "12345");
+
+				String sql = "DELETE FROM user"
+						 + " where id = '"+Qid+"';";		
+				pstmt = conn.prepareStatement(sql);		
+				pstmt.execute();
+				
+				sql = "DELETE FROM friend"
+						 + " where my_id = '"+Qid+"' or"
+						 + " friend_id = '"+Qid+"';"; 
+				pstmt2 = conn.prepareStatement(sql);		
+				pstmt2.execute();
+				
+				sql = "DELETE FROM friend_plus"
+						 + " where send_id = '"+Qid+"' or"
+						 + " receive_id = '"+Qid+"';"; 
+				pstmt3 = conn.prepareStatement(sql);		
+				pstmt3.execute();
+		
+				
+				System.out.println("완료되었습니다.");
+				
+			}   
+			catch( ClassNotFoundException e){
+				System.out.println("Error"); 
+			}
+			catch( SQLException e){
+				System.out.println("Error:  " + e);
+			}
+			finally{
+				try{
+					if( conn != null && !conn.isClosed()){
+						conn.close();
+					}
+					if( pstmt != null && !pstmt.isClosed()){
+	                   pstmt.close();
+					}
+				}
+				catch( SQLException e){
+					e.printStackTrace(); 
+				}  
+			}
+		}
 }
