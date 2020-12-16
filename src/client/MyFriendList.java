@@ -1,5 +1,6 @@
 package client;
 
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
@@ -120,6 +121,13 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    jTable.getTableHeader().setReorderingAllowed(false);
 	    jTable.getTableHeader().setResizingAllowed(false);
 	    
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    for(int i = 0; i < tcm.getColumnCount() - 1; i++){
+	    	tcm.getColumn(i).setCellRenderer(dtcr);
+	    }
+	      
 	    jTable.setRowHeight(30);
 	    jTable.setShowGrid(false);
 		jTable.setShowVerticalLines(false);
@@ -133,7 +141,10 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    panel.setPreferredSize(new Dimension(200, 35));
 	    friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
 	    friend.add(jScollPane, "Left"); //JScrooPane에 담은 JList를 나타내기 위해 배치한다.
+	    
 	    frame.add(friend);
+	    
+	    frame.setTitle("List");
 	    frame.setVisible(true);
         frame.setSize(200, 300);
         frame.setLocationRelativeTo(null);

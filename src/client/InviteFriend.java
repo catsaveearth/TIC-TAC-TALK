@@ -1,4 +1,5 @@
 package client;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
@@ -101,6 +102,12 @@ public class InviteFriend extends JFrame implements MouseListener {
 	    jTable.setRowSelectionAllowed(true);
 	    jTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 	    
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    tcm.getColumn(0).setCellRenderer(dtcr);
+	    tcm.getColumn(1).setCellRenderer(dtcr);
+	    
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
 	    
@@ -119,6 +126,7 @@ public class InviteFriend extends JFrame implements MouseListener {
 	    frame.add(table);
 	    frame.add(makeroom, BorderLayout.SOUTH);
 	    
+	    frame.setTitle("Invite Friend");
 	    frame.setVisible(true);
         frame.setSize(250, 350);
         frame.setLocationRelativeTo(null);

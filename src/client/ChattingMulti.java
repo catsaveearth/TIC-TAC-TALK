@@ -1,5 +1,6 @@
 package client;
 
+
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
@@ -101,18 +102,36 @@ public class ChattingMulti {
         
     	ImageIcon icon = new ImageIcon("image/add.png");
     	Image addImage = icon.getImage();
-	    Image addChangingImg = addImage.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+	    Image addChangingImg = addImage.getScaledInstance(28, 28, Image.SCALE_SMOOTH);
 	    ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
 
 	    ImageIcon icon3 = new ImageIcon("image/user.png");
 	    Image userImage = icon3.getImage();
-	    Image userChangeImg = userImage.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+	    Image userChangeImg = userImage.getScaledInstance(28, 28, Image.SCALE_SMOOTH);
 	    ImageIcon userChangeIcon = new ImageIcon(userChangeImg);
 
 	    JButton add = new JButton();
+	    add.setBorder(null);
 	    add.setBounds(10, 6, 28, 28);
 	    add.setIcon(addChangeIcon);
 	      
+	    ImageIcon addClickImgIcon = new ImageIcon("image/addClick.png");
+		Image addClick = addClickImgIcon.getImage();
+		Image addClickImg = addClick.getScaledInstance(28, 28, Image.SCALE_SMOOTH);
+		ImageIcon addClickChangeImgIcon = new ImageIcon(addClickImg);
+		add.addMouseListener(new MouseListener() {
+			public void mousePressed(MouseEvent e) {
+				add.setIcon(addClickChangeImgIcon);
+			}
+
+			public void mouseEntered(MouseEvent e) {}
+			public void mouseExited(MouseEvent e) {}
+			public void mouseClicked(MouseEvent e) {}
+			public void mouseReleased(MouseEvent e) {
+				add.setIcon(addChangeIcon);
+			}
+		});
+		  
 	    //친구초대기능!!
 	    add.addActionListener(new ActionListener() {
 		       @Override
@@ -122,9 +141,27 @@ public class ChattingMulti {
 		});
 	    
 	    JButton user = new JButton();
+	    user.setBorder(null);
 	    user.setBounds(304, 6, 28, 28);
 	    user.setIcon(userChangeIcon);
 	    
+	    ImageIcon userClickImgIcon = new ImageIcon("image/userClick.png");
+		Image userClick = userClickImgIcon.getImage();
+		Image userClickImg = userClick.getScaledInstance(28, 28, Image.SCALE_SMOOTH);
+		ImageIcon userClickChangeImgIcon = new ImageIcon(userClickImg);
+		user.addMouseListener(new MouseListener() {
+			public void mousePressed(MouseEvent e) {
+				user.setIcon(userClickChangeImgIcon);
+			}
+
+			public void mouseEntered(MouseEvent e) {}
+			public void mouseExited(MouseEvent e) {}
+			public void mouseClicked(MouseEvent e) {}
+			public void mouseReleased(MouseEvent e) {
+				user.setIcon(userChangeIcon);
+			}
+		});
+		
 	    //현재 접속 유저 확인 기능!
 	    user.addActionListener(new ActionListener() {
 		       @Override
@@ -193,6 +230,7 @@ public class ChattingMulti {
         });
 
 
+        frame.setTitle("Multi Chatting");
         frame.setVisible(true);
         frame.setSize(350, 550);
         frame.setResizable(false);

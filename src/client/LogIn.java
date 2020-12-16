@@ -1,5 +1,6 @@
 package client;
 
+
 /**
  * 공사 끝
  * */
@@ -109,13 +110,16 @@ public class LogIn extends JFrame {
 		BtnPanel.add(logBtn);
 		BtnPanel.add(signUpBtn);
 		
-		frame.add(blank);
-		frame.add(titleBtn);
-		frame.add(IDPanel);
-		frame.add(PWPanel);
-		frame.add(BtnPanel);
-		frame.add(blank1);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(titleBtn);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(BtnPanel);
+		frame.getContentPane().add(blank1);
 		
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("LogIn");
 		frame.setVisible(true);
 		frame.setSize(300, 220);
 		frame.setLocationRelativeTo(null);

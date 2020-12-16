@@ -1,4 +1,5 @@
 package client;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -34,11 +35,17 @@ public class ChattingOnlinePeople extends JFrame {
 	    jTable = new JTable(model);
 	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// 단일선택
 	    jTable.getColumn("닉네임(이름)").setPreferredWidth(100);
+	    
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
 	    JPanel table = new JPanel();
 	    table.setBackground(new Color(0, 54, 78));
 	    table.setPreferredSize(new Dimension(200, 200));
+
+	    DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+	    dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+	    TableColumnModel tcm = jTable.getColumnModel() ;
+	    tcm.getColumn(0).setCellRenderer(dtcr);
 	    
 	    jTable.setShowGrid(false);
 	    jTable.setRowHeight(30);
@@ -50,6 +57,7 @@ public class ChattingOnlinePeople extends JFrame {
 	    frame.add(friend, BorderLayout.NORTH);
 	    frame.add(table);
 	    
+	    frame.setTitle("Chatting Member");
 	    frame.setVisible(true);
         frame.setSize(200, 300);
         frame.setResizable(false);

@@ -1,5 +1,6 @@
 package client;
 
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -67,6 +68,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 		if (!end) {
 
 			if (order == 1) {
+				checkedBlock[x][y] = 1;
 				changeOrder();
 				// 클라이언트에게 넘기는 부분
 				Client.MYSELECTinTTT(rn, x, y);
@@ -172,7 +174,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 
 		yourTurnImgIcon = new ImageIcon("image/yourCircle.png");
 	    Image yourTurn = yourTurnImgIcon.getImage();
-	    Image yourTurnImg = yourTurn.getScaledInstance(55, 55, Image.SCALE_SMOOTH);
+	    Image yourTurnImg = yourTurn.getScaledInstance(130, 76, Image.SCALE_SMOOTH);
 	    yourTurnImgIcon = new ImageIcon(yourTurnImg);
 
 	    JButton boardTitleBtn = new JButton();
@@ -359,6 +361,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 		frame.add(boardBtn[2][2]);
 		frame.add(back);
 
+		frame.setTitle("Tic Tac Toe Game");
 		frame.setVisible(true);
 		frame.setSize(450, 450);
 		frame.setLocationRelativeTo(null);

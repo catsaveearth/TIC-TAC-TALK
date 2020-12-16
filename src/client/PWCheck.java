@@ -1,4 +1,5 @@
 package client;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -71,14 +72,17 @@ public class PWCheck extends JFrame {
 				}
 			}
 		});
-		
+
 		pwPanel.add(passward);
 		btnPanel.add(checkBtn);
-		frame.add(blank);
-		frame.add(label);
-		frame.add(pwPanel);
-		frame.add(btnPanel);
-		frame.add(blank1);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(pwPanel);
+		frame.getContentPane().add(btnPanel);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("Passward Check");
 		frame.setVisible(true);
 		frame.setSize(300, 200);
 		frame.setLocationRelativeTo(null);

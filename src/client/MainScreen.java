@@ -1,8 +1,12 @@
 package client;
 
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -285,15 +289,38 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 			flag += 2;
 			if (flag == 3) {
 				JPopupMenu pm = new JPopupMenu();
+                TitledBorder pmLine = new TitledBorder(new LineBorder(Color.black));
+	            pm.setBorder(pmLine);
+	            
 				JMenuItem pm_item1 = new JMenuItem("정보");
+                pm_item1.setBackground(Color.white);
+                pm_item1.setForeground(Color.black);
+                pm_item1.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+                pm_item1.setBorder(pmLine);
 				pm_item1.addActionListener(this);
+				
 				System.out.println(this);
 				JMenuItem pm_item2 = new JMenuItem("1:1 채팅");
+                pm_item2.setBackground(Color.white);
+                pm_item2.setForeground(Color.black);
+                pm_item2.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+                pm_item2.setBorder(pmLine);
 				pm_item2.addActionListener(this);
+				
 				JMenuItem pm_item3 = new JMenuItem("파일전송");
+                pm_item3.setBackground(Color.white);
+                pm_item3.setForeground(Color.black);
+                pm_item3.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+                pm_item3.setBorder(pmLine);
 				pm_item3.addActionListener(this);
+				
 				JMenuItem pm_item4 = new JMenuItem("게임하기");
+                pm_item4.setBackground(Color.white);
+                pm_item4.setForeground(Color.black);
+                pm_item4.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+                pm_item4.setBorder(pmLine);
 				pm_item4.addActionListener(this);
+				
 				pm.add(pm_item1);
 				pm.add(pm_item2);
 				pm.add(pm_item3);
@@ -396,16 +423,44 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       System.out.println(searching);
       top.add(searching);
 
+      ImageIcon searchingClickImgIcon = new ImageIcon("image/searchingClick.png");
+	  Image searchingClick = searchingClickImgIcon.getImage();
+	  Image searchingClickImg = searchingClick.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	  ImageIcon searchingClickChangeImgIcon = new ImageIcon(searchingClickImg);
+	  searching.addMouseListener(new MouseListener() {
+		   public void mousePressed(MouseEvent e) {
+			   searching.setIcon(searchingClickChangeImgIcon);
+		   }
+
+		   public void mouseEntered(MouseEvent e) {}
+		   public void mouseExited(MouseEvent e) {}
+		   public void mouseClicked(MouseEvent e) {}
+		   public void mouseReleased(MouseEvent e) {
+			   searching.setIcon(searchChangeIcon);
+		   }
+	  });
       
       //searching 버튼 -> 끝! 건들지 마세요
       searching.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent event) {
                if (event.getButton() == MouseEvent.BUTTON1) {
                    JPopupMenu pm = new JPopupMenu();
+                   TitledBorder line = new TitledBorder(new LineBorder(Color.black));
+	               pm.setBorder(line);
+	               
                    JMenuItem pm_item1 = new JMenuItem("내 친구 찾기");
+	               pm_item1.setBackground(Color.white);
+	               pm_item1.setForeground(Color.black);
+	               pm_item1.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+	               pm_item1.setBorder(line);
                    JMenuItem pm_item2 = new JMenuItem("새 친구 찾기");
+	               pm_item2.setBackground(Color.white);
+	               pm_item2.setForeground(Color.black);
+	               pm_item2.setFont(new Font("나눔바른펜", Font.BOLD, 13));
+	               pm_item2.setBorder(line);
                    
                    pm.add(pm_item1);
+	               pm_item1.setHorizontalTextPosition(SwingConstants.CENTER);
                    pm.add(pm_item2);
                    pm.show(event.getComponent(), event.getX(), event.getY());
 
@@ -438,6 +493,24 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       chatting.setIcon(chatChangingIcon);
       top.add(chatting);
       
+      ImageIcon chattingClickImgIcon = new ImageIcon("image/chattingClick.png");
+	  Image chattingClick = chattingClickImgIcon.getImage();
+	  Image chattingClickImg = chattingClick.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	  ImageIcon chattingClickChangeImgIcon = new ImageIcon(chattingClickImg);
+	  chatting.addMouseListener(new MouseListener() {
+		   public void mousePressed(MouseEvent e) {
+			   chatting.setIcon(chattingClickChangeImgIcon);
+		   }
+		   
+
+		   public void mouseEntered(MouseEvent e) {}
+		   public void mouseExited(MouseEvent e) {}
+		   public void mouseClicked(MouseEvent e) {}
+		   public void mouseReleased(MouseEvent e) {
+			      chatting.setIcon(chatChangingIcon);
+		   }
+	  });
+	  
       //멀티룸 초대 버튼 액션
       chatting.addActionListener(new ActionListener() {
          @SuppressWarnings("unused")
@@ -462,6 +535,22 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
          }
       });
       
+      ImageIcon settingClickImgIcon = new ImageIcon("image/settingClick.png");
+	  Image settingClick = settingClickImgIcon.getImage();
+	  Image settingClickImg = settingClick.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+	  ImageIcon settingClickChangeImgIcon = new ImageIcon(settingClickImg);
+	  setting.addMouseListener(new MouseListener() {
+		   public void mousePressed(MouseEvent e) {
+			   setting.setIcon(settingClickChangeImgIcon);
+		   }
+
+		   public void mouseEntered(MouseEvent e) {}
+		   public void mouseExited(MouseEvent e) {}
+		   public void mouseClicked(MouseEvent e) {}
+		   public void mouseReleased(MouseEvent e) {
+			   setting.setIcon(settingChangeIcon);
+		   }
+	  });
       
       //기본 정보 가져오기!=========================================
       String[] binfo = Client.basicinfo();
@@ -480,13 +569,13 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       blank.setBackground(new Color(255, 229, 110));
       
 	  myName = new JLabel("   " + binfo[0] + "(" + binfo[1] + ")");
-      myName.setFont(new Font("나눔바른펜", Font.PLAIN, 13));
+      myName.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
       message = new JLabel(binfo[2]);
-      message.setFont(new Font("나눔바른펜", Font.PLAIN, 13));
+      message.setFont(new Font("나눔바른펜", Font.PLAIN, 15));
       // 친구목록 부분
       JPanel friend = new JPanel();
       JLabel friend2 = new JLabel("   친구목록");
-      friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 11));
+      friend2.setFont(new Font("나눔바른펜", Font.PLAIN, 13));
       friend2.setPreferredSize(new Dimension(430, 13));
       friend2.setForeground(Color.white);
       friend.setPreferredSize(new Dimension(430, 380));
@@ -550,6 +639,14 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       jScollPane.setPreferredSize(new Dimension(425, 350));
       jTable.getTableHeader().setReorderingAllowed(false);
       jTable.getTableHeader().setResizingAllowed(false);
+      
+      DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+      dtcr.setHorizontalAlignment(SwingConstants.CENTER); 
+      TableColumnModel tcm = jTable.getColumnModel() ;
+      for(int i = 0; i < tcm.getColumnCount() - 1; i++){
+    	  tcm.getColumn(i).setCellRenderer(dtcr);
+      }
+      
       jTable.setRowHeight(30);
       jTable.setGridColor(new Color(0, 54, 78));
 	  jTable.setShowVerticalLines(false);

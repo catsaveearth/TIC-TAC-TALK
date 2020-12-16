@@ -1,4 +1,5 @@
 package client;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -59,7 +60,7 @@ public class Setting extends JFrame {
 	    });
 		
 		JLabel option = new JLabel("비밀번호를 변경하지 않는다면 비밀번호 칸을 비워두세요");
-		option.setFont(new Font("나눔바른펜", Font.BOLD, 16));
+		option.setFont(new Font("나눔바른펜", Font.BOLD, 14));
 		
 		JLabel labelID = new JLabel("ID                           : ");
 		JLabel labelNickName = new JLabel("NickName           : ");

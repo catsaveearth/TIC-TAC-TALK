@@ -1,4 +1,5 @@
 package client;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -71,13 +72,16 @@ public class FindAllFriend extends JFrame {
 		findPanel.add(find);
 		btnPanel.add(search);
 		
-		frame.add(blank);
-		frame.add(name);
-		frame.add(findPanel);
-		frame.add(btnPanel);
-		frame.add(blank1);
-		frame.add(blank2);
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(name);
+		frame.getContentPane().add(findPanel);
+		frame.getContentPane().add(btnPanel);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
+
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
 		
+		frame.setTitle("Searching All Friend");
 		frame.setVisible(true);
 		frame.setSize(300, 200);
 		frame.setLocationRelativeTo(null);

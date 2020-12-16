@@ -1,5 +1,6 @@
 package client;
 
+
 /**
  * 공사 끝
  * */
@@ -233,22 +234,26 @@ public class SignUp extends JFrame {
 			}
 		});
 		
-		frame.add(blank);
-		frame.add(label);
-		frame.add(IDPanel);
-		frame.add(NickNamePanel);
-		frame.add(PWPanel);
-		frame.add(NamePanel);
-		frame.add(PNPanel);
-		frame.add(EmailPanel);
-		frame.add(BirthPanel);
-		frame.add(GithubPanel);
-		frame.add(panelBtn);
-		frame.add(blank1);
-		frame.add(blank2);
-		frame.add(blank3);
-		frame.add(blank4);
+
+		frame.getContentPane().add(blank);
+		frame.getContentPane().add(label);
+		frame.getContentPane().add(IDPanel);
+		frame.getContentPane().add(NickNamePanel);
+		frame.getContentPane().add(PWPanel);
+		frame.getContentPane().add(NamePanel);
+		frame.getContentPane().add(PNPanel);
+		frame.getContentPane().add(EmailPanel);
+		frame.getContentPane().add(BirthPanel);
+		frame.getContentPane().add(GithubPanel);
+		frame.getContentPane().add(panelBtn);
+		frame.getContentPane().add(blank1);
+		frame.getContentPane().add(blank2);
+		frame.getContentPane().add(blank3);
+		frame.getContentPane().add(blank4);
 		
+		frame.getContentPane().setBackground(new Color(74, 210, 149));
+		
+		frame.setTitle("Sign-Up");
 		frame.setVisible(true);
 		frame.setSize(450, 550);
 		frame.setLocationRelativeTo(null);
