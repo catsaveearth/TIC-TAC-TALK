@@ -2,38 +2,34 @@ package client;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
-
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 	JTable jTable;
 	DefaultTableModel model;
 	HashSet<Integer> selectnum = new HashSet<Integer>();
-    JLabel flist = new JLabel("Ä£±¸¸¦ ¼±ÅÃÇÏ¼¼¿ä");
+    JLabel flist = new JLabel("ì¹œêµ¬ë¥¼ ì„ íƒí•˜ì„¸ìš”");
     JPanel listPanel = new JPanel();
 
-	
-//getSelectedRows ()
 	public void mouseClicked(MouseEvent me) {
 		int row = jTable.getSelectedRow();
 
-		if(selectnum.contains(row)) {//¼±ÅÃÇØÁ¦
+		if(selectnum.contains(row)) {//ì„ íƒí•´ì œ
 			selectnum.remove(row);
 		}
-		else { //¼±ÅÃ
+		else { //ì„ íƒ
 			selectnum.add(row);
 		}
 		
 		if(selectnum.isEmpty()) {
-			flist.setText("Ä£±¸¸¦ ¼±ÅÃÇÏ¼¼¿ä");	
+			flist.setText("ì¹œêµ¬ë¥¼ ì„ íƒí•˜ì„¸ìš”");	
 		}
 		else {
 			flist.setText(selectnum.toString());
 		}
 	}
-	
 	
 	public InviteFriendInOriginRoom(DefaultTableModel m, int rn) {
 		model = m;
@@ -43,27 +39,25 @@ public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 	    JButton makeroom = new JButton();
 	    makeroom.setBackground(new Color(74, 210, 149));
 	    makeroom.setPreferredSize(new Dimension(180, 25));
-		makeroom.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 10));
-		makeroom.setText("ÃÊ´ëÇÏ±â");
-		flist.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 18));
+		makeroom.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 10));
+		makeroom.setText("ì´ˆëŒ€í•˜ê¸°");
+		flist.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 18));
 		flist.setForeground(Color.white);
 
-		//Ä£±¸ ÃÊ´ëÇÏ±â
+		//ì¹œêµ¬ ì´ˆëŒ€í•˜ê¸°
 		makeroom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(!selectnum.isEmpty()) {
-					//ID¸¦ ±¼ºñ¿«±â
+					//IDë¥¼ êµ´ë¹„ì—®ê¸°
 					String IDs = "";
 					int first = 0;
 					for(int i : selectnum) {
 						if (first++ == 0) IDs = (String) model.getValueAt(i, 0);
 						else IDs = IDs + "^" + model.getValueAt(i, 0);
 					}
-					
 					frame.dispose();
-
-				   //ÃÊ´ë ¿äÃ»
+				   //ì´ˆëŒ€ ìš”ì²­
 					Client.InviteFriend(rn, IDs);
 				}
 			}
@@ -72,42 +66,22 @@ public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 		JPanel title = new JPanel();
 		title.setPreferredSize(new Dimension(250, 30));
 		title.setBackground(new Color(74, 210, 149));
-	    JLabel friend2 = new JLabel("Ä£±¸ÃÊ´ë");
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
+	    JLabel friend2 = new JLabel("ì¹œêµ¬ì´ˆëŒ€");
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
 	    friend.setPreferredSize(new Dimension(430, 380));
 	    
-	    ImageIcon onlineImgIcon = new ImageIcon("image/online.png");
-	    Image online = onlineImgIcon.getImage();
-	    Image onlineImg = online.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon onlineIcon = new ImageIcon(onlineImg);
-	    
-	    ImageIcon offlineImgIcon = new ImageIcon("image/offline.png");
-	    Image offline = offlineImgIcon.getImage();
-	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
-	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-	    Icon status = new ImageIcon();
-	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
-	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
 	    jTable.addMouseListener(this);
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
 	
 	    
-	    jTable.getColumn("ÇÑÁÙ¸Ş½ÃÁö").setWidth(0);
-	    jTable.getColumn("ÇÑÁÙ¸Ş½ÃÁö").setMinWidth(0);
-	    jTable.getColumn("ÇÑÁÙ¸Ş½ÃÁö").setMaxWidth(0);
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setWidth(0);
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setMinWidth(0);
+	    jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setMaxWidth(0);
 	    
 	    jTable.getTableHeader().setReorderingAllowed(false);
 	    jTable.getTableHeader().setResizingAllowed(false);
@@ -119,25 +93,16 @@ public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 	    jTable.setRowHeight(30);
 	    
 	    title.add(friend2);
-	    //friend.add(friend2);
-	    //friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
 	    jScollPane.setPreferredSize(new Dimension(230, 230));
 	    JPanel table = new JPanel();
 	    table.setPreferredSize(new Dimension(250, 280));
 	    table.setBackground(new Color(0, 54, 78));
 	    
 	    table.add(jScollPane, "Left");
-	    table.add(flist);
-	    //friend.add(makeroom);
-	    
+	    table.add(flist);  
 	    frame.add(title, BorderLayout.NORTH);
-	    //frame.add(jScollPane);
 	    frame.add(table);
-	    //frame.add(listPanel);
-	    //frame.add(friend);
 	    frame.add(makeroom, BorderLayout.SOUTH);
-	    //frame.add(friend, BorderLayout.SOUTH);
-
 	    
 	    frame.setVisible(true);
         frame.setSize(250, 350);
@@ -153,5 +118,4 @@ public class InviteFriendInOriginRoom extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
 }

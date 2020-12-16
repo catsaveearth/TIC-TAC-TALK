@@ -1,11 +1,9 @@
 package client;
 
 /**
- * ∞¯ªÁ ≥°
+ * Í≥µÏÇ¨ ÎÅù
  * */
 
-
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,6 +14,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class LogIn extends JFrame {
 
 	public LogIn() {
@@ -45,22 +44,20 @@ public class LogIn extends JFrame {
 		    titleBtn.addActionListener(new ActionListener() {
 		     @Override
 		     	public void actionPerformed(ActionEvent e) {
-		          // ∏∏æ‡ ∫Òπ–π¯»£∞° ∏¬¿∏∏È Setting setting = new Setting();
-		          // ∆≤∏Æ∏È JOptionPane.showMessageDialog(null,  "Wrong!!");
 		        }
 		});
 		
 		JPanel IDPanel = new JPanel();
 		IDPanel.setBackground(new Color(74, 210, 149));
 		JLabel label = new JLabel("ID                 : ");
-		label.setFont(new Font("∞ÌµÒ", Font.BOLD, 12));
+		label.setFont(new Font("Í≥†Îîï", Font.BOLD, 12));
 		label.setForeground(Color.black);
 		JTextField txtID = new JTextField(10);
 		
 		JPanel PWPanel = new JPanel();
 		PWPanel.setBackground(new Color(74, 210, 149));
 		JLabel pswrd = new JLabel("Password : ");
-		pswrd.setFont(new Font("∞ÌµÒ", Font.BOLD, 12));
+		pswrd.setFont(new Font("Í≥†Îîï", Font.BOLD, 12));
 		pswrd.setForeground(Color.black);
 		JPasswordField txtPass = new JPasswordField(10);
 		
@@ -79,14 +76,15 @@ public class LogIn extends JFrame {
 		signUpBtn.setBorder(null);
 
 		logBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
 				boolean log = Client.logincheck(txtID.getText(), txtPass.getPassword());
 						
-				if (log) {//∑Œ±◊¿Œ º∫∞¯«œ∏È
+				if (log) {//Î°úÍ∑∏Ïù∏ ÏÑ±Í≥µÌïòÎ©¥
 					frame.dispose();
-					MainScreen frame = new MainScreen(); //main¿∏∑Œ ∞Ì∞Ìæ≈~
+					MainScreen frame = new MainScreen(); //mainÏúºÎ°ú Í≥†Í≥†ÏîΩ~
 					
 				} else {
 					JOptionPane.showMessageDialog(null,  "You failed to log in");
@@ -96,12 +94,12 @@ public class LogIn extends JFrame {
 		});
 		
 		signUpBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				frame.dispose();
 				SignUp frame = new SignUp();
 			}
-			
 		});
 		
 		IDPanel.add(label);
@@ -124,5 +122,4 @@ public class LogIn extends JFrame {
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
 }

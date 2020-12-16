@@ -1,15 +1,10 @@
 package client;
 import java.awt.event.*;
-import java.io.*;
-import java.net.Socket;
-import java.util.Scanner;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
 
 public class ChattingOne{
 	private String FID;
-    private String NN;
     private String nm;
     private String sender;
     
@@ -28,25 +23,24 @@ public class ChattingOne{
     JLabel label = new JLabel("CHATTING ROOM");
 
 
-    //»ó´ë¹æÀÇ ¹İÀÀ¿¡ µû¸¥ °áÁ¤
+    //ìƒëŒ€ë°©ì˜ ë°˜ì‘ì— ë”°ë¥¸ ê²°ì •
     public void checkAnswer(String YN, String nn, String name) {
     	if(YN.equals("N")) {
-			JOptionPane.showMessageDialog(null, "»ó´ë¹æÀÌ Ã¤ÆÃÀ» °ÅÀıÇÏ¼Ì½À´Ï´Ù.");
+			JOptionPane.showMessageDialog(null, "ìƒëŒ€ë°©ì´ ì±„íŒ…ì„ ê±°ì ˆí•˜ì…¨ìŠµë‹ˆë‹¤.");
 			Client.delPCHAT(FID);
 	        frame.dispose();
     	}
     	else {
     		setoppenInfo(nn, name);
     		frame.setTitle("1:1 chat with " + sender);
-    		messageArea.append("»ó´ë¹æÀÌ ÀÔÀåÇÏ¼Ì½À´Ï´Ù. \n");
+    		messageArea.append("ìƒëŒ€ë°©ì´ ì…ì¥í•˜ì…¨ìŠµë‹ˆë‹¤. \n");
 
-    		//Ã¤ÆÃ È°¼ºÈ­
+    		//ì±„íŒ… í™œì„±í™”
             textField.setEditable(true);
     	}
     }
     
     public void setoppenInfo(String nn, String name) {
-		NN = nn;
 		this.nm = name;
 		sender = nn + "(" + nm + ")";
     }
@@ -56,29 +50,29 @@ public class ChattingOne{
     }
 
     public void endchat() {
-		messageArea.append("»ó´ë¹æÀÌ ³ª°¡¼Ì½À´Ï´Ù. \n");
+		messageArea.append("ìƒëŒ€ë°©ì´ ë‚˜ê°€ì…¨ìŠµë‹ˆë‹¤. \n");
         textField.setEditable(false);
 		button.setEnabled(false);
     }
     
-	//¸Ş¼¼Áö Ãß°¡
+	//ë©”ì„¸ì§€ ì¶”ê°€
     public void receiveChat(String content) {
     	messageArea.append(sender + ": "+ content + "\n");
     }
     
-    //¸Ş¼¼Áö º¸³»±â
+    //ë©”ì„¸ì§€ ë³´ë‚´ê¸°
     public void sendChat() {
 		String getTxt = textField.getText();
 		if(getTxt.equals("")) return;
-		Client.sendPCHAT(FID, getTxt); //ÀÌ°Ô ÇÙ½É!
+		Client.sendPCHAT(FID, getTxt); //ì´ê²Œ í•µì‹¬!
 		
-		messageArea.append("³ª : " + getTxt + "\n");
+		messageArea.append("ë‚˜ : " + getTxt + "\n");
 		textField.setText("");
     }
      
-    public void exitChat() { //Ã¤ÆÃ Á¾·áÇÏ±â
-    	//Á¾·áÇÒ°Å³Ä°í ÇÑ ¹ø ´õ ¹°¾îº¸±â
-		int reply = JOptionPane.showConfirmDialog(null, "Ã¤ÆÃÀ» Á¾·áÇÏ½Ã°Ú½À´Ï±î?", "Ã¤ÆÃ¾Ë¸²", JOptionPane.YES_NO_OPTION);
+    public void exitChat() { //ì±„íŒ… ì¢…ë£Œí•˜ê¸°
+    	//ì¢…ë£Œí• ê±°ëƒê³  í•œ ë²ˆ ë” ë¬¼ì–´ë³´ê¸°
+		int reply = JOptionPane.showConfirmDialog(null, "ì±„íŒ…ì„ ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì±„íŒ…ì•Œë¦¼", JOptionPane.YES_NO_OPTION);
 
 		if (reply == JOptionPane.YES_OPTION) {
 			Client.delPCHAT(FID);
@@ -86,7 +80,7 @@ public class ChattingOne{
 		}	
     }
     
-    public void FexitChat() { //Ã¤ÆÃ Á¾·áÇÏ±â
+    public void FexitChat() { //ì±„íŒ… ì¢…ë£Œí•˜ê¸°
     	Client.delPCHAT(FID);
         frame.dispose();
     }
@@ -112,7 +106,7 @@ public class ChattingOne{
     	name.add(label);
     	label.setHorizontalAlignment(JLabel.CENTER);
     	label.setPreferredSize(new Dimension(220, 30));
-        label.setFont(new Font("°íµñ", Font.BOLD, 23));
+        label.setFont(new Font("ê³ ë”•", Font.BOLD, 23));
         label.setForeground(Color.black);
         
         
@@ -124,14 +118,14 @@ public class ChattingOne{
         bottomLine.setPreferredSize(new Dimension(600, 1));
         bottomLine.setBackground(new Color(255, 229, 110));
         textField.setEditable(true);
-        Font font = new Font("°íµñ", Font.PLAIN, 14);
+        Font font = new Font("ê³ ë”•", Font.PLAIN, 14);
         messageArea.setFont(font);
         messageArea.setLineWrap(true);
         messageArea.setBorder(null);
         messageArea.setEditable(false);
         messageArea.setBackground(new Color(0, 54, 78));
         button.setPreferredSize(new Dimension(58, 22));
-        button.setFont(new Font("°íµñ", Font.BOLD, 13));
+        button.setFont(new Font("ê³ ë”•", Font.BOLD, 13));
         button.setBackground(new Color(255, 229, 110));
         button.setBorder(null);
         top.setBackground(new Color(74, 210, 149));
@@ -158,7 +152,7 @@ public class ChattingOne{
         
         messageArea.setForeground(Color.white);
    
-        //¹öÆ° ´­·¯µµ, ¿£ÅÍ¸¦ ÃÄµµ °°Àº µ¿ÀÛ!
+        //ë²„íŠ¼ ëˆŒëŸ¬ë„, ì—”í„°ë¥¼ ì³ë„ ê°™ì€ ë™ì‘!
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	sendChat();

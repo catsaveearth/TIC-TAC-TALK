@@ -3,14 +3,13 @@ package client;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-
 import javax.swing.*;
 
 
+@SuppressWarnings("serial")
 public class TTTGAME extends JFrame implements ActionListener {
 	public int rn;
-	public int order = 1; // ³»Â÷·Ê
+	public int order = 1; // ë‚´ì°¨ë¡€
 	public boolean end = false;
 	public ImageIcon myturn = new ImageIcon("image/myturn.png");
 	public ImageIcon yourturn = new ImageIcon("image/yourturn.png");
@@ -19,80 +18,74 @@ public class TTTGAME extends JFrame implements ActionListener {
     Image myTurnImage = myturn.getImage();
     Image myTurnChangeImg = myTurnImage.getScaledInstance(80, 60, Image.SCALE_SMOOTH);
     ImageIcon myTurnChangeIcon = new ImageIcon(myTurnChangeImg);
-    
     Image yourTurnImage = yourturn.getImage();
     Image yourTurnChangeImg = yourTurnImage.getScaledInstance(80, 60, Image.SCALE_SMOOTH);
     ImageIcon yourTurnChangeIcon = new ImageIcon(yourTurnChangeImg);
-    
     Image notTurnImage = notturn.getImage();
     Image notTurnChangeImg = notTurnImage.getScaledInstance(80, 60, Image.SCALE_SMOOTH);
     ImageIcon notTurnChangeIcon = new ImageIcon(notTurnChangeImg);
-
 	
 	private ImageIcon myTurnImgIcon;
 	private ImageIcon yourTurnImgIcon;
     private JButton[][] boardBtn = new JButton[3][3];
-    
     private JButton myTurnBtn = new JButton();
     private JButton yourTurnBtn = new JButton();
 
-	
 	JTable table;
 	
 	private int doubleClick = 0;
 	@Override
 	public void actionPerformed(ActionEvent arg0) {}
 	private Integer[][] checkedBlock = new Integer[3][3];
-	
 
 	
-	//¼ø¼­ ¹Ù²ãÁÖ±â (order°¡ 0ÀÌ¸é ¾Æ¹«¸® ´­·¯µµ ¹öÆ° ¾È¹Ù²ñ
+	//ìˆœì„œ ë°”ê¿”ì£¼ê¸° (orderê°€ 0ì´ë©´ ì•„ë¬´ë¦¬ ëˆŒëŸ¬ë„ ë²„íŠ¼ ì•ˆë°”ë€œ
 	public void changeOrder() {
 		if(!end) {
 			if(order == 1) order = 0;
 			else order = 1;
 		
-			if (order == 1) { // ³» Â÷·ÊÀÏ¶§
+			if (order == 1) { // ë‚´ ì°¨ë¡€ì¼ë•Œ
 			    myTurnBtn.setIcon(myTurnChangeIcon);
 			    yourTurnBtn.setIcon(notTurnChangeIcon);
-			} else if (order == 0) { // »ó´ë Â÷·ÊÀÏ¶§
+			} else if (order == 0) { // ìƒëŒ€ ì°¨ë¡€ì¼ë•Œ
 			    myTurnBtn.setIcon(notTurnChangeIcon);
 			    yourTurnBtn.setIcon(yourTurnChangeIcon);
 			}
 		}
 	}
 	
-	//»ó´ë°¡ ¹¹ ¼±ÅÃÇß´ÂÁö Ã¼Å©
+	//ìƒëŒ€ê°€ ë­ ì„ íƒí–ˆëŠ”ì§€ ì²´í¬
 	public void checkOPPNblock(int x, int y) {
 		checkedBlock[x][y] = 1;
 		boardBtn[x][y].setIcon(yourTurnImgIcon);
 		changeOrder();
 	}
 	
-	// ³»°¡ ¼±ÅÃÀ» ÇÏ¸é ÅÏÀÌ ³Ñ¾î°¡°í, ¹» ¼±ÅÃÇß´ÂÁö º¸³»Áà¾ß ÇÑ´Ù.
+	// ë‚´ê°€ ì„ íƒì„ í•˜ë©´ í„´ì´ ë„˜ì–´ê°€ê³ , ë­˜ ì„ íƒí–ˆëŠ”ì§€ ë³´ë‚´ì¤˜ì•¼ í•œë‹¤.
 	public void selectBlock(int x, int y) {
 		if (!end) {
 
 			if (order == 1) {
 				changeOrder();
-				// Å¬¶óÀÌ¾ğÆ®¿¡°Ô ³Ñ±â´Â ºÎºĞ
+				// í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë„˜ê¸°ëŠ” ë¶€ë¶„
 				Client.MYSELECTinTTT(rn, x, y);
 			}
 		}
 	}
 	
-	//1ÀÌ µé¾î¿À¸é ³»°¡ ÀÌ±ä°Å, 0ÀÌ µé¾î¿À¸é »ó´ë°¡ ÀÌ±ä°Å -1ÀÌ µé¾î¿À¸é ºñ±ä°Å
+	//1ì´ ë“¤ì–´ì˜¤ë©´ ë‚´ê°€ ì´ê¸´ê±°, 0ì´ ë“¤ì–´ì˜¤ë©´ ìƒëŒ€ê°€ ì´ê¸´ê±° -1ì´ ë“¤ì–´ì˜¤ë©´ ë¹„ê¸´ê±°
 	public void Winner(int order) {
 		
-		String windowName = "°ÔÀÓ Á¾·á ";
-		String showMessage = "½ÂÀÚ°¡ ´©±ºÁö";
+		String windowName = "ê²Œì„ ì¢…ë£Œ ";
+		String showMessage = "ìŠ¹ìê°€ ëˆ„êµ°ì§€";
 		
-		if(order == 1) showMessage = "ÀÌ°å½À´Ï´Ù!";
-		else if(order == 0) showMessage = "ÆĞ¹èÇß½À´Ï´Ù!";
-		else showMessage = "ºñ°å½À´Ï´Ù!";
+		if(order == 1) showMessage = "ì´ê²¼ìŠµë‹ˆë‹¤!";
+		else if(order == 0) showMessage = "íŒ¨ë°°í–ˆìŠµë‹ˆë‹¤!";
+		else showMessage = "ë¹„ê²¼ìŠµë‹ˆë‹¤!";
 
 		
-		//°ÔÀÓ ³¡³ª¼­ ¾Æ¹«°Íµµ ¼±ÅÃ ºÒ°¡
+		//ê²Œì„ ëë‚˜ì„œ ì•„ë¬´ê²ƒë„ ì„ íƒ ë¶ˆê°€
 		if(order == 1) order = 0;
 		end = true;
 		
@@ -103,9 +96,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 	}
 	
 	
-
-	
-	//º°¸íÀÌ µé¾î¿Â´Ù!!!
+	//ë³„ëª…ì´ ë“¤ì–´ì˜¨ë‹¤!!!
 	public TTTGAME(int roomnumber, int od, String MNN, String FNN) {
 		for(int i=0;i<3;i++) {
 			for(int j=0;j<3;j++) {
@@ -113,8 +104,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 			}
 		}
 		this.rn = roomnumber;
-		order = od; //´©°¡ ¼±ÀÎÁö ¹Ş´Â´Ù
-		
+		order = od; //ëˆ„ê°€ ì„ ì¸ì§€ ë°›ëŠ”ë‹¤
 		
 		JFrame frame = new JFrame();
 		
@@ -130,8 +120,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 	    Image titleChangeImg = titleImage.getScaledInstance(450, 50, Image.SCALE_SMOOTH);
 	    ImageIcon titleChangeIcon = new ImageIcon(titleChangeImg);
 	    titleBtn.setIcon(titleChangeIcon);
-	    
-	    
+
 		JPanel titleIcon = new JPanel();
 		titleIcon.setPreferredSize(new Dimension(150, 0));
 		titleIcon.setBackground(new Color(74, 210, 149));
@@ -144,31 +133,26 @@ public class TTTGAME extends JFrame implements ActionListener {
 	    Image fightChangeImg = fightImage.getScaledInstance(88, 88, Image.SCALE_SMOOTH);
 	    ImageIcon fightChangeIcon = new ImageIcon(fightChangeImg);
 	    fightBtn.setIcon(fightChangeIcon);
-	    
-
 
 		myTurnBtn.setBounds(45, 50, 80, 60);
 		myTurnBtn.setBorder(null);
-		
 		yourTurnBtn.setBounds(325, 50, 80, 60);
 		yourTurnBtn.setBorder(null);
-
 		
-		if (order == 1) { // ³» Â÷·ÊÀÏ¶§
+		if (order == 1) { // ë‚´ ì°¨ë¡€ì¼ë•Œ
 		    myTurnBtn.setIcon(myTurnChangeIcon);
 		    yourTurnBtn.setIcon(notTurnChangeIcon);
-		} else if (order == 0) { // »ó´ë Â÷·ÊÀÏ¶§
+		} else if (order == 0) { // ìƒëŒ€ ì°¨ë¡€ì¼ë•Œ
 		    myTurnBtn.setIcon(notTurnChangeIcon);
 		    yourTurnBtn.setIcon(yourTurnChangeIcon);
 		}
 
-
 		JLabel myIDLabel = new JLabel(MNN);
-		myIDLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 15));
+		myIDLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 15));
 		myIDLabel.setBackground(Color.yellow);
 		
 		JLabel yourIDLabel = new JLabel(FNN);
-		yourIDLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 15));
+		yourIDLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 15));
 		yourIDLabel.setBackground(Color.yellow);
 		
 		JPanel myIDPanel = new JPanel();
@@ -199,9 +183,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 	    Image boardTitleChangeImg = boardTitleImage.getScaledInstance(390, 32, Image.SCALE_SMOOTH);
 	    ImageIcon boardTitleChangeIcon = new ImageIcon(boardTitleChangeImg);
 	    boardTitleBtn.setIcon(boardTitleChangeIcon);
-		
-	    
-	    
+
 	    boardBtn[0][0] = new JButton();
 	    boardBtn[0][0].setBounds(30, 176, 130, 76);
 		ImageIcon icon6 = new ImageIcon("image/board.png");
@@ -211,7 +193,7 @@ public class TTTGAME extends JFrame implements ActionListener {
 	    boardBtn[0][0].setIcon(boardChangeIcon);
 	    boardBtn[0][0].addActionListener(new ActionListener () {
 			public void actionPerformed(ActionEvent e) {
-				if (order == 1) { // ³»Â÷·ÊÀÏ¶§¸¸ ÀÛµ¿µÇµµ·Ï
+				if (order == 1) { // ë‚´ì°¨ë¡€ì¼ë•Œë§Œ ì‘ë™ë˜ë„ë¡
 					doubleClick++;
 					if (doubleClick == 2 && checkedBlock[0][0] != 1) {
 						boardBtn[0][0].setIcon(myTurnImgIcon);
@@ -220,7 +202,6 @@ public class TTTGAME extends JFrame implements ActionListener {
 						doubleClick = 1;
 					}
 				}
-
 			}
 		});
 
@@ -376,14 +357,11 @@ public class TTTGAME extends JFrame implements ActionListener {
 		frame.add(boardBtn[2][0]);
 		frame.add(boardBtn[2][1]);
 		frame.add(boardBtn[2][2]);
-		
 		frame.add(back);
-		
-		
+
 		frame.setVisible(true);
 		frame.setSize(450, 450);
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
 	}
-	
 }

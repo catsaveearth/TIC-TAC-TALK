@@ -1,11 +1,6 @@
 /**
 MainServer.java
 
-Ã¤ÆÃ ÇÁ·Î±×·¥ÀÇ main server.
-room manage¸¦ µ¹¸®¸é¼­ Ã¤ÆÃ¹æÀ» °ü¸®ÇÑ´Ù. => Å¬¶óÀÌ¾ğÆ® -> ¼­¹ö·Î Ã¤ÆÃ ¿¬¶ôÀÌ ¿Ã ½Ã, ¹æ¿¡ ÀÖ´Â »ç¶÷µéÀÇ Á¤º¸¸¦ ³Ñ°ÜÁÖ¾î¾ß ÇÑ´Ù.
-
-client·ÎºÎÅÍ accept¿¬°á ¿äÃ»À» ¹ŞÀ¸¸é client¸¦ ´Ù·ç´Â thread¸¦ »ı¼ºÇØ¼­ socketÀ» ³Ñ°ÜÁØ´Ù. (±× thread´Â EchoServer¿¡ Á¸Àç)
-
 modifier: Kim Su hyeon.
 E-mail Address: tpfbdpf@naver.com
 */
@@ -21,16 +16,15 @@ import java.text.SimpleDateFormat;
 
 
 public class MainServer {
+	public static HashMap<String, PrintWriter> client = new HashMap<>(); //ì ‘ì†ì¤‘ì¸ clientê´€ë¦¬
+	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>(); //chat threadì™€ì˜ ê³µìœ ë©”ëª¨ë¦¬
+	public static HashMap<Integer, Queue<TMessage>> TTTSet = new HashMap<>(); //TTT threadì™€ì˜ ê³µìœ ë©”ëª¨ë¦¬
 
-	public static HashMap<String, PrintWriter> client = new HashMap<>(); //Á¢¼ÓÁßÀÎ client°ü¸®
-	public static HashMap<Integer, Queue<Message>> messageSet = new HashMap<>(); //chat thread¿ÍÀÇ °øÀ¯¸Ş¸ğ¸®
-	public static HashMap<Integer, Queue<TMessage>> TTTSet = new HashMap<>(); //TTT thread¿ÍÀÇ °øÀ¯¸Ş¸ğ¸®
-
-	//°øÀ¯¸Ş¸ğ¸®¸¦ »ç¿ëÇÒ ¶§ ¿øÀÚ¼º º¸Àå
+	//ê³µìœ ë©”ëª¨ë¦¬ë¥¼ ì‚¬ìš©í•  ë•Œ ì›ìì„± ë³´ì¥ (Ensure atomic when using shared memory)
 	private static AtomicInteger messageCK = new AtomicInteger(1); 
 	private static AtomicInteger TTTCK = new AtomicInteger(1);
 
-	//threadµéÀ» °ü¸®ÇÏ´Â thread pool
+	//threadë“¤ì„ ê´€ë¦¬í•˜ëŠ” thread pool (The thread pool that manages the threads)
 	private static ExecutorService messagepool = Executors.newFixedThreadPool(500);
 	private static ExecutorService filepool = Executors.newFixedThreadPool(50);
 	private static ExecutorService TTTpool = Executors.newFixedThreadPool(50);
@@ -39,95 +33,90 @@ public class MainServer {
 	private static int forroomnumber = 1;
 	private static int TTTnumber = 1;
 	private static int fileportnum = 33333;
-	
-	//ÇöÀç ½Ã°£À» °¡Á®¿È
-	public static String getCurrentTime() {
-		Date date_now = new Date(System.currentTimeMillis()); // ÇöÀç½Ã°£À» °¡Á®¿Í DateÇüÀ¸·Î ÀúÀåÇÑ´Ù
-		
-		//HHmmss
-		SimpleDateFormat date_format = new SimpleDateFormat("yyMMddHHmmssSS");
 
+	// í˜„ì¬ ì‹œê°„ì„ ê°€ì ¸ì˜´ (get current time)
+	public static String getCurrentTime() {
+		Date date_now = new Date(System.currentTimeMillis()); // í˜„ì¬ì‹œê°„ì„ ê°€ì ¸ì™€ Dateí˜•ìœ¼ë¡œ ì €ì¥í•œë‹¤
+
+		// HHmmss
+		SimpleDateFormat date_format = new SimpleDateFormat("yyMMddHHmmssSS");
 		return date_format.format(date_now).toString();
 	}
 
-	
 	public static void main(String[] args) throws Exception {
-		// client¿Í ¼ÒÅëÇÏ´Â thread¸¦ °ü¸®ÇÒ pool»ı¼º (ÃÖ´ë 500¸í±îÁö °¡´É)
+		// clientì™€ ì†Œí†µí•˜ëŠ” threadë¥¼ ê´€ë¦¬í•  poolìƒì„± (ìµœëŒ€ 500ëª…ê¹Œì§€ ê°€ëŠ¥)
 		ExecutorService pool = Executors.newFixedThreadPool(500);
-		
+
 		System.out.println("start server!");
-		try (ServerSocket listener = new ServerSocket(portnum)) { // listener socket»ı¼º
+		try (ServerSocket listener = new ServerSocket(portnum)) { // listener socketìƒì„±
 			while (true) {
-				pool.execute(new Handler(listener.accept())); // socket¿¬°á¿äÃ»ÀÌ ¿À¸é acceptÇÏ°í thread¸¦ »ı¼ºÇÏ¸ç socketÀ» ³Ñ°ÜÁÜ
+				pool.execute(new Handler(listener.accept())); // socketì—°ê²°ìš”ì²­ì´ ì˜¤ë©´ acceptí•˜ê³  threadë¥¼ ìƒì„±í•˜ë©° socketì„ ë„˜ê²¨ì¤Œ
 			}
 		}
 	}
-	
-	/** client thread ÄÚµå. - ÀÌÁ¦ client¿Í °ü·ÃµÈ ÀÏÀº ¸ğµÎ ¿©±â¼­ Ã³¸®ÇÑ´Ù. 
-	 * client°¡ ¿¬°á µÉ ¶§ ¸¶´Ù Handler thread°¡ ÇÏ³ª ¾¿ »ı°Ü³ª¼­ client¿¡¼­ÀÇ ÀÔ·ÂÀ» Àü´ã ¸¶Å©ÇÑ´Ù.
-	 * Handler thread´Â client hashmap¿¡¼­ °ü¸®µÈ´Ù.
-	 * */
+
+	/**
+	 * client thread ì½”ë“œ. - ì´ì œ clientì™€ ê´€ë ¨ëœ ì¼ì€ ëª¨ë‘ ì—¬ê¸°ì„œ ì²˜ë¦¬í•œë‹¤. clientê°€ ì—°ê²° ë  ë•Œ ë§ˆë‹¤ Handler
+	 * threadê°€ í•˜ë‚˜ ì”© ìƒê²¨ë‚˜ì„œ clientì—ì„œì˜ ì…ë ¥ì„ ì „ë‹´ ë§ˆí¬í•œë‹¤. Handler threadëŠ” client hashmapì—ì„œ
+	 * ê´€ë¦¬ëœë‹¤. Client thread to here. are all code - now the work associated with
+	 * client Every time be linked client handler client, caused by a single thread
+	 * for input from the mark. Handler thread the client hashmap in.
+	 */
 	public static class Handler implements Runnable {
-		// ¿¬°á socket°ú stream
+		// ì—°ê²° socketê³¼ stream
 		private Socket socket;
 		private Scanner in;
 		private PrintWriter out;
 		Thread thread;
-		
-		// »ç¿ëÀÚ Á¤º¸ ÀúÀå
+
+		// ì‚¬ìš©ì ì •ë³´ ì €ì¥
 		private String ID = null;
 
-		// constructor -> stream ¿¬°áÀÛ¾÷
+		// constructor -> stream ì—°ê²°ì‘ì—…
 		public Handler(Socket socket) throws IOException {
-			this.socket = socket; // »ı¼ºÇÒ ¶§ socket ¹ŞÀ½
+			this.socket = socket; // ìƒì„±í•  ë•Œ socket ë°›ìŒ
 		}
 
 		@Override
 		public void run() {
 			try {
 				in = new Scanner(socket.getInputStream());
-			    out = new PrintWriter(socket.getOutputStream(), true);
+				out = new PrintWriter(socket.getOutputStream(), true);
 
-			    //¸ŞÀÎ È­¸é ¶ã ‹š ±îÁö µ¹¾Æ°¡´Â °Í				
-				while (true) { // Ã³À½¿¡ ·Î±×ÀÎ °úÁ¤ + È¸¿ø°¡ÀÔ => ·Î±×ÀÎÀ» ÇØ¾ßÁö ÀÌ whileÀ» ³Ñ¾î°£´Ù
+				// ë©”ì¸ í™”ë©´ ëœ° Â‹Âš ê¹Œì§€ ëŒì•„ê°€ëŠ” ê²ƒ
+				while (true) { // ì²˜ìŒì— ë¡œê·¸ì¸ ê³¼ì • + íšŒì›ê°€ì… => ë¡œê·¸ì¸ì„ í•´ì•¼ì§€ ì´ whileì„ ë„˜ì–´ê°„ë‹¤
 					String line = in.nextLine();
 					System.out.println(line);
 
-					// ·Î±×ÀÎ : LOGIN ID PASSWORD
-					if(line.startsWith("REQSALT")) {
+					// ë¡œê·¸ì¸ : LOGIN ID PASSWORD
+					if (line.startsWith("REQSALT")) {
 						String info[] = line.split("\\`\\|");
-
 						System.out.println(info[1]);
-
-						
 						out.println(query.bringSALT(info[1]));
-
 					}
 					else if (line.startsWith("LOGIN")) {
 						String info[] = line.split("\\`\\|");
-						// ¾ÆÀÌµğ ºñ¹øÀÌ ¸Â´ÂÁö µ¥ÀÌÅÍº£ÀÌ½º¿Í ´ëÃÊÇÏ¸ç Ã¼Å©
-						
+						// ì•„ì´ë”” ë¹„ë²ˆì´ ë§ëŠ”ì§€ ë°ì´í„°ë² ì´ìŠ¤ì™€ ëŒ€ì´ˆí•˜ë©° ì²´í¬
 						int rt = query.selectLOGIN(info[1], info[2]);
 
-						if (rt == 1) { // ¸¸¾à ¸Â´Ù¸é, ID°ªÀ» ÀúÀå
+						if (rt == 1) { // ë§Œì•½ ë§ë‹¤ë©´, IDê°’ì„ ì €ì¥
 							this.ID = info[1];
-							client.put(ID, out); // clinet hashmap¿¡ »ç¿ëÀÚµî·Ï
+							client.put(ID, out); // clinet hashmapì— ì‚¬ìš©ìë“±ë¡
 							out.println("LOGIN`|SUCCESS");
 							break;
-						} else { // ¾Æ´Ï¸é ´Ù½Ã ·Î±×ÀÎÇÏ¶ó°í ÇØÁÜ
+						} else { // ì•„ë‹ˆë©´ ë‹¤ì‹œ ë¡œê·¸ì¸í•˜ë¼ê³  í•´ì¤Œ
 							out.println("LOGIN`|FAIL");
 						}
-
 					}
 
-					// È¸¿ø°¡ÀÔ : 
+					// íšŒì›ê°€ì…
 					else if (line.startsWith("REGISTER")) {
 						String info[] = line.split("\\`\\|");
-						
-						for(String t : info) {
+
+						for (String t : info) {
 							System.out.println(t);
 						}
-						
+
 						HashMap<String, String> temp = new HashMap<String, String>();
 						temp.put("SALT", info[2]);
 						temp.put("ID", info[3]);
@@ -138,29 +127,26 @@ public class MainServer {
 						temp.put("EMAIL", info[8]);
 						temp.put("BIRTH", info[9]);
 
-						if(info[1].compareTo("1") == 0) {
+						if (info[1].compareTo("1") == 0) {
 							temp.put("GITHUB", info[10]);
 						}
-						
-						
-						//ÀÏ´Ü id, nicknameÁßº¹ Ã¼Å©¸¦ ÇÑ´Ù.
-						//¸¸¾à Áßº¹Ã¼Å©¸¦ ÇÏ´Âµ¥ °ãÄ£´Ù¸é, ¾îµğ°¡ ¾ÈµÇ´ÂÁö ¸®ÅÏ
-						if(query.selectID(info[3]) == -1) {
+
+						// ì¼ë‹¨ id, nicknameì¤‘ë³µ ì²´í¬ë¥¼ í•œë‹¤.
+						// ë§Œì•½ ì¤‘ë³µì²´í¬ë¥¼ í•˜ëŠ”ë° ê²¹ì¹œë‹¤ë©´, ì–´ë””ê°€ ì•ˆë˜ëŠ”ì§€ ë¦¬í„´
+						if (query.selectID(info[3]) == -1) {
 							out.println("REGISTER`|ID");
-						}
-						else if(query.selectNICKNAME(info[4]) == -1) {
+						} else if (query.selectNICKNAME(info[4]) == -1) {
 							out.println("REGISTER`|NN");
-						}
-						else {
+						} else {
 							query.insertUSER(temp);
 							out.println("REGISTER`|OK");
 						}
-						query.updateLAST_CONNECTION(info[3], getCurrentTime()); //Áö±İ ½Ã°£ ³Ö¾îÁÖ±â
+						query.updateLAST_CONNECTION(info[3], getCurrentTime()); // ì§€ê¸ˆ ì‹œê°„ ë„£ì–´ì£¼ê¸°
 					}
 				}
-				//·Î±×ÀÎ ¼º°ø½Ã ¿©±â¼­ ½ÃÀÛ
+				//ë¡œê·¸ì¸ ì„±ê³µì‹œ ì—¬ê¸°ì„œ ì‹œì‘
 							
-				// Ã¹ ½ÃÀÛ½Ã ±âº» Á¤º¸µéÀ» client¿¡°Ô ÀüºÎ º¸³»ÁØ´Ù JDBC¸¦ ÀÌ¿ëÇØ¾ßÇÔ
+				// ì²« ì‹œì‘ì‹œ ê¸°ë³¸ ì •ë³´ë“¤ì„ clientì—ê²Œ ì „ë¶€ ë³´ë‚´ì¤€ë‹¤ JDBCë¥¼ ì´ìš©í•´ì•¼í•¨
 			    HashMap<String,String> binfo = new HashMap<String,String>();
 			    binfo = query.selectNAME_NICKNAME_STATE(ID);
 				
@@ -168,14 +154,13 @@ public class MainServer {
 				out.println("BASICINFO`|nickname`|" + binfo.get("NICKNAME"));
 				out.println("BASICINFO`|state_message`|" + binfo.get("STATE_MESSAGE"));
 				
-				//Á¢¼Ó»óÅÂ ¾÷µ¥ÀÌÆ®!!! -> Áö±İ Á¢¼ÓÁßÀÌ¶ó´Â ¶æ
+				//ì ‘ì†ìƒíƒœ ì—…ë°ì´íŠ¸!!! -> ì§€ê¸ˆ ì ‘ì†ì¤‘ì´ë¼ëŠ” ëœ»
 				query.updateLAST_CONNECTION(ID, "0");
 								
-				//Ä£±¸¸ñ·Ï(Ä£±¸°¡ Á¢¼ÓÁßÀÎÁö ¾Æ´ÑÁöµµ)
-				//Ä£±¸¸ñ·Ï ¹Ş¾Æ¿À±â
+				//ì¹œêµ¬ëª©ë¡(ì¹œêµ¬ê°€ ì ‘ì†ì¤‘ì¸ì§€ ì•„ë‹Œì§€ë„)
 				String[][] f_list = query.selectFRIEND(ID);
 
-				out.println("BASICINFO`|FRIENDLIST"); //ÀÌÁ¦ºÎÅÍ Ä£±¸ ¸®½ºÆ®°¡ ³Ñ¾î°£´Ù°í ½ÅÈ£¸¦ ÁØ´Ù
+				out.println("BASICINFO`|FRIENDLIST"); //ì´ì œë¶€í„° ì¹œêµ¬ ë¦¬ìŠ¤íŠ¸ê°€ ë„˜ì–´ê°„ë‹¤ê³  ì‹ í˜¸ë¥¼ ì¤€ë‹¤
 				int fnum = Integer.parseInt(f_list[0][1]) - 1;
 				
 				for(int i=1;i<=fnum;i++) {
@@ -190,58 +175,55 @@ public class MainServer {
 					}
 					out.println(flist);
 				}
-				out.println("BFEND"); //ÀÌÁ¦ ³Ñ±â´Â°Å Á¾·á¶ó´Â ¶æ!
-
+				out.println("BFEND"); //ì´ì œ ë„˜ê¸°ëŠ”ê±° ì¢…ë£Œë¼ëŠ” ëœ»!
 				
-				//´Ù¸¥ »ç¶÷µé¿¡°Ô ³»°¡ µé¾î¿Ô´Ù°í ¾Ë¸°´Ù! (Á¢¼Ó»óÅÂ º¯°æ)
+				//ë‹¤ë¥¸ ì‚¬ëŒë“¤ì—ê²Œ ë‚´ê°€ ë“¤ì–´ì™”ë‹¤ê³  ì•Œë¦°ë‹¤! (ì ‘ì†ìƒíƒœ ë³€ê²½)
 				for (PrintWriter output : client.values()) {
 					if(output.equals(out)) continue;
-					//¸ğµÎ¿¡°Ô º¸³»¸é client¿¡¼­ ¾Ë¾Æ¼­ °É·¯¼­ µéÀ»°ÍÀÓ
-					//Çü½Ä ; UPDATE F_state F_ID »óÅÂ(1ÀÌ¸é ¿ÀÇÁ¶óÀÎ)
+					//ëª¨ë‘ì—ê²Œ ë³´ë‚´ë©´ clientì—ì„œ ì•Œì•„ì„œ ê±¸ëŸ¬ì„œ ë“¤ì„ê²ƒì„
+					//í˜•ì‹ ; UPDATE F_state F_ID ìƒíƒœ(1ì´ë©´ ì˜¤í”„ë¼ì¸)
 					output.println("UPDATE`|F_state`|" + ID + "`|" + 0);
 				}
-				
-				
-				//¿©±â±îÁö°¡ (·Î±×ÀÎ & È¸¿ø°¡ÀÔ & ±âº» Á¤º¸ º¸³»ÁÖ±â) <<==================================
+				//ì—¬ê¸°ê¹Œì§€ê°€ (ë¡œê·¸ì¸ & íšŒì›ê°€ì… & ê¸°ë³¸ ì •ë³´ ë³´ë‚´ì£¼ê¸°) <<==================================
 
-				//ÀÌÁ¦ Ä£±¸½ÅÃ»À» °¨ÁöÇÏ´Â Thread¿Í ¾Æ·¡ÀÇ whileÀÌ µ¿½Ã¿¡ µ¹¾Æ°¡°Ô µË´Ï´Ù
+				//ì´ì œ ì¹œêµ¬ì‹ ì²­ì„ ê°ì§€í•˜ëŠ” Threadì™€ ì•„ë˜ì˜ whileì´ ë™ì‹œì— ëŒì•„ê°€ê²Œ ë©ë‹ˆë‹¤
 				RealTimeUpdater runnable = new RealTimeUpdater(ID, out);
 				thread = new Thread(runnable);
 
-				thread.start();	//Ä£±¸½ÅÃ» È®ÀÎ thread ÀÛµ¿ ½ÃÀÛ
-				System.out.println("µ¹±â½ÃÀÛÇÕ´Ï´Ù!");
+				thread.start();	//ì¹œêµ¬ì‹ ì²­ í™•ì¸ thread ì‘ë™ ì‹œì‘
+				System.out.println("ëŒê¸°ì‹œì‘í•©ë‹ˆë‹¤!");
 
-//ÇÁ·Î±×·¥ÀÌ µ¹¾Æ°¡´Â µ¿¾È ¼ÒÅëÀÌ ÀÌ·ç¾îÁö´Â ºÎºĞ (Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ÀÔ·ÂÀ» ¹Ş´ÂºÎºĞ! / client -> server)
+				//í”„ë¡œê·¸ë¨ì´ ëŒì•„ê°€ëŠ” ë™ì•ˆ ì†Œí†µì´ ì´ë£¨ì–´ì§€ëŠ” ë¶€ë¶„ (í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ì…ë ¥ì„ ë°›ëŠ”ë¶€ë¶„! / client -> server)
 				while (true) {
-					System.out.println("ºù±Û¹ğ±Û!");
+					System.out.println("ë¹™ê¸€ë±…ê¸€!");
 					
 					String line = in.nextLine();
 					System.out.println(line);
 					
-/**Ä£±¸ °ü·Ã Ã³¸®========================================*/
+/**ì¹œêµ¬ ê´€ë ¨ ì²˜ë¦¬========================================*/
 					if (line.startsWith("FRIEND")) {
 						String info[] = line.split("\\`\\|");
 						
-						//Ä£±¸ ½ÅÃ» (apply) => FRIEND APP [FID]
+						//ì¹œêµ¬ ì‹ ì²­ (apply) => FRIEND APP [FID]
 						if(info[1].compareTo("APP") == 0) {
-							//ID, FID°¡ Ä£±¸ ½ÅÃ» ´ë±â table¿¡ µé¾î°¡°Ô µÈ´Ù.
+							//ID, FIDê°€ ì¹œêµ¬ ì‹ ì²­ ëŒ€ê¸° tableì— ë“¤ì–´ê°€ê²Œ ëœë‹¤.
 							query.insertFRIEND_PLUS(ID, info[2]);
 						}
 						
-						//Ä£±¸ ¼ö¶ô => FRIEND OK [FID]
+						//ì¹œêµ¬ ìˆ˜ë½ => FRIEND OK [FID]
 						else if(info[1].compareTo("OK") == 0) {
-							//Ä£±¸½ÅÃ» Å×ÀÌºí¿¡¼­ »èÁ¦ÇØÁÖ°í, Ä£±¸ Å×ÀÌºí¿¡ Ãß°¡ÇØÁØ´Ù.
+							//ì¹œêµ¬ì‹ ì²­ í…Œì´ë¸”ì—ì„œ ì‚­ì œí•´ì£¼ê³ , ì¹œêµ¬ í…Œì´ë¸”ì— ì¶”ê°€í•´ì¤€ë‹¤.
 							query.deleteFRIEND_PLUS(ID, info[2]);
 							query.insertFRIEND(ID, info[2]);
 							
-							//Ä£±¸¸¦ ¼ö¶ôÇØ¼­ Friend°¡ µÇ¾ú´Ù¸é, client¿¡µµ Ãß°¡¸¦ ÇØÁà¾ß°ÚÁÒ?
-							//ÀÏ´Ü ³»²¨ ¾÷µ¥ÀÌÆ®ÇÏ±â => Ä£±¸ Å×ÀÌºíÀ» Àç±¸¼ºÇÏ¶ó°í ¾Ë·ÁÁÖ´Â°ÅÀÓ
-							//ID, name, nickname, last_connection, »ó¸Ş
+							//ì¹œêµ¬ë¥¼ ìˆ˜ë½í•´ì„œ Friendê°€ ë˜ì—ˆë‹¤ë©´, clientì—ë„ ì¶”ê°€ë¥¼ í•´ì¤˜ì•¼ê² ì£ ?
+							//ì¼ë‹¨ ë‚´êº¼ ì—…ë°ì´íŠ¸í•˜ê¸° => ì¹œêµ¬ í…Œì´ë¸”ì„ ì¬êµ¬ì„±í•˜ë¼ê³  ì•Œë ¤ì£¼ëŠ”ê±°ì„
+							//ID, name, nickname, last_connection, ìƒë©”
 							HashMap<String, String> mapmy = query.bringINFO(info[2]);	
 							out.println("FRIEND`|APND`|" + mapmy.get("ID") + "`|" + mapmy.get("NAME") + "`|" + mapmy.get("NICKNAME") + "`|"
 									+ mapmy.get("LAST_CONNECTION") + "`|"+ mapmy.get("STATE_MESSAGE"));
 							
-							//¸¸¾à Ä£±¸µµ Á¢¼ÓÁßÀÌ¶ó¸é, Ä£±¸ list¸¦ ¾÷µ¥ÀÌÆ® ½ÃÄÑÁÖ¶ó°í Á÷Á¢ ¸»ÇØÁÖ±â!
+							//ë§Œì•½ ì¹œêµ¬ë„ ì ‘ì†ì¤‘ì´ë¼ë©´, ì¹œêµ¬ listë¥¼ ì—…ë°ì´íŠ¸ ì‹œì¼œì£¼ë¼ê³  ì§ì ‘ ë§í•´ì£¼ê¸°!
 							if(client.containsKey(info[2])) {
 								HashMap<String, String> mapp = query.bringINFO(ID);	
 								client.get(info[2]).println("FRIEND`|APND`|" + mapp.get("ID") + "`|" + mapp.get("NAME") + "`|" + mapp.get("NICKNAME") + "`|"
@@ -249,53 +231,47 @@ public class MainServer {
 							}
 						}
 						
-						//Ä£±¸ °ÅÀı => FRIEND NO [FID]
+						//ì¹œêµ¬ ê±°ì ˆ => FRIEND NO [FID]
 						else if(info[1].compareTo("NO") == 0) {
-							//Ä£±¸ ½ÅÃ» Å×ÀÌºí¿¡¼­ »èÁ¦ÇØÁÖ°í, ³¡.
+							//ì¹œêµ¬ ì‹ ì²­ í…Œì´ë¸”ì—ì„œ ì‚­ì œí•´ì£¼ê³ , ë.
 							query.deleteFRIEND_PLUS(ID, info[2]);
 						}
 						
-						//Ä£±¸ »ó¼¼Á¤º¸ È®ÀÎ => FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+						//ì¹œêµ¬ ìƒì„¸ì •ë³´ í™•ì¸ => FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 						else if(info[1].compareTo("INFO") == 0) {
 							HashMap<String, String> map = query.bringINFO(info[2]);
 							out.println("FRIEND`|INFO`|" + map.get("NICKNAME") + "`|" + map.get("NAME") + "`|" + map.get("STATE_MESSAGE")  + "`|" 
 									+ map.get("EMAIL")  + "`|" + map.get("PHONE") + "`|" + map.get("BIRTH")  + "`|" + map.get("GITHUB")  + "`|");
 						}
 						
-						//Ä£±¸ ½ÅÃ» Å×ÀÌºí¿¡ ÀÖ´ÂÁö È®ÀÎ => FRIEND PCK [FID]
-						//¾øÀ¸¸é false¸¦ ¸®ÅÏÇÑ´Ù.
+						//ì¹œêµ¬ ì‹ ì²­ í…Œì´ë¸”ì— ìˆëŠ”ì§€ í™•ì¸ => FRIEND PCK [FID]
+						//ì—†ìœ¼ë©´ falseë¥¼ ë¦¬í„´í•œë‹¤.
 						else if(info[1].compareTo("PCK") == 0) {
-
 							String ck = query.checkFRIEND_PLUS(ID, info[2]);
 							System.out.println("ww" + ck);
 
-							if(ck.compareTo("true") == 0) {
-								out.println("FRIEND`|PCK`|T");
-							}
+							if(ck.compareTo("true") == 0) out.println("FRIEND`|PCK`|T");
 							else out.println("FRIEND`|PCK`|F");
 						}
 						
-						//Ä£±¸ Å×ÀÌºí¿¡ ÀÖ´ÂÁö È®ÀÎ => FRIEND FCK [FID]
+						//ì¹œêµ¬ í…Œì´ë¸”ì— ìˆëŠ”ì§€ í™•ì¸ => FRIEND FCK [FID]
 						else if(info[1].compareTo("FCK") == 0) {
 
 							String ck = query.checkFRIEND(ID, info[2]);
 							System.out.println(ck);
 
-							if(ck.compareTo("true") == 0) {
-								out.println("FRIEND`|FCK`|T");
-							}
+							if(ck.compareTo("true") == 0) out.println("FRIEND`|FCK`|T");
 							else out.println("FRIEND`|FCK`|F");	
 						}
 					}
 					
-/**°Ë»ö °ü·Ã Ã³¸®========================================*/
+/**ê²€ìƒ‰ ê´€ë ¨ ì²˜ë¦¬========================================*/
 					else if (line.startsWith("SEARCH")) {
 						String info[] = line.split("\\`\\|");
 						
-						//³» Ä£±¸ °Ë»ö (my friend) => SEARCH MF [°Ë»ö¾î]
+						//ë‚´ ì¹œêµ¬ ê²€ìƒ‰ (my friend) => SEARCH MF [ê²€ìƒ‰ì–´]
 						if(info[1].compareTo("MF") == 0) {
 							String[][] idlist = query.searchMYFRIEND(ID, info[2]);
-							
 							int num = 0;
 							String list = null;
 							
@@ -317,17 +293,13 @@ public class MainServer {
 									ck++;
 								}
 								System.out.println(list);
-
 							}
-							
-							//°ªÀ» º¸³»Áà¾ßÇÔ
+							//ê°’ì„ ë³´ë‚´ì¤˜ì•¼í•¨
 							out.println("SEARCH`|REQ`|MF`|" + num + "`|" + list);
 						}
 						
-						//¿ÜºÎ Ä£±¸ °Ë»ö (other friend) => SEARCH OF [°Ë»ö¾î]
+						//ì™¸ë¶€ ì¹œêµ¬ ê²€ìƒ‰ (other friend) => SEARCH OF [ê²€ìƒ‰ì–´]
 						else if(info[1].compareTo("OF") == 0) {
-							//	// return String[][id, nickname, name, last_connection]
-							
 							String[][] idlist = query.searchOTHERFRIEND(ID, info[2]);
 							int num = 0;
 							String list = null;
@@ -337,7 +309,6 @@ public class MainServer {
 								continue;
 							}
 
-							
 							for(String[] s : idlist) {
 								if(s[0] == null) break;
 								num++;
@@ -352,47 +323,39 @@ public class MainServer {
 								System.out.println(list);
 							}
 
-							//°ªÀ» º¸³»Áà¾ßÇÔ
+							//ê°’ì„ ë³´ë‚´ì¤˜ì•¼í•¨
 							out.println("SEARCH`|REQ`|OF`|" + num + list);
 							
 							System.out.println(num);
 							System.out.println("SEARCH`|REQ`|OF`|" + num + list);
-
 						}
 					}
-
 								
-/**¼³Á¤ °ü·Ã Ã³¸®========================================*/
+/**ì„¤ì • ê´€ë ¨ ì²˜ë¦¬========================================*/
 					else if (line.startsWith("SETTING")) {
 						String info[] = line.split("\\`\\|");
 
 						
-						//¼³Á¤¿¡ ÀÔÀåÇÏ±â À§ÇÑ ºñ¹ø check => SETTING PWCK [¾ÏÈ£È­µÈ PW]
+						//ì„¤ì •ì— ì…ì¥í•˜ê¸° ìœ„í•œ ë¹„ë²ˆ check => SETTING PWCK [ì•”í˜¸í™”ëœ PW]
 						if(info[1].compareTo("PWCK") == 0) {
 							int ck = query.checkPASSWORD(ID, info[2]);
 
-							//°á°ú ¸®ÅÏ
-							if(ck == 1) {
-								out.println("SETTING`|PWCK`|OK");
-							}
-							else {
-								out.println("SETTING`|PWCK`|NO");
-							}
-
+							//ê²°ê³¼ ë¦¬í„´
+							if(ck == 1) out.println("SETTING`|PWCK`|OK");
+							else out.println("SETTING`|PWCK`|NO");
 						}
 						
-						//¼³Á¤À» ÀúÀå => SETTING SAVE [0 NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
-						//           SETTING SAVE [1 PW SALT NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE] => ¾îÂ÷ÇÇ ¾ÆÀÌµğ´Â ¸ø¹Ù²Ş
+						//ì„¤ì •ì„ ì €ì¥ => SETTING SAVE [0 NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+						//           SETTING SAVE [1 PW SALT NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE] => ì–´ì°¨í”¼ ì•„ì´ë””ëŠ” ëª»ë°”ê¿ˆ
 						else if(info[1].compareTo("SAVE") == 0) {
-							
 							int ck = Integer.parseInt(info[2]);
 							if(ck == 1) ck++;
 
-							//¹Ù²ï°Í¸¸ updateÇØÁÖÀÚ!
+							//ë°”ë€ê²ƒë§Œ updateí•´ì£¼ì!
 							HashMap<String, String> map = query.bringINFO(ID); 
 
 							if(map.get("NICKNAME").compareTo(info[3 + ck]) != 0) {
-								//´Ğ³×ÀÓ Áßº¹Ã¼Å©!!!
+								//ë‹‰ë„¤ì„ ì¤‘ë³µì²´í¬!!!
 								if(query.selectNICKNAME(info[3 + ck]) == 1) {
 									query.updateNICKNAME(ID, info[3 + ck]);
 									out.println("SETTING`|NN`|OK");				
@@ -402,39 +365,33 @@ public class MainServer {
 									continue;
 								}
 							}
-							else {
-								out.println("SETTING`|NN`|OK");									
-							}
+							else out.println("SETTING`|NN`|OK");	
 							
-							
-							if(map.get("NAME").compareTo(info[4 + ck]) != 0) {
+							if (map.get("NAME").compareTo(info[4 + ck]) != 0) {
 								query.updateNAME(ID, info[4 + ck]);
 							}
-							
-							if(map.get("PHONE").compareTo(info[5 + ck]) != 0) {
+
+							if (map.get("PHONE").compareTo(info[5 + ck]) != 0) {
 								query.updatePHONE(ID, info[5 + ck]);
 							}
-							
-							if(map.get("EMAIL").compareTo(info[6 + ck]) != 0) {
+
+							if (map.get("EMAIL").compareTo(info[6 + ck]) != 0) {
 								query.updateEMAIL(ID, info[6 + ck]);
 							}
-							
-							if(map.get("BIRTH").compareTo(info[7 + ck]) != 0) {
+
+							if (map.get("BIRTH").compareTo(info[7 + ck]) != 0) {
 								query.updateBIRTH(ID, info[7 + ck]);
 							}
 							
-							//ÀÌ°Å µÎ°³´Â °Á ¾÷µ¥ÀÌÆ® ÇÏÀÚ => GITHUB STATE_MESSAGE
+							//ì´ê±° ë‘ê°œëŠ” ê± ì—…ë°ì´íŠ¸ í•˜ì => GITHUB STATE_MESSAGE
 							try {
-								if(info[8 + ck].compareTo("") == 0)
-									query.updateGITHUB(ID, null);
-								else
-									query.updateGITHUB(ID, info[8 + ck]);
+								if(info[8 + ck].compareTo("") == 0) query.updateGITHUB(ID, null);
+								else query.updateGITHUB(ID, info[8 + ck]);
 							}
 							catch(Exception e) {
 								query.updateGITHUB(ID, null);
 								info[8 + ck] = null;
 							}
-
 							
 							try {
 								if(info[9 + ck].compareTo("") == 0)
@@ -445,20 +402,19 @@ public class MainServer {
 							catch(Exception e) {
 								query.updateSTATE_MESSAGE(ID, null);
 								info[9 + ck] = null;
-
 							}
 
-							//ºñ¹Ğ¹øÈ£ ¾÷µ¥ÀÌÆ®
+							//ë¹„ë°€ë²ˆí˜¸ ì—…ë°ì´íŠ¸
 							if(ck == 2) query.updatePASSWORD(ID, info[3], info[3]);
 							
-							//¸ğµç ÀÔ·ÂÀÌ ¹«»çÈ÷ ´Ù ³¡³ª¸é ±×Á¦¼­¾ß ¾÷µ¥ÀÌÆ®!
+							//ëª¨ë“  ì…ë ¥ì´ ë¬´ì‚¬íˆ ë‹¤ ëë‚˜ë©´ ê·¸ì œì„œì•¼ ì—…ë°ì´íŠ¸!
 							out.println("UPDATE`|MYINFO`|" + info[4 + ck] + "`|" + info[3 + ck] + "`|" + info[9 + ck]);
 							
-							//Ä£±¸µé¿¡°Ôµµ ¹Ù²ï ³» Á¤º¸¸¦ ÀÚ¶ûÇØ¾ßÁö
-							//ÀÏ´Ü ³» Ä£±¸ Á¤º¸ ¹Ş¾Æ¿À°í
+							//ì¹œêµ¬ë“¤ì—ê²Œë„ ë°”ë€ ë‚´ ì •ë³´ë¥¼ ìë‘í•´ì•¼ì§€
+							//ì¼ë‹¨ ë‚´ ì¹œêµ¬ ì •ë³´ ë°›ì•„ì˜¤ê³ 
 							String[][] f_list2 = query.selectFRIEND(ID);
 							
-							//Ä£±¸µéÀÇ ID°¡ Á¢¼ÓÁßÀÌ¶ó¸é º¸³»ÁÖ¼¼¿ä~
+							//ì¹œêµ¬ë“¤ì˜ IDê°€ ì ‘ì†ì¤‘ì´ë¼ë©´ ë³´ë‚´ì£¼ì„¸ìš”~
 							int plag = 1;
 							for(String[] l : f_list2) {
 								if(plag == 1) {
@@ -471,24 +427,23 @@ public class MainServer {
 							}
 						}
 						
-						//³» Á¤º¸ ¿äÃ» => SETTING REQ (GUI¿¡ Ã¤¿ö³ÖÀ» ³» Á¤º¸¸¦ ¿äÃ»ÇÏ´Â °Í)
+						//ë‚´ ì •ë³´ ìš”ì²­ => SETTING REQ (GUIì— ì±„ì›Œë„£ì„ ë‚´ ì •ë³´ë¥¼ ìš”ì²­í•˜ëŠ” ê²ƒ)
 						else if(info[1].compareTo("REQ") == 0) {
-							//³ªÀÇ »ó¼¼ Á¤º¸¸¦ º¸³»ÁØ´Ù.
+							//ë‚˜ì˜ ìƒì„¸ ì •ë³´ë¥¼ ë³´ë‚´ì¤€ë‹¤.
 							HashMap<String, String> map = query.bringINFO(ID);
 							
-							//Á¤º¸¸¦ º¸³»ÁØ´Ù
+							//ì •ë³´ë¥¼ ë³´ë‚´ì¤€ë‹¤
 							out.println("SETTING`|INFO`|" + map.get("ID") + "`|" + map.get("NICKNAME") + "`|" + map.get("NAME") + "`|" 
 										+ map.get("PHONE") + "`|" + map.get("EMAIL")  + "`|" + map.get("BIRTH")  + "`|" + map.get("GITHUB")  
 										+ "`|" + map.get("STATE_MESSAGE"));
-							//º¸³»´Â Çü½Ä : FRIEND INFO [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
-							//github°ú »ó¸Ş´Â ¾ø´Ù¸é nullÀÏ °Í.			
+							//ë³´ë‚´ëŠ” í˜•ì‹ : FRIEND INFO [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
+							//githubê³¼ ìƒë©”ëŠ” ì—†ë‹¤ë©´ nullì¼ ê²ƒ.			
 						}
-						
 	
-						//È¸¿øÅ»Åğ=> SETTING BYE
+						//íšŒì›íƒˆí‡´=> SETTING BYE
 						else if(info[1].compareTo("BYE") == 0) {
 							
-							//Ä£±¸µéÀÇ ID°¡ Á¢¼ÓÁßÀÌ¶ó¸é Å»ÅğÇŞ´Ù°í ¾Ë·ÁÁÖ±â
+							//ì¹œêµ¬ë“¤ì˜ IDê°€ ì ‘ì†ì¤‘ì´ë¼ë©´ íƒˆí‡´í–‡ë‹¤ê³  ì•Œë ¤ì£¼ê¸°
 							String[][] f_list2 = query.selectFRIEND(ID);
 							int plag = 1;
 							for(String[] l : f_list2) {
@@ -501,114 +456,111 @@ public class MainServer {
 								}
 							}
 							query.deleteEVERYWHERE(ID);	
-
 						}
 					}
 					
 					
-/**Ã¤ÆÃ¹æ °ü·Ã (1:1) personal chat ========================================*/
+/**ì±„íŒ…ë°© ê´€ë ¨ (1:1) personal chat ========================================*/
 					else if (line.startsWith("PCHAT")) {
 						String info[] = line.split("\\`\\|");
 						
-						//PCHAT`|REQCHAT`|" + FID : ¾ê¶û Ã¤ÆÃÇÏ°í ½Í´Ù°í ½ÅÈ£ÁÖ±â
+						//PCHAT`|REQCHAT`|" + FID : ì–˜ë‘ ì±„íŒ…í•˜ê³  ì‹¶ë‹¤ê³  ì‹ í˜¸ì£¼ê¸°
 						if(info[1].compareTo("REQCHAT") == 0) {
-							//»ó´ë¹æ¿¡°Ô Ã¤ÆÃ¹æ¿¡ Âü¿©ÇÒ°ÇÁö ¹°¾îºÁ¾ßÇÔ
+							//ìƒëŒ€ë°©ì—ê²Œ ì±„íŒ…ë°©ì— ì°¸ì—¬í• ê±´ì§€ ë¬¼ì–´ë´ì•¼í•¨
 							HashMap<String, String> map = query.bringINFO(ID);
-							//¿©±â¼­ id´Â A. (b°¡ AÀÇ Á¤º¸¸¦ ¹Ş´Â »óÈ²) (Áö±İ ¿©±â´Â A°í, B¿¡°Ô º¸³»¾ß ÇÕ´Ï´Ù!)
+							//ì—¬ê¸°ì„œ idëŠ” A. (bê°€ Aì˜ ì •ë³´ë¥¼ ë°›ëŠ” ìƒí™©) (ì§€ê¸ˆ ì—¬ê¸°ëŠ” Aê³ , Bì—ê²Œ ë³´ë‚´ì•¼ í•©ë‹ˆë‹¤!)
 							
-							//PCHAT`|QUSCHAT`|" + Ã¤ÆÃ¿äÃ»ÀÚID + º°¸í + ÀÌ¸§ : »ó´ë¹æ ¾Ë·ÁÁÖ¸é¼­ Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾îº¸±â   =>¹Ş´ÂÂÊ : ÀÌ¶§ º°¸í(ÀÌ¸§), ID ÀúÀåÇÏ±â
+							//PCHAT`|QUSCHAT`|" + ì±„íŒ…ìš”ì²­ìID + ë³„ëª… + ì´ë¦„ : ìƒëŒ€ë°© ì•Œë ¤ì£¼ë©´ì„œ ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´ë³´ê¸°   =>ë°›ëŠ”ìª½ : ì´ë•Œ ë³„ëª…(ì´ë¦„), ID ì €ì¥í•˜ê¸°
 							client.get(info[2]).println("PCHAT`|QUSCHAT`|" + ID+ "`|" + map.get("NICKNAME")+ "`|" + map.get("NAME"));
 						}
 						
-						
-						//PCHAT`|PESPONCHAT`|" + Ã¤ÆÃ¿äÃ»ÀÚID + Y/N : Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾î”fÀ»¶§ Ã¤ÆÃ ÇÒ°ÇÁö ¸»°ÇÁö ´äº¯
+						//PCHAT`|PESPONCHAT`|" + ì±„íŒ…ìš”ì²­ìID + Y/N : ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´Â”fì„ë•Œ ì±„íŒ… í• ê±´ì§€ ë§ê±´ì§€ ë‹µë³€
 						else if(info[1].compareTo("PESPONCHAT") == 0) {
-							//PCHAT`|ANSCHAT`|" + Ã¤ÆÃ¿äÃ»ÀÚID + º°¸í(ÀÌ¸§) : »ó´ë¹æÀÌ Ã¤ÆÃ ¼ö¶ôÇß´Ù°í ¾Ë·ÁÁÖ±â + Ã¤ÆÃ Àá±İ Ç®¸² //º¸³½ÂÊ : ÀÌ¶§ º°¸í(ÀÌ¸§), ID ÀúÀåÇÏ±â
+							//PCHAT`|ANSCHAT`|" + ì±„íŒ…ìš”ì²­ìID + ë³„ëª…(ì´ë¦„) : ìƒëŒ€ë°©ì´ ì±„íŒ… ìˆ˜ë½í–ˆë‹¤ê³  ì•Œë ¤ì£¼ê¸° + ì±„íŒ… ì ê¸ˆ í’€ë¦¼ //ë³´ë‚¸ìª½ : ì´ë•Œ ë³„ëª…(ì´ë¦„), ID ì €ì¥í•˜ê¸°
 							HashMap<String, String> map = query.bringINFO(ID);
-							//¿©±â¼­ id´Â B (A°¡ BÀÇ ¼ö¶ô ¿©ºÎ¿Í Á¤º¸¸¦ ¹Ş´Â »óÈ²) => a¿¡°Ô Á¤º¸¸¦ Àü´ŞÇØ¾ß ÇÏ´Â »óÈ² (Áö±İ ¿©±â´Â B´Ù)
+							//ì—¬ê¸°ì„œ idëŠ” B (Aê°€ Bì˜ ìˆ˜ë½ ì—¬ë¶€ì™€ ì •ë³´ë¥¼ ë°›ëŠ” ìƒí™©) => aì—ê²Œ ì •ë³´ë¥¼ ì „ë‹¬í•´ì•¼ í•˜ëŠ” ìƒí™© (ì§€ê¸ˆ ì—¬ê¸°ëŠ” Bë‹¤)
 
-							if(info[3].equals("Y")) { //Ã¤ÆÃÀ» ¼ö¶ôÇÑ´Ù¸é ¼ö¶ôÇÑ´Ù°í ¾Ë·ÁÁÜ
+							if(info[3].equals("Y")) { //ì±„íŒ…ì„ ìˆ˜ë½í•œë‹¤ë©´ ìˆ˜ë½í•œë‹¤ê³  ì•Œë ¤ì¤Œ
 								client.get(info[2]).println("PCHAT`|ANSCHAT`|" + ID +"`|" + map.get("NICKNAME")+ "`|" + map.get("NAME") + "`|" + "Y");
 							}
-							else { //°ÅÀıÇÑ´Ù¸é °ÅÀıÇÑ´Ù°í ¾Ë¸²
+							else { //ê±°ì ˆí•œë‹¤ë©´ ê±°ì ˆí•œë‹¤ê³  ì•Œë¦¼
 								client.get(info[2]).println("PCHAT`|ANSCHAT`|" + ID + "`|" + map.get("NICKNAME")+ "`|" + map.get("NAME") + "`|" + "N");
 							}
 						}
 						
-						
-						//A°¡ ¾´ Ã¤ÆÃÀ» B¿¡°Ô º¸³»ÁÖ´Â »óÈ² (Áö±İ ¿©±â´Â AÀÌ°í, ³ª´Â bÀ¸ ¤ÓÅ¬¶óÀÌ¾ğÆ®¿¡ ¹Ù·Î Ã¤ÆÃ º¸³»±â! (¼­¹ö°¡ ¾Æ´Ô))
-						//PCHAT`|sendCHAT`|" + Ã¤ÆÃ¹Ş´ÂÀÚID + Content : Ã¤ÆÃ³»¿ë Àü¼Û (³»°¡¾´°ÅÀÓ)
+						//Aê°€ ì“´ ì±„íŒ…ì„ Bì—ê²Œ ë³´ë‚´ì£¼ëŠ” ìƒí™© (ì§€ê¸ˆ ì—¬ê¸°ëŠ” Aì´ê³ , ë‚˜ëŠ” bìœ¼ ã…£í´ë¼ì´ì–¸íŠ¸ì— ë°”ë¡œ ì±„íŒ… ë³´ë‚´ê¸°! (ì„œë²„ê°€ ì•„ë‹˜))
+						//PCHAT`|sendCHAT`|" + ì±„íŒ…ë°›ëŠ”ìID + Content : ì±„íŒ…ë‚´ìš© ì „ì†¡ (ë‚´ê°€ì“´ê±°ì„)
 						else if(info[1].compareTo("sendCHAT") == 0) {
-							//PCHAT`|receivedCHAT`|" + Ã¤ÆÃº¸³½ÀÚID + Content : Ã¤ÆÃ³»¿ë Àü¼Û (³»°¡ ¹ŞÀº°Å)
+							//PCHAT`|receivedCHAT`|" + ì±„íŒ…ë³´ë‚¸ìID + Content : ì±„íŒ…ë‚´ìš© ì „ì†¡ (ë‚´ê°€ ë°›ì€ê±°)
 							client.get(info[2]).println("PCHAT`|receivedCHAT`|" + ID +"`|" + info[3]);
 						}
 						
-						
-						//A°¡ B¿¡°Ô º»ÀÎÀÌ ³ª°£´Ù°í ¾Ë·ÁÁÖ´Â ºÎºĞ
-						//PCHAT`|outCHAT`|" + Ã¤ÆÃ¹Ş´ÂÀÚID
+						//Aê°€ Bì—ê²Œ ë³¸ì¸ì´ ë‚˜ê°„ë‹¤ê³  ì•Œë ¤ì£¼ëŠ” ë¶€ë¶„
+						//PCHAT`|outCHAT`|" + ì±„íŒ…ë°›ëŠ”ìID
 						else if(info[1].compareTo("outCHAT") == 0) {
-							//PCHAT`|outCHAT`|" + Ã¤ÆÃº¸³½ÀÚID
+							//PCHAT`|outCHAT`|" + ì±„íŒ…ë³´ë‚¸ìID
 							client.get(info[2]).println("PCHAT`|OUTCHAT`|" + ID);
 						}
 					}
 				
 					
-/**Ã¤ÆÃ¹æ °ü·Ã (¸ÖÆ¼) chat multi ========================================*/
+/**ì±„íŒ…ë°© ê´€ë ¨ (ë©€í‹°) chat multi ========================================*/
 					else if (line.startsWith("MCHAT")) {
 						while (messageCK.get() == 0) {};
 						messageCK.set(0);
 						
 						String info[] = line.split("\\`\\|");
 						
-						//"MCHAT`|REQROOM`|" + ¹æÀÌ¸§ + ³»¿ë º¸ÀÓ ¿©ºÎ +  ¹æ¸¸µé±â ¿äÃ»ÀÚ ID + flist      
-						//¹æ¸¸µé±â ¿äÃ»
+						//"MCHAT`|REQROOM`|" + ë°©ì´ë¦„ + ë‚´ìš© ë³´ì„ ì—¬ë¶€ +  ë°©ë§Œë“¤ê¸° ìš”ì²­ì ID + flist      
+						//ë°©ë§Œë“¤ê¸° ìš”ì²­
 						if(info[1].compareTo("REQROOM") == 0) {
-							//¹æ ¼ıÀÚ¸¦ ºÎ¿©¹Ş´Â´Ù
+							//ë°© ìˆ«ìë¥¼ ë¶€ì—¬ë°›ëŠ”ë‹¤
 							int rn = forroomnumber;
 							forroomnumber++;
 							
-							//flist¸¦ ³ª´²¼­ ÂğÀ¸·Î ¸®½ºÆ® ¸¸µé±â?
+							//flistë¥¼ ë‚˜ëˆ ì„œ ì°ìœ¼ë¡œ ë¦¬ìŠ¤íŠ¸ ë§Œë“¤ê¸°?
 							String requset_flist[] = info[5].split("\\^");
 														
-							messagepool.execute(new Chat(rn, info[2], info[3], info[4], requset_flist)); // socket¿¬°á¿äÃ»ÀÌ ¿À¸é acceptÇÏ°í thread¸¦ »ı¼ºÇÏ¸ç socketÀ» ³Ñ°ÜÁÜ
+							messagepool.execute(new Chat(rn, info[2], info[3], info[4], requset_flist)); // socketì—°ê²°ìš”ì²­ì´ ì˜¤ë©´ acceptí•˜ê³  threadë¥¼ ìƒì„±í•˜ë©° socketì„ ë„˜ê²¨ì¤Œ
 
-							Queue<Message> m = new LinkedList();
+							Queue<Message> m = new LinkedList<Message>();
 							messageSet.put(rn, m);
 							
-							//"MCHAT`|RoomNumber`|" + ¹æ¹øÈ£    //¹æ ¹øÈ£ º¸³»ÁÖ±â - ÀÌ°Ç ¿¬¼ÓµÈ ½ºÅÜÀ¸·Î °¡¾ßÇÒµí??? Áï, ¹æÀÌ¸§ Àú±â¼­ ±â´Ù·Á¾ß ÇÏ´Â ºÎºĞÀÓ.
+							//"MCHAT`|RoomNumber`|" + ë°©ë²ˆí˜¸    //ë°© ë²ˆí˜¸ ë³´ë‚´ì£¼ê¸° - ì´ê±´ ì—°ì†ëœ ìŠ¤í…ìœ¼ë¡œ ê°€ì•¼í• ë“¯??? ì¦‰, ë°©ì´ë¦„ ì €ê¸°ì„œ ê¸°ë‹¤ë ¤ì•¼ í•˜ëŠ” ë¶€ë¶„ì„.
 							out.println("MCHAT`|RoomNumber`|" + rn);
 						}
-						
-						//"MCHAT`|RESPONCHAT`|" + ¹æ¹øÈ£+ ³» ID?? + Y // Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾î”fÀ»¶§ Ã¤ÆÃ ÇÒ°ÇÁö ¸»°ÇÁö ´äº¯
-						else if(info[1].compareTo("RESPONCHAT") == 0) {
-							//ÀÌ°Å ¹ŞÀ¸¸é ¹Ù·Î Ã¤ÆÃ¿¡ Âü¿©ÇÏ°Ú´Ù´Â ÀÇ¹Ì¿Í °°½À´Ï´Ù.
+
+						// "MCHAT`|RESPONCHAT`|" + ë°©ë²ˆí˜¸+ ë‚´ ID?? + Y // ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´Â”fì„ë•Œ ì±„íŒ… í• ê±´ì§€ ë§ê±´ì§€ ë‹µë³€
+						else if (info[1].compareTo("RESPONCHAT") == 0) {
+							// ì´ê±° ë°›ìœ¼ë©´ ë°”ë¡œ ì±„íŒ…ì— ì°¸ì—¬í•˜ê² ë‹¤ëŠ” ì˜ë¯¸ì™€ ê°™ìŠµë‹ˆë‹¤.
 							Message m = new Message(Integer.parseInt(info[2]), 0, ID, "0", "0");
 							messageSet.get(Integer.parseInt(info[2])).add(m);
 						}
-						
-						//out.println("MCHAT`|sendCHAT`|"+ Integer.toString(rn) + "`|" + ID + "`|" + getCurrentTime() + "`|" + chat);
-						//¸Ş¼¼Áö¹ŞÀ½
-						else if(info[1].compareTo("sendCHAT") == 0) {
+
+						// out.println("MCHAT`|sendCHAT`|"+ Integer.toString(rn) + "`|" + ID + "`|" +
+						// getCurrentTime() + "`|" + chat);
+						// ë©”ì„¸ì§€ë°›ìŒ
+						else if (info[1].compareTo("sendCHAT") == 0) {
 							Message m = new Message(Integer.parseInt(info[2]), 1, ID, info[4], info[5]);
 							messageSet.get(Integer.parseInt(info[2])).add(m);
-							}
-						
-						//"MCHAT`|OUTCHAT`|" + ¹æ¹øÈ£ + ³ª°¡´ÂID //Ã¤ÆÃ¿¡¼­ ³ª°©´Ï´Ù
-						//³ª°£´Ù°í ¸»ÇÏ±â
+						}
+
+						//"MCHAT`|OUTCHAT`|" + ë°©ë²ˆí˜¸ + ë‚˜ê°€ëŠ”ID //ì±„íŒ…ì—ì„œ ë‚˜ê°‘ë‹ˆë‹¤
+						//ë‚˜ê°„ë‹¤ê³  ë§í•˜ê¸°
 						else if(info[1].compareTo("OUTCHAT") == 0) {
-							//³ª°£´Ù - rn, 3, ³ª°¡´ÂÀÚ ID, 0, 0
+							//ë‚˜ê°„ë‹¤ - rn, 3, ë‚˜ê°€ëŠ”ì ID, 0, 0
 							Message m = new Message(Integer.parseInt(info[2]), 3, ID, "0", "0");
 							messageSet.get(Integer.parseInt(info[2])).add(m);
 						}
 						
-						//"MCHAT`|REQuLIST`|" + ¹æ¹øÈ£  //Ã¤ÆÃ¿¡¼­ ³ª°©´Ï´Ù
-						//³ª°£´Ù°í ¸»ÇÏ±â
+						//"MCHAT`|REQuLIST`|" + ë°©ë²ˆí˜¸  //ì±„íŒ…ì—ì„œ ë‚˜ê°‘ë‹ˆë‹¤
+						//ë‚˜ê°„ë‹¤ê³  ë§í•˜ê¸°
 						else if(info[1].compareTo("REQuLIST") == 0) {
 							Message m = new Message(Integer.parseInt(info[2]), 4, ID, "0", "0");
 							messageSet.get(Integer.parseInt(info[2])).add(m);
 						}
 						
-						//"MCHAT`|InviteFriend`|" + ¹æ¹øÈ£ + Ä£±¸ ¾ÆÀÌµğ(µé)
+						//"MCHAT`|InviteFriend`|" + ë°©ë²ˆí˜¸ + ì¹œêµ¬ ì•„ì´ë””(ë“¤)
 						else if(info[1].compareTo("InviteFriend") == 0) {
 							Message m = new Message(Integer.parseInt(info[2]), 5, ID, info[3], "0");
 							messageSet.get(Integer.parseInt(info[2])).add(m);
@@ -616,75 +568,73 @@ public class MainServer {
 						messageCK.set(1);
 					}
 					
-/**file Àü¼Û °ü·Ã (A - sender, B - receiver) ========================================*/
+/**file ì „ì†¡ ê´€ë ¨ (A - sender, B - receiver) ========================================*/
 					else if (line.startsWith("FILES")) {
 						String info[] = line.split("\\`\\|");
-						// >> ¿©±â¼­´Â ÆÄÀÏÀ» ÁÖ°í¹ŞÀ»Áö °áÁ¤ÇÏ´Â ¿¬¶ôµéÀÌ ¿À°í°¡°í, ÆÄÀÏÀ» ÁÖ°í ¹Ş´Â°Ç »õ·Î¿î thread¿¡¼­ »õ·Î socketÀ» ¿­¾î¼­ ÁøÇà
+						// >> ì—¬ê¸°ì„œëŠ” íŒŒì¼ì„ ì£¼ê³ ë°›ì„ì§€ ê²°ì •í•˜ëŠ” ì—°ë½ë“¤ì´ ì˜¤ê³ ê°€ê³ , íŒŒì¼ì„ ì£¼ê³  ë°›ëŠ”ê±´ ìƒˆë¡œìš´ threadì—ì„œ ìƒˆë¡œ socketì„ ì—´ì–´ì„œ ì§„í–‰
 						
-						//A°¡ B¿¡°Ô ÆÄÀÏÀ» º¸³»°í ½Í´Ù°í ¿¬¶ôÀÌ ¿Ô¾î¿ä => FILES ASK »ó´ëID
+						//Aê°€ Bì—ê²Œ íŒŒì¼ì„ ë³´ë‚´ê³  ì‹¶ë‹¤ê³  ì—°ë½ì´ ì™”ì–´ìš” => FILES ASK ìƒëŒ€ID
 						if(info[1].compareTo("ASK") == 0) {
-							//»ó´ë¸¦ Ã£¾Æ¼­ º¸³»´Â API¿¡ ¸ÂÃç¼­ º¸³»ÁÜ (FILES ASK A¾ÆÀÌµğ ÀÌ¸§(º°¸í)
+							//ìƒëŒ€ë¥¼ ì°¾ì•„ì„œ ë³´ë‚´ëŠ” APIì— ë§ì¶°ì„œ ë³´ë‚´ì¤Œ (FILES ASK Aì•„ì´ë”” ì´ë¦„(ë³„ëª…)
 							HashMap<String, String> map = query.bringINFO(ID);
 							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
-
 							client.get(info[2]).println("FILES`|ASK`|" + ID + "`|" + senderInfo);
 						}
 												
-						//B¿¡°Ô A°¡ º¸³»´Â ÆÄÀÏÀ» ¹ŞÀ»Áö ¸»Áö ¿©ºÎ¸¦ °áÁ¤ÇÏ´Â ¿¬¶ôÀÌ ¿Ô¾î¿ä => FILES ANS »ó´ëID, Y/N
+						//Bì—ê²Œ Aê°€ ë³´ë‚´ëŠ” íŒŒì¼ì„ ë°›ì„ì§€ ë§ì§€ ì—¬ë¶€ë¥¼ ê²°ì •í•˜ëŠ” ì—°ë½ì´ ì™”ì–´ìš” => FILES ANS ìƒëŒ€ID, Y/N
 						else if(info[1].compareTo("ANS") == 0) {
 							
-							//ÆÄÀÏ Àü¼ÛÀ» ¹Ş´Â´Ù°í ÇÑ´Ù¸é?
+							//íŒŒì¼ ì „ì†¡ì„ ë°›ëŠ”ë‹¤ê³  í•œë‹¤ë©´?
 							if(info[3].equals("Y")) {
-								//µÑ »çÀÌ¸¦ ÀÌ¾îÁÙ thread¸¦ ¸¸µé¾î Áİ´Ï´Ù.
-								filepool.execute(new filemanage(fileportnum)); // socket¿¬°á¿äÃ»ÀÌ ¿À¸é acceptÇÏ°í thread¸¦ »ı¼ºÇÏ¸ç socketÀ» ³Ñ°ÜÁÜ
+								//ë‘˜ ì‚¬ì´ë¥¼ ì´ì–´ì¤„ threadë¥¼ ë§Œë“¤ì–´ ì¤ë‹ˆë‹¤.
+								filepool.execute(new filemanage(fileportnum)); // socketì—°ê²°ìš”ì²­ì´ ì˜¤ë©´ acceptí•˜ê³  threadë¥¼ ìƒì„±í•˜ë©° socketì„ ë„˜ê²¨ì¤Œ
 
-								//º¸³»´Â »ç¶÷ÀÌ ¹Ş´Â »ç¶÷º¸´Ù 1 ´õ Å« portnumÀ» °¡Áø´Ù.
+								//ë³´ë‚´ëŠ” ì‚¬ëŒì´ ë°›ëŠ” ì‚¬ëŒë³´ë‹¤ 1 ë” í° portnumì„ ê°€ì§„ë‹¤.
 								out.println("FILES`|PNUM`|" + fileportnum );
 								fileportnum+=1;
 								client.get(info[2]).println("FILES`|ANS`|" + ID + "`|" + "Y" + "`|" + fileportnum);
 								fileportnum+=1;
 							}
-							else { //¾È¹Ş´Â´Ù°í ÇÏ¸é? => A¿¡°Ô ¾ÈÁàµµ µÈ´Ù°í ¾Ë¸®±â
+							else { //ì•ˆë°›ëŠ”ë‹¤ê³  í•˜ë©´? => Aì—ê²Œ ì•ˆì¤˜ë„ ëœë‹¤ê³  ì•Œë¦¬ê¸°
 								client.get(info[2]).println("FILES`|ANS`|" + ID + "`|" + "N" );
 							}
 						}						
 					}
 					
-/**TTT °ü·Ã  ========================================*/
+/**TTT ê´€ë ¨  ========================================*/
 					else if (line.startsWith("TTT")) {
 						String info[] = line.split("\\`\\|");
 						
 						while (TTTCK.get() == 0) {};
 						TTTCK.set(0);
 						
-						//A°¡ B¿¡°Ô ´ë°áÀ» ½ÅÃ» (TTT ASK »ó´ëID)
+						//Aê°€ Bì—ê²Œ ëŒ€ê²°ì„ ì‹ ì²­ (TTT ASK ìƒëŒ€ID)
 						if(info[1].compareTo("ASK") == 0) {
-							// »ó´ë¸¦ Ã£¾Æ¼­ º¸³»´Â API¿¡ ¸ÂÃç¼­ º¸³»ÁÜ (TTT ASK A¾ÆÀÌµğ ÀÌ¸§(º°¸í)
+							// ìƒëŒ€ë¥¼ ì°¾ì•„ì„œ ë³´ë‚´ëŠ” APIì— ë§ì¶°ì„œ ë³´ë‚´ì¤Œ (TTT ASK Aì•„ì´ë”” ì´ë¦„(ë³„ëª…)
 							HashMap<String, String> map = query.bringINFO(ID);
 							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
-
 							client.get(info[2]).println("TTT`|ASK`|" + ID + "`|" + senderInfo);
 						}
 												
-						//B¿¡°Ô A°¡ º¸³»´Â ÆÄÀÏÀ» ¹ŞÀ»Áö ¸»Áö ¿©ºÎ¸¦ °áÁ¤ÇÏ´Â ¿¬¶ôÀÌ ¿Ô¾î¿ä => FILES ANS »ó´ëID, Y/N
+						//Bì—ê²Œ Aê°€ ë³´ë‚´ëŠ” íŒŒì¼ì„ ë°›ì„ì§€ ë§ì§€ ì—¬ë¶€ë¥¼ ê²°ì •í•˜ëŠ” ì—°ë½ì´ ì™”ì–´ìš” => FILES ANS ìƒëŒ€ID, Y/N
 						else if(info[1].compareTo("ANS") == 0) {
-							//°ÔÀÓÀ» ÇÑ´Ù°í ÇÏ¸é?
+							//ê²Œì„ì„ í•œë‹¤ê³  í•˜ë©´?
 							if(info[3].equals("Y")) {
 								int rn = TTTnumber++;
 								
-								//¼± Á¤ÇÏ±â
+								//ì„  ì •í•˜ê¸°
 								double dValue = Math.random();
 								int order = ((int) (dValue * 10))%2;
 								int Aorder = 0;
 								int Border = 0;
 								
-								//0ÀÌ¸é A¼±, 1ÀÌ¸é B°¡ ¼±.
+								//0ì´ë©´ Aì„ , 1ì´ë©´ Bê°€ ì„ .
 								if(order == 0) Aorder = 1;
 								else Border = 1;
 								
-								//TTT°ÔÀÓÀ» ¼öÇàÇÒ thread¸¦ ¸¸µé¾î Áİ´Ï´Ù.
-								TTTpool.execute(new TTT(rn, info[2] ,ID)); //°ÔÀÓÀ» °Ç »ó´ë°¡ A
-								Queue<TMessage> m = new LinkedList();
+								//TTTê²Œì„ì„ ìˆ˜í–‰í•  threadë¥¼ ë§Œë“¤ì–´ ì¤ë‹ˆë‹¤.
+								TTTpool.execute(new TTT(rn, info[2] ,ID)); //ê²Œì„ì„ ê±´ ìƒëŒ€ê°€ A
+								Queue<TMessage> m = new LinkedList<TMessage>();
 								TTTSet.put(rn, m);
 								
 								HashMap<String, String> map = query.bringINFO(info[2]);
@@ -693,21 +643,20 @@ public class MainServer {
 								HashMap<String, String> map2 = query.bringINFO(ID);
 								String senderInfo2 = map2.get("NICKNAME") + "(" + map2.get("NAME") + ")";
 
-								//¹Ş´Â ÂÊÀ¸·Î ´Ù½Ã Á¤º¸¸¦ º¸³»ÁØ´Ù (TTT INFO MNN FNN ROOMNUMBER ORDER) => ÀÌ°Å ¹Ş°í GUI±¸Ãà
+								//ë°›ëŠ” ìª½ìœ¼ë¡œ ë‹¤ì‹œ ì •ë³´ë¥¼ ë³´ë‚´ì¤€ë‹¤ (TTT INFO MNN FNN ROOMNUMBER ORDER) => ì´ê±° ë°›ê³  GUIêµ¬ì¶•
 								out.println("TTT`|INFO`|" + senderInfo2 + "`|" + senderInfo + "`|" + rn + "`|" + Border);
 
-								//°ÔÀÓ °Ç »ç¶÷¿¡°Ôµµ Á¤º¸¸¦ º¸³»ÁÜ (TTT INFO MNN FNN ROOMNUMBER ORDER) => ÀÌ°Å ¹Ş°í GUI ±¸Ãà
+								//ê²Œì„ ê±´ ì‚¬ëŒì—ê²Œë„ ì •ë³´ë¥¼ ë³´ë‚´ì¤Œ (TTT INFO MNN FNN ROOMNUMBER ORDER) => ì´ê±° ë°›ê³  GUI êµ¬ì¶•
 								client.get(info[2]).println("TTT`|INFO`|" + senderInfo + "`|" + senderInfo2 + "`|" + rn + "`|" + Aorder);
-								
 							}
-							else { //¾È¹Ş´Â´Ù°í ÇÏ¸é? => A¿¡°Ô °ÅÀıÇß´Ù°í ¾Ë¸®±â
+							else { //ì•ˆë°›ëŠ”ë‹¤ê³  í•˜ë©´? => Aì—ê²Œ ê±°ì ˆí–ˆë‹¤ê³  ì•Œë¦¬ê¸°
 								client.get(info[2]).println("TTT`|ANS`|" + ID + "`|" + "N" );
 							}
 						}		
 						
-						//°ÔÀÓ µµÁß ÁÖ°í¹Ş´Â Á¤º¸µé (TTT ING RoonNumber X Y)
+						//ê²Œì„ ë„ì¤‘ ì£¼ê³ ë°›ëŠ” ì •ë³´ë“¤ (TTT ING RoonNumber X Y)
 						else if(info[1].compareTo("ING") == 0) {
-							// Tmessage queue¿¡ ³Ö¾îÁØ´Ù. => ±×·³ ±× thread¿¡¼­ »ó´ë¿¡°Ô ³» Á¤º¸¸¦ ¾Ë·ÁÁÖ´ø°¡ ÇÒ °Í.
+							// Tmessage queueì— ë„£ì–´ì¤€ë‹¤. => ê·¸ëŸ¼ ê·¸ threadì—ì„œ ìƒëŒ€ì—ê²Œ ë‚´ ì •ë³´ë¥¼ ì•Œë ¤ì£¼ë˜ê°€ í•  ê²ƒ.
 							TMessage m = new TMessage(Integer.parseInt(info[3]), Integer.parseInt(info[4]), ID);
 							TTTSet.get(Integer.parseInt(info[2])).add(m);
 						}
@@ -717,27 +666,25 @@ public class MainServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
-				// Client°¡ Á¾·áÇÏ¸é, ÈçÀûµéÀ» ´Ù Á¤¸®ÇØÁØ´Ù.
+				// Clientê°€ ì¢…ë£Œí•˜ë©´, í”ì ë“¤ì„ ë‹¤ ì •ë¦¬í•´ì¤€ë‹¤.
 
 				if(ID != null) {
-					// ·Î±×ÀÎ µÈ »óÅÂ¶ó¸é
-					//¸¶Áö¸· Á¢¼Ó½Ã°£µµ ¾÷µ¥ÀÌÆ®µÇ¾î¾ßÇÔ
+					// ë¡œê·¸ì¸ ëœ ìƒíƒœë¼ë©´
+					//ë§ˆì§€ë§‰ ì ‘ì†ì‹œê°„ë„ ì—…ë°ì´íŠ¸ë˜ì–´ì•¼í•¨
 					query.updateLAST_CONNECTION(ID, getCurrentTime());
 					
-					//Ä£±¸µé¿¡°Ôµµ ³ª Á¾·áÇÑ´Ù°í µ¿³×¹æ³× ¼Ò¹®³»±â
+					//ì¹œêµ¬ë“¤ì—ê²Œë„ ë‚˜ ì¢…ë£Œí•œë‹¤ê³  ë™ë„¤ë°©ë„¤ ì†Œë¬¸ë‚´ê¸°
 					for (PrintWriter output : client.values()) {
 						if(output.equals(out)) continue;
-						//¸ğµÎ¿¡°Ô º¸³»¸é client¿¡¼­ ¾Ë¾Æ¼­ °É·¯¼­ µéÀ»°ÍÀÓ
-						//Çü½Ä ; UPDATE F_state F_ID »óÅÂ(1ÀÌ¸é ¿ÀÇÁ¶óÀÎ)
+						//ëª¨ë‘ì—ê²Œ ë³´ë‚´ë©´ clientì—ì„œ ì•Œì•„ì„œ ê±¸ëŸ¬ì„œ ë“¤ì„ê²ƒì„
+						//í˜•ì‹ ; UPDATE F_state F_ID ìƒíƒœ(1ì´ë©´ ì˜¤í”„ë¼ì¸)
 						output.println("UPDATE`|F_state`|" + ID + "`|" + 1);
 					}
-	
-					// Ã¤ÆÃ¹æ¿¡¼­µµ ´Ù ³ª°¡Á®¾ßÇÑ´Ù!!! => client¿¡¼­ Ã³¸®
-
-					//client¿¡¼­ ºüÁü
+					// ì±„íŒ…ë°©ì—ì„œë„ ë‹¤ ë‚˜ê°€ì ¸ì•¼í•œë‹¤!!! => clientì—ì„œ ì²˜ë¦¬
+					//clientì—ì„œ ë¹ ì§
 					client.remove(ID);
 				}
-				//ºñ·Î±×ÀÎ »óÅÂ¿¡´Â ³²´Â°Ô ¾ø¾î¼­ °Á ¤©¤·ÀÌ¼ÒÄÏ¸¸ ³¡³»¸é µÊ
+				//ë¹„ë¡œê·¸ì¸ ìƒíƒœì—ëŠ” ë‚¨ëŠ”ê²Œ ì—†ì–´ì„œ ê± ã„¹ã…‡ì´ì†Œì¼“ë§Œ ëë‚´ë©´ ë¨
 			}
 			try {
 				socket.close();
@@ -746,22 +693,21 @@ public class MainServer {
 		}
 	}
 
-	/** file Àü¼Û thread ÄÚµå
-	 * : fileÀ» Àü¼ÛÇÒ ¶§, µÎ client¿Í »õ·Î¿î socketÀ» ¿­¾î¼­ ±âÁ¸ Socket°ú´Â ÆÄÀÏÀ» µ¶¸³ÀûÀ¸·Î Àü¼ÛÇÑ´Ù.
+	/** file ì „ì†¡ thread ì½”ë“œ=====================================================
+	 * : fileì„ ì „ì†¡í•  ë•Œ, ë‘ clientì™€ ìƒˆë¡œìš´ socketì„ ì—´ì–´ì„œ ê¸°ì¡´ Socketê³¼ëŠ” íŒŒì¼ì„ ë…ë¦½ì ìœ¼ë¡œ ì „ì†¡í•œë‹¤.
 	 * */
 	public static class filemanage implements Runnable{
-
 		private ServerSocket soc;
 		private ServerSocket soc1;
 		static Socket sender = new Socket(); 
 		static Socket receiver = new Socket(); 
 
-
 		public filemanage (int pnum) throws IOException {
-	    	soc = new ServerSocket(pnum);  //¹Ş´Â »ç¶÷ ¼ÒÄÏ
-	    	soc1 = new ServerSocket(pnum + 1);  //º¸³»´Â »ç¶÷ ¼ÒÄÏ.
+	    	soc = new ServerSocket(pnum);  //ë°›ëŠ” ì‚¬ëŒ ì†Œì¼“
+	    	soc1 = new ServerSocket(pnum + 1);  //ë³´ë‚´ëŠ” ì‚¬ëŒ ì†Œì¼“.
 		}
 		
+		@SuppressWarnings("resource")
 		@Override
 		public void run() {
 
@@ -769,116 +715,108 @@ public class MainServer {
 				sender = soc1.accept();
 				receiver = soc.accept();
 
-				// º¸³»´Â »ç¶÷À¸·ÎºÎÅÍ ÆÄÀÏÀ» ¹Ş±â!
-				InputStream in = null; // A·Î ºÎÅÍ ÀĞ¾î¿À±âÀ§ÇÔ
-				FileOutputStream out = null; // ¼­¹ö¿¡¼­ÀÇ ÆÄÀÏ»ı¼ºÀ» À§ÇØ »ı¼º
-				in = sender.getInputStream(); // Å¬¶óÀÌ¾ğÆ®·Î ºÎÅÍ ¹ÙÀÌÆ® ´ÜÀ§·Î ÀÔ·ÂÀ» ¹Ş´Â InputStreamÀ» ¾ò¾î¿Í °³ÅëÇÕ´Ï´Ù.
-				DataInputStream din = new DataInputStream(in); // InputStreamÀ» ÀÌ¿ëÇØ µ¥ÀÌÅÍ ´ÜÀ§·Î ÀÔ·ÂÀ» ¹Ş´Â DataInputStream °³Åë.
+				// ë³´ë‚´ëŠ” ì‚¬ëŒìœ¼ë¡œë¶€í„° íŒŒì¼ì„ ë°›ê¸°!
+				InputStream in = null; // Aë¡œ ë¶€í„° ì½ì–´ì˜¤ê¸°ìœ„í•¨
+				FileOutputStream out = null; // ì„œë²„ì—ì„œì˜ íŒŒì¼ìƒì„±ì„ ìœ„í•´ ìƒì„±
+				in = sender.getInputStream(); // í´ë¼ì´ì–¸íŠ¸ë¡œ ë¶€í„° ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ ì…ë ¥ì„ ë°›ëŠ” InputStreamì„ ì–»ì–´ì™€ ê°œí†µí•©ë‹ˆë‹¤.
+				DataInputStream din = new DataInputStream(in); // InputStreamì„ ì´ìš©í•´ ë°ì´í„° ë‹¨ìœ„ë¡œ ì…ë ¥ì„ ë°›ëŠ” DataInputStream ê°œí†µ.
 			
 				
 				/* sender -> receiver*/
-				int data = din.readInt(); // (IntÇü µ¥ÀÌÅÍ)¹ŞÀ» ÆÄÀÏÀÇ byte ÀĞ¾î¿À±â
-				String filename = din.readUTF(); // StringÇü µ¥ÀÌÅÍ¸¦ Àü¼Û¹Ş¾Æ filename(ÆÄÀÏÀÇ ÀÌ¸§À¸·Î ¾²ÀÏ)¿¡ ÀúÀåÇÕ´Ï´Ù.
+				int data = din.readInt(); // (Intí˜• ë°ì´í„°)ë°›ì„ íŒŒì¼ì˜ byte ì½ì–´ì˜¤ê¸°
+				String filename = din.readUTF(); // Stringí˜• ë°ì´í„°ë¥¼ ì „ì†¡ë°›ì•„ filename(íŒŒì¼ì˜ ì´ë¦„ìœ¼ë¡œ ì“°ì¼)ì— ì €ì¥í•©ë‹ˆë‹¤.
 				String[] flist = filename.split("\\\\");
 				filename = flist[flist.length-1];
 
-				File file = new File(filename); // ÀÔ·Â¹ŞÀº FileÀÇ ÀÌ¸§À¸·Î º¹»çÇÏ¿© »ı¼ºÇÕ´Ï´Ù.
+				File file = new File(filename); // ì…ë ¥ë°›ì€ Fileì˜ ì´ë¦„ìœ¼ë¡œ ë³µì‚¬í•˜ì—¬ ìƒì„±í•©ë‹ˆë‹¤.
 
-				out = new FileOutputStream(file); // »ı¼ºÇÑ ÆÄÀÏÀ» Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ Àü¼Û¹Ş¾Æ ¿Ï¼º½ÃÅ°´Â FileOutputStreamÀ» °³ÅëÇÕ´Ï´Ù.
-				int datas = data; // Àü¼ÛÈ½¼ö, ¿ë·®À» ÃøÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù.
-				byte[] buffer = new byte[1024]; // ¹ÙÀÌÆ®´ÜÀ§·Î ÀÓ½ÃÀúÀåÇÏ´Â ¹öÆÛ¸¦ »ı¼ºÇÕ´Ï´Ù.
+				out = new FileOutputStream(file); // ìƒì„±í•œ íŒŒì¼ì„ í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ì „ì†¡ë°›ì•„ ì™„ì„±ì‹œí‚¤ëŠ” FileOutputStreamì„ ê°œí†µí•©ë‹ˆë‹¤.
+				byte[] buffer = new byte[1024]; // ë°”ì´íŠ¸ë‹¨ìœ„ë¡œ ì„ì‹œì €ì¥í•˜ëŠ” ë²„í¼ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.
 
-				int len; // Àü¼ÛÇÒ µ¥ÀÌÅÍÀÇ ±æÀÌ¸¦ ÃøÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù.
-				for (; data > 0; data--) { // Àü¼Û¹ŞÀº dataÀÇ È½¼ö¸¸Å­ Àü¼Û¹Ş¾Æ¼­ FileOutputStreamÀ» ÀÌ¿ëÇÏ¿© FileÀ» ¿Ï¼º½ÃÅµ´Ï´Ù.
+				int len; // ì „ì†¡í•  ë°ì´í„°ì˜ ê¸¸ì´ë¥¼ ì¸¡ì •í•˜ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤.
+				for (; data > 0; data--) { // ì „ì†¡ë°›ì€ dataì˜ íšŸìˆ˜ë§Œí¼ ì „ì†¡ë°›ì•„ì„œ FileOutputStreamì„ ì´ìš©í•˜ì—¬ Fileì„ ì™„ì„±ì‹œí‚µë‹ˆë‹¤.
 					len = in.read(buffer);
 					out.write(buffer, 0, len);
 				}
+				System.out.println("íŒŒì¼ ë°›ê¸° ì™„ë£Œ");
 
-				System.out.println("ÆÄÀÏ ¹Ş±â ¿Ï·á");
-
-				
 				/* server -> receiver */
-				FileInputStream fin = new FileInputStream(new File(filename)); // FileInputStream - ÆÄÀÏ¿¡¼­ ÀÔ·Â¹Ş´Â ½ºÆ®¸²
-				OutputStream outt = receiver.getOutputStream(); // Å¬¶óÀÌ¾ğÆ®¿¡°Ô º¸³»±â À§ÇÔ
-				DataOutputStream dout = new DataOutputStream(outt); // OutputStreamÀ» ÀÌ¿ëÇØ µ¥ÀÌÅÍ ´ÜÀ§·Î º¸³»´Â ½ºÆ®¸²À» °³ÅëÇÕ´Ï´Ù
-				buffer = new byte[1024]; //ÀÓ½ÃÀúÀå ¹öÆÛ
-				len = 0; //±æÀÌ
-				data = 0; // Àü¼ÛÈ½¼ö
+				FileInputStream fin = new FileInputStream(new File(filename)); // FileInputStream - íŒŒì¼ì—ì„œ ì…ë ¥ë°›ëŠ” ìŠ¤íŠ¸ë¦¼
+				OutputStream outt = receiver.getOutputStream(); // í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë³´ë‚´ê¸° ìœ„í•¨
+				DataOutputStream dout = new DataOutputStream(outt); // OutputStreamì„ ì´ìš©í•´ ë°ì´í„° ë‹¨ìœ„ë¡œ ë³´ë‚´ëŠ” ìŠ¤íŠ¸ë¦¼ì„ ê°œí†µí•©ë‹ˆë‹¤
+				buffer = new byte[1024]; //ì„ì‹œì €ì¥ ë²„í¼
+				len = 0; //ê¸¸ì´
+				data = 0; // ì „ì†¡íšŸìˆ˜
 				
-				// FileInputStreamÀ» ÅëÇØ ÆÄÀÏ¿¡¼­ ÀÔ·Â¹ŞÀº µ¥ÀÌÅÍ¸¦ ¹öÆÛ¿¡ ÀÓ½ÃÀúÀåÇÏ°í ±× ±æÀÌ¸¦ ÃøÁ¤ÇÕ´Ï´Ù.
-				while ((len = fin.read(buffer)) > 0) { 
+				// FileInputStreamì„ í†µí•´ íŒŒì¼ì—ì„œ ì…ë ¥ë°›ì€ ë°ì´í„°ë¥¼ ë²„í¼ì— ì„ì‹œì €ì¥í•˜ê³  ê·¸ ê¸¸ì´ë¥¼ ì¸¡ì •í•©ë‹ˆë‹¤.
+				while ((len = fin.read(buffer)) > 0) {
 					data++;
 				}
-				datas = data; // ¾Æ·¡ for¹®À» ÅëÇØ data°¡ 0ÀÌµÇ±â¶§¹®¿¡ ÀÓ½ÃÀúÀåÇÑ´Ù.
 				fin.close();
 
-				fin = new FileInputStream(filename); // FileInputStreamÀÌ ¸¸·áµÇ¾úÀ¸´Ï »õ·Ó°Ô °³ÅëÇÕ´Ï´Ù.
+				fin = new FileInputStream(filename); // FileInputStreamì´ ë§Œë£Œë˜ì—ˆìœ¼ë‹ˆ ìƒˆë¡­ê²Œ ê°œí†µí•©ë‹ˆë‹¤.
 
-				dout.writeInt(data); // µ¥ÀÌÅÍ Àü¼ÛÈ½¼ö¸¦ ¼­¹ö¿¡ Àü¼ÛÇÏ°í,
-				dout.writeUTF(filename); // ÆÄÀÏÀÇ ÀÌ¸§À» ¼­¹ö¿¡ Àü¼ÛÇÕ´Ï´Ù.
+				dout.writeInt(data); // ë°ì´í„° ì „ì†¡íšŸìˆ˜ë¥¼ ì„œë²„ì— ì „ì†¡í•˜ê³ ,
+				dout.writeUTF(filename); // íŒŒì¼ì˜ ì´ë¦„ì„ ì„œë²„ì— ì „ì†¡í•©ë‹ˆë‹¤.
 
 				len = 0;
-				for (; data > 0; data--) { // µ¥ÀÌÅÍ¸¦ ÀĞ¾î¿Ã È½¼ö¸¸Å­ FileInputStream¿¡¼­ ÆÄÀÏÀÇ ³»¿ëÀ» ÀĞ¾î¿É´Ï´Ù.
-					len = fin.read(buffer); // FileInputStreamÀ» ÅëÇØ ÆÄÀÏ¿¡¼­ ÀÔ·Â¹ŞÀº µ¥ÀÌÅÍ¸¦ ¹öÆÛ¿¡ ÀÓ½ÃÀúÀåÇÏ°í ±× ±æÀÌ¸¦ ÃøÁ¤ÇÕ´Ï´Ù.
-					outt.write(buffer, 0, len); // ¼­¹ö¿¡°Ô ÆÄÀÏÀÇ Á¤º¸(1kbyte¸¸Å­º¸³»°í, ±× ±æÀÌ¸¦ º¸³À´Ï´Ù.
+				for (; data > 0; data--) { // ë°ì´í„°ë¥¼ ì½ì–´ì˜¬ íšŸìˆ˜ë§Œí¼ FileInputStreamì—ì„œ íŒŒì¼ì˜ ë‚´ìš©ì„ ì½ì–´ì˜µë‹ˆë‹¤.
+					len = fin.read(buffer); // FileInputStreamì„ í†µí•´ íŒŒì¼ì—ì„œ ì…ë ¥ë°›ì€ ë°ì´í„°ë¥¼ ë²„í¼ì— ì„ì‹œì €ì¥í•˜ê³  ê·¸ ê¸¸ì´ë¥¼ ì¸¡ì •í•©ë‹ˆë‹¤.
+					outt.write(buffer, 0, len); // ì„œë²„ì—ê²Œ íŒŒì¼ì˜ ì •ë³´(1kbyteë§Œí¼ë³´ë‚´ê³ , ê·¸ ê¸¸ì´ë¥¼ ë³´ëƒ…ë‹ˆë‹¤.
 				}
-				System.out.println("ÆÄÀÏ º¸³»±â ¿Ï·á");
+				System.out.println("íŒŒì¼ ë³´ë‚´ê¸° ì™„ë£Œ");
 
-				out.close(); // client¿¡°Ô º¸³½ ÈÄ ÆÄÀÏÀ» Áö¿ì±â À§ÇØ¼­ ÇÊ¼ö!!
-				fin.close(); // client¿¡°Ô º¸³½ ÈÄ ÆÄÀÏÀ» Áö¿ì±â À§ÇØ¼­ ÇÊ¼ö!!
+				out.close(); // clientì—ê²Œ ë³´ë‚¸ í›„ íŒŒì¼ì„ ì§€ìš°ê¸° ìœ„í•´ì„œ í•„ìˆ˜!!
+				fin.close(); // clientì—ê²Œ ë³´ë‚¸ í›„ íŒŒì¼ì„ ì§€ìš°ê¸° ìœ„í•´ì„œ í•„ìˆ˜!!
 
-				if (file.exists()) { // º¸³½ ÆÄÀÏ »èÁ¦
+				if (file.exists()) { // ë³´ë‚¸ íŒŒì¼ ì‚­ì œ
 					if (file.delete()) {
-						System.out.println("ÆÄÀÏ»èÁ¦ ¼º°ø");
+						System.out.println("íŒŒì¼ì‚­ì œ ì„±ê³µ");
 					} else {
-						System.out.println("ÆÄÀÏ»èÁ¦ ½ÇÆĞ");
+						System.out.println("íŒŒì¼ì‚­ì œ ì‹¤íŒ¨");
 					}
 				} else {
-					System.out.println("ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+					System.out.println("íŒŒì¼ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-			} //´Ù ³¡³ª¸é Á¾·á
+			} //ë‹¤ ëë‚˜ë©´ ì¢…ë£Œ
 		}
 	}
 	
-	/** multi-Chat thread ÄÚµå
-	 * ¿©·¯ client³¢¸® ´ÜÃ¼ Ã¤ÆÃÀ» ÇÒ ¶§, ±× Ã¤ÆÃÀÇ ¸ğµç°ÍÀ» ´ã´çÇÑ´Ù.
+	/** multi-Chat thread ì½”ë“œ=====================================================
+	 * ì—¬ëŸ¬ clientë¼ë¦¬ ë‹¨ì²´ ì±„íŒ…ì„ í•  ë•Œ, ê·¸ ì±„íŒ…ì˜ ëª¨ë“ ê²ƒì„ ë‹´ë‹¹í•œë‹¤.
 	 * */
 	public static class Chat implements Runnable {
 		int room_num;
 		String room_name;
-		private String type; //ÀÌÀü³»¿ë º¸¿©ÁÙÁö ¸»Áö => N¸é ¾Èº¸¿©ÁÖ°í Y¸é º¸¿©ÁÜ
-		private int participants_num = 0; //¹æÀå Æ÷ÇÔ
-		private HashSet<String> participants_list = new HashSet<String>(); //list¸¦ ¸ğ¾ÆµĞ °Í
+		private String type; //ì´ì „ë‚´ìš© ë³´ì—¬ì¤„ì§€ ë§ì§€ => Në©´ ì•ˆë³´ì—¬ì£¼ê³  Yë©´ ë³´ì—¬ì¤Œ
+		private int participants_num = 0; //ë°©ì¥ í¬í•¨
+		private HashSet<String> participants_list = new HashSet<String>(); //listë¥¼ ëª¨ì•„ë‘” ê²ƒ
 		
 		public Chat(int room_num, String room_name, String type, String requester_ID, String[] flist) {
 			this.room_num = room_num;
 			this.room_name = room_name;
-			this.type = type; //1ÀÌ µé¾î¿À¸é Àü¿¡²¨ ´Ùº¸¿©Áà¾ßÇÔ.
-			
+			this.type = type; // 1ì´ ë“¤ì–´ì˜¤ë©´ ì „ì—êº¼ ë‹¤ë³´ì—¬ì¤˜ì•¼í•¨.
+
 			HashMap<String, String> map = query.bringINFO(requester_ID);
-			String makerInfo = map.get("NICKNAME")+ "(" + map.get("NAME") + ")";
-						
-			//flistµ¹¸é¼­ »ç¶÷µé¿¡°Ô Ã¤ÆÃ ÃÊ´ë ¸Ş¼¼Áö º¸³»±â
-			for(String id : flist) {
-				//"MCHAT`|INVCHAT`|" + ¹æ¹øÈ£ + ¹æÀÌ¸§ + ÃÊ´ëÀÚ ÀÌ¸§    //»ó´ë¹æ¿¡°Ô ´Ô ÃÊ´ë´çÇŞ´Ù°í ¾Ë·ÁÁÖ±â
-				if(client.containsKey(id))
+			String makerInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
+
+			// flistëŒë©´ì„œ ì‚¬ëŒë“¤ì—ê²Œ ì±„íŒ… ì´ˆëŒ€ ë©”ì„¸ì§€ ë³´ë‚´ê¸°
+			for (String id : flist) {
+				// "MCHAT`|INVCHAT`|" + ë°©ë²ˆí˜¸ + ë°©ì´ë¦„ + ì´ˆëŒ€ì ì´ë¦„ //ìƒëŒ€ë°©ì—ê²Œ ë‹˜ ì´ˆëŒ€ë‹¹í–‡ë‹¤ê³  ì•Œë ¤ì£¼ê¸°
+				if (client.containsKey(id))
 					client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + makerInfo);
-			}	
+			}
 			participants_list.add(requester_ID);
 			participants_num++;
 		}
-		
+
 		@Override
 		public void run() {
 			boolean flag = true;
 			
-			while (flag) {
-				// ¸Ş¼¼Áö¼Â¿¡ ¸Ş¼¼Áö°¡ µé¾îÀÖ´Âµ¥
-
-				System.out.println(Integer.toString(room_num) + messageSet.get(room_num).isEmpty());
-				
+			while (flag) {			
 				if (!messageSet.get(room_num).isEmpty()){
 					Message m = messageSet.get(room_num).poll();
 					
@@ -888,9 +826,9 @@ public class MainServer {
 					int k = m.getType();
 
 					if (k == 0) {
-						// Âü¿©ÇÑ´Ù - rn, 0, Âü¿©ÀÚ ID, 0, 0
-						// ´Ù¸¥ Âü¿©ÀÚµé¿¡°Ô ÀÌ»ç¶÷ÀÌ µé¾î¿Ô´Ù°í ¾Ë·ÁÁÖ´Â ºÎºĞ + µé¾î¿Â »ç¶÷¿¡°Ô´Â TypeÃ¼Å©ÇØ¼­ 
-						// "MCHAT`|ANSCHAT`|" + ¹æ¹øÈ£ + »ó´ëID
+						// ì°¸ì—¬í•œë‹¤ - rn, 0, ì°¸ì—¬ì ID, 0, 0
+						// ë‹¤ë¥¸ ì°¸ì—¬ìë“¤ì—ê²Œ ì´ì‚¬ëŒì´ ë“¤ì–´ì™”ë‹¤ê³  ì•Œë ¤ì£¼ëŠ” ë¶€ë¶„ + ë“¤ì–´ì˜¨ ì‚¬ëŒì—ê²ŒëŠ” Typeì²´í¬í•´ì„œ 
+						// "MCHAT`|ANSCHAT`|" + ë°©ë²ˆí˜¸ + ìƒëŒ€ID
 						HashMap<String, String> map = query.bringINFO(m.getSender_id());
 						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
 
@@ -898,12 +836,11 @@ public class MainServer {
 							client.get(id).println("MCHAT`|ANSCHAT`|" + room_num + "`|" + senderInfo);
 						}
 
-						if(type.equals("1")) { //1ÀÌ¶ó°í ÇÏ¸é µé¾î¿À±â ÀüÀÇ ¸Ş¼¼Áö¸¦ ´Ù º¸³»ÁØ´Ù
+						if(type.equals("1")) { //1ì´ë¼ê³  í•˜ë©´ ë“¤ì–´ì˜¤ê¸° ì „ì˜ ë©”ì„¸ì§€ë¥¼ ë‹¤ ë³´ë‚´ì¤€ë‹¤
 							// return array[][time, sender, content]
 							String[][] chatlist = query.bringCHATTING(Integer.toString(room_num));
 							
 							int cnum = Integer.parseInt(chatlist[0][0]);
-							
 							String messagelist = "";
 							
 							for(int i=1;i<=cnum;i++) {
@@ -913,18 +850,15 @@ public class MainServer {
 
 								messagelist =  messagelist + "`|" + senderInfo2 + "^" + chatlist[i][2];
 							}
-							
-							//ÀÌÀü Ãª³»¿ë º¸³»ÁÖ±â
+							//ì´ì „ ì±—ë‚´ìš© ë³´ë‚´ì£¼ê¸°
 							client.get(m.getSender_id()).println("MCHAT`|PRECHAT`|" + room_num +  "`|" + cnum + messagelist);
-					
 						}
-
 						participants_list.add(m.getSender_id());
 						participants_num++;
 					}
 
-					else if (k == 1) {// ¸Ş¼¼Áöº¸³»±â - rn, 1, sender ID, time, message
-						// "MCHAT`|receivedCHAT`|" + ¹æ¹øÈ£ + Ã¤ÆÃº¸³½ÀÚID + º°¸í(name) + content //Ã¤ÆÃ³»¿ë Àü¼Û (»Ñ¸®±â)
+					else if (k == 1) {// ë©”ì„¸ì§€ë³´ë‚´ê¸° - rn, 1, sender ID, time, message
+						// "MCHAT`|receivedCHAT`|" + ë°©ë²ˆí˜¸ + ì±„íŒ…ë³´ë‚¸ìID + ë³„ëª…(name) + content //ì±„íŒ…ë‚´ìš© ì „ì†¡ (ë¿Œë¦¬ê¸°)
 						HashMap<String, String> map = query.bringINFO(m.getSender_id());
 						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
 
@@ -935,15 +869,15 @@ public class MainServer {
 						query.insertCHATTING(Integer.toString(room_num), m.getTime(), m.getSender_id(), m.getMessage());
 					}
 
-					else if (k == 2) { // ÃÊ´ëÇÑ´Ù- rn, 2, ÃÊ´ëÀÚ ID, ÃÊ´ë¹Ş´ÂÀÚ ID, 0
+					else if (k == 2) { // ì´ˆëŒ€í•œë‹¤- rn, 2, ì´ˆëŒ€ì ID, ì´ˆëŒ€ë°›ëŠ”ì ID, 0
 						client.get(m.getTime())
 								.println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + m.getSender_id());
-					} 
-					
-					else if (k == 3) { // ³ª°£´Ù - rn, 3, ³ª°¡´ÂÀÚ ID, 0, 0
+					}
+
+					else if (k == 3) { // ë‚˜ê°„ë‹¤ - rn, 3, ë‚˜ê°€ëŠ”ì ID, 0, 0
 						participants_list.remove(m.getSender_id());
 						participants_num--;
-						// "MCHAT`|outCHAT`|" + ¹æ¹øÈ£ + ³ª°¡´ÂID + º°¸í(name) //Ã¤ÆÃ¿¡¼­ ³ª°©´Ï´Ù (»Ñ¸®±â)
+						// "MCHAT`|outCHAT`|" + ë°©ë²ˆí˜¸ + ë‚˜ê°€ëŠ”ID + ë³„ëª…(name) //ì±„íŒ…ì—ì„œ ë‚˜ê°‘ë‹ˆë‹¤ (ë¿Œë¦¬ê¸°)
 						HashMap<String, String> map = query.bringINFO(m.getSender_id());
 						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
 
@@ -951,50 +885,46 @@ public class MainServer {
 							client.get(id).println(
 									"MCHAT`|outCHAT`|" + room_num + "`|" + m.getSender_id() + "`|" + senderInfo);
 						}
-					} 
-					
+					}
+
 					else if (k == 4) {
-						// "MCHAT`|ulist`|" + ¹æ¹øÈ£ + ¸®½ºÆ® Ã¤¿ï ¼ö ÀÖ´Â Á¤º¸ //Á¢¼ÓÁßÀÎ À¯Àú¸®½ºÆ®¸¦ ¿äÃ»ÀÚ¿¡°Ô Àü¼Û
-						String userlist = null; // ÀÌ°Å Ã¤¿öÁÖ±â!!!!
+						// "MCHAT`|ulist`|" + ë°©ë²ˆí˜¸ + ë¦¬ìŠ¤íŠ¸ ì±„ìš¸ ìˆ˜ ìˆëŠ” ì •ë³´ //ì ‘ì†ì¤‘ì¸ ìœ ì €ë¦¬ìŠ¤íŠ¸ë¥¼ ìš”ì²­ìì—ê²Œ ì „ì†¡
+						String userlist = null; // ì´ê±° ì±„ì›Œì£¼ê¸°!!!!
 						int a = 0;
-						
+
 						for (String id : participants_list) {
 							HashMap<String, String> map = query.bringINFO(id);
 							String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
-							
-							if(a == 0) {
+
+							if (a == 0) {
 								a++;
 								userlist = senderInfo;
-							}
-							else {
+							} else {
 								userlist = userlist + "^" + senderInfo;
 							}
 						}
-	
 						client.get(m.getSender_id()).println("MCHAT`|ulist`|" + room_num + "`|" + userlist);
 					}
 					
-					else if (k == 5) { //Ä£±¸¿¡°Ô ÃÊ´ëÇÏ±â
-
+					else if (k == 5) { //ì¹œêµ¬ì—ê²Œ ì´ˆëŒ€í•˜ê¸°
 						String ulist[] = m.getTime().split("\\^");
 						
 						HashMap<String, String> map = query.bringINFO(m.getSender_id());
 						String senderInfo = map.get("NICKNAME") + "(" + map.get("NAME") + ")";
 						
-						//flistµ¹¸é¼­ »ç¶÷µé¿¡°Ô Ã¤ÆÃ ÃÊ´ë ¸Ş¼¼Áö º¸³»±â
+						//flistëŒë©´ì„œ ì‚¬ëŒë“¤ì—ê²Œ ì±„íŒ… ì´ˆëŒ€ ë©”ì„¸ì§€ ë³´ë‚´ê¸°
 						for(String id : ulist) {
-							//"MCHAT`|INVCHAT`|" + ¹æ¹øÈ£ + ¹æÀÌ¸§ + ÃÊ´ëÀÚ ÀÌ¸§    //»ó´ë¹æ¿¡°Ô ´Ô ÃÊ´ë´çÇŞ´Ù°í ¾Ë·ÁÁÖ±â
+							//"MCHAT`|INVCHAT`|" + ë°©ë²ˆí˜¸ + ë°©ì´ë¦„ + ì´ˆëŒ€ì ì´ë¦„    //ìƒëŒ€ë°©ì—ê²Œ ë‹˜ ì´ˆëŒ€ë‹¹í–‡ë‹¤ê³  ì•Œë ¤ì£¼ê¸°
 							if(client.containsKey(id) && !participants_list.contains(id))
 								client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + senderInfo);
 						}
 					}
-
 					messageCK.set(1);
 				} else {
 					System.out.println("+");
 				}
 
-				// ÀÎ¿ø¼ö°¡ 0¸íÀÌ µÇ¸é ÃªÀÌ Á¾·áµÊ => ÀÌ°Íµµ »ç¶óÁü
+				// ì¸ì›ìˆ˜ê°€ 0ëª…ì´ ë˜ë©´ ì±—ì´ ì¢…ë£Œë¨ => ì´ê²ƒë„ ì‚¬ë¼ì§
 				if (participants_num < 1) {
 					flag = false;
 					messageSet.remove(room_num);
@@ -1002,15 +932,13 @@ public class MainServer {
 					System.out.println(".");
 				}
 			}
-			
-			//½º·¹µå Á¾·áÇÏ±âÀü¿¡ chat³»¿ë ÀüÃ¼ »èÁ¦, room¿¡¼­ º»ÀÎ »èÁ¦ ÇØ¾ßÇÔ	
+			//ìŠ¤ë ˆë“œ ì¢…ë£Œí•˜ê¸°ì „ì— chatë‚´ìš© ì „ì²´ ì‚­ì œ, roomì—ì„œ ë³¸ì¸ ì‚­ì œ í•´ì•¼í•¨	
 			query.deleteCHATTING(Integer.toString(room_num));
-
 		}
 	}
 
-	/** Æ½ÅÃÅå thread ÄÚµå
-	 * µÎ client³¢¸® Æ½ÅÃÅå °ÔÀÓÀ» ÇÒ ¶§, °ÔÀÓÀÇ ¸ğµç°ÍÀ» ´ã´ç!
+	/** í‹±íƒí†¡ thread ì½”ë“œ=====================================================
+	 * ë‘ clientë¼ë¦¬ í‹±íƒí†¡ ê²Œì„ì„ í•  ë•Œ, ê²Œì„ì˜ ëª¨ë“ ê²ƒì„ ë‹´ë‹¹!
 	 * */
 	public static class TTT implements Runnable{
 		private int room_num;
@@ -1020,15 +948,13 @@ public class MainServer {
 		private int count=0;
 		
 		public TTT(int room_num, String A, String B) {
-			//order°¡ 1ÀÌ¸é A°¡ ¼±, 0ÀÌ¸é B°¡ ¼±.
-			
+			//orderê°€ 1ì´ë©´ Aê°€ ì„ , 0ì´ë©´ Bê°€ ì„ .
 			this.room_num = room_num;
-			this.AID = A; //O¿ªÇÒ
-			this.BID = B; //X¿ªÇÒ
-			
+			this.AID = A; //Oì—­í• 
+			this.BID = B; //Xì—­í• 
 		}
 
-		//½ÂÆĞ°¡ ³µ´ÂÁö È®ÀÎÇÏ´Â ÄÚµå. (´©°¡ ½ÂÀÚÀÎÁö È®ÀÎÇÏ´Â ÄÚµå (1ÀÌ¸é A, 2ÀÌ¸é B)), -1ÀÌ¸é ¹«½ÂºÎ, 0ÀÌ¸é ´õ ÇÒ¼ö ÀÖ´Ù´Â ¶æ 
+		//ìŠ¹íŒ¨ê°€ ë‚¬ëŠ”ì§€ í™•ì¸í•˜ëŠ” ì½”ë“œ. (ëˆ„ê°€ ìŠ¹ìì¸ì§€ í™•ì¸í•˜ëŠ” ì½”ë“œ (1ì´ë©´ A, 2ì´ë©´ B)), -1ì´ë©´ ë¬´ìŠ¹ë¶€, 0ì´ë©´ ë” í• ìˆ˜ ìˆë‹¤ëŠ” ëœ» 
 		public int checkIfWinner() {
 			for(int i=0;i<gameboard.length;i++) {
 				if (((gameboard[i][0]==1)||(gameboard[i][0]==2)) && (gameboard[i][0] == gameboard[i][1]) && (gameboard[i][0] == gameboard[i][2])) {
@@ -1051,7 +977,7 @@ public class MainServer {
 				else return 2;
 			}	
 			
-			if(count==9) {//¹«½ÂºÎ1
+			if(count==9) {//ë¬´ìŠ¹ë¶€1
 				return -1;
 			}
 			return 0;
@@ -1076,9 +1002,8 @@ public class MainServer {
 					client.get(BID).println(gameboard[0][0]+ "|" + gameboard[0][1]+ "|" + gameboard[0][2]+ "\n" + gameboard[1][0] + "|" +  gameboard[1][1]+ "|" +  gameboard[1][2]
 							+ "\n" + gameboard[2][0]+ "|" + gameboard[2][1] + "|" + gameboard[2][2]);
 					client.get(BID).println(m.getx()+ "|" +m.gety());
-
 					
-					//»ó´ë°¡ ¾îµğ¿¡ ¼ö¸¦ µ×´ÂÁö ¾Ë¸®±â
+					//ìƒëŒ€ê°€ ì–´ë””ì— ìˆ˜ë¥¼ ë’€ëŠ”ì§€ ì•Œë¦¬ê¸°
 					if(m.getSender_id().equals(AID)) 
 						client.get(BID).println("TTT`|NOTI`|" + room_num + "`|" + m.getx() + "`|" + m.gety());
 					else
@@ -1086,17 +1011,17 @@ public class MainServer {
 					
 					int ckwinner = checkIfWinner();
 					
-					if(ckwinner == 1) { //½ÂÀÚ°¡ A¶ó¸é~
+					if(ckwinner == 1) { //ìŠ¹ìê°€ Aë¼ë©´~
 						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "WIN");
 						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "LOSE");
 						flag = false;
 						
-					} else if (ckwinner == 2) { // ½ÂÀÚ°¡ B¶ó¸é~~
+					} else if (ckwinner == 2) { // ìŠ¹ìê°€ Bë¼ë©´~~
 						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "LOSE");
 						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "WIN");
 						flag = false;
 
-					} else if (checkIfWinner() == -1) {// ¹«½ÂºÎ!
+					} else if (checkIfWinner() == -1) {// ë¬´ìŠ¹ë¶€!
 						client.get(AID).println("TTT`|RESULT`|" + room_num + "`|" + "SAME");
 						client.get(BID).println("TTT`|RESULT`|" + room_num + "`|" + "SAME");
 
@@ -1117,11 +1042,11 @@ public class MainServer {
 		}
 	}
 	
-	/** Ä£±¸½ÅÃ» °¨½Ã thread ÄÚµå
-	 * ÇÏ³ªÀÇ handler thread°¡ ½ÇÇàµÉ ‹š, °°ÀÌ ºÙ¾î¼­ ½ÇÇàµÇ¸ç ½Ç½Ã°£À¸·Î Ä£±¸½ÅÃ»À» °¨ÁöÇÑ´Ù.
+	/** ì¹œêµ¬ì‹ ì²­ ê°ì‹œ thread ì½”ë“œ=====================================================
+	 * í•˜ë‚˜ì˜ handler threadê°€ ì‹¤í–‰ë  Â‹Âš, ê°™ì´ ë¶™ì–´ì„œ ì‹¤í–‰ë˜ë©° ì‹¤ì‹œê°„ìœ¼ë¡œ ì¹œêµ¬ì‹ ì²­ì„ ê°ì§€í•œë‹¤.
 	 * */
 	public static class RealTimeUpdater implements Runnable {
-		// »ç¿ëÀÚ Á¤º¸ ÀúÀå
+		// ì‚¬ìš©ì ì •ë³´ ì €ì¥
 		private String ID = null;
 		private PrintWriter out;
 
@@ -1135,13 +1060,11 @@ public class MainServer {
 			System.out.println("realtime!");
 
 			while (client.containsKey(ID)) {
-
-				if (query.checkPLUS(ID) == 1) { // ¸¸¾à Ä£±¸½ÅÃ» ¸®½ºÆ®¿¡ ³»°¡ ÀÖ´Ù¸é?
+				if (query.checkPLUS(ID) == 1) { // ë§Œì•½ ì¹œêµ¬ì‹ ì²­ ë¦¬ìŠ¤íŠ¸ì— ë‚´ê°€ ìˆë‹¤ë©´?
 
 					String[][] FriendPlusList = query.bringFRIEND_PLUS(ID);
-					int i = 0;
 
-					// °Á ÀÖ´Â°Å ´Ù º¸³»~~ // return String[][name, nickname, last_connection, »ó¸Ş ,id]
+					//return String[][name, nickname, last_connection, ìƒë©” ,id]
 					for (String[] list : FriendPlusList) {
 						try {
 							if (list[0].compareTo("null") == 0)
@@ -1151,23 +1074,18 @@ public class MainServer {
 						}
 
 						out.println("UPDATE`|FRIREQ`|" + list[1] + "`|" + list[0] + "`|" + list[4]);
-
-						System.out.println("!");
-
-						// client¿¡¼­ ÀÀ´äÇØ¼­ ¹«¾ğ°¡ ¹Ù²ğ¶§±îÁö ±â´Ù¸²
+						// clientì—ì„œ ì‘ë‹µí•´ì„œ ë¬´ì–¸ê°€ ë°”ë€”ë•Œê¹Œì§€ ê¸°ë‹¤ë¦¼
 						while (query.checkFRIEND_PLUS(list[4], ID).compareTo("false") != 0) {
 							;
 						}
 						System.out.println("change!");
 
-						// ¹Ù²î¾î¼­ DB¿¡ Àû¿ëµÇ¸é ±×Á¦¼­¾ß ´ÙÀ½À¸·Î ³Ñ¾î°©´Ï´Ù
+						// ë°”ë€Œì–´ì„œ DBì— ì ìš©ë˜ë©´ ê·¸ì œì„œì•¼ ë‹¤ìŒìœ¼ë¡œ ë„˜ì–´ê°‘ë‹ˆë‹¤
 					}
 				}
 				try {
 					Thread.sleep(1000);
-
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

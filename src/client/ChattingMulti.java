@@ -6,10 +6,7 @@ import javax.swing.*;
 
 public class ChattingMulti {
 	public int roomnumber;
-	private String room_name;
-
-
-    JFrame frame = new JFrame("Chatter");
+	JFrame frame = new JFrame("Chatter");
     JPanel panel = new JPanel();
     JTextField textField = new JTextField(23);
     JTextArea messageArea = new JTextArea(16, 50);
@@ -24,60 +21,60 @@ public class ChattingMulti {
     JLabel label = new JLabel("CHATTING ROOM");
 
     
-	//´©±º°¡ µé¾î¿Ó¾î¿ä ¾Ë¸²
-    public void notifyCome(String sender) {
-    	messageArea.append(sender + "´ÔÀÌ ÀÔÀåÇÏ¼Ì½À´Ï´Ù.\n");
-    }
-    
-	//´©±º°¡ ³ª°¡¿ä ¾Ë¸²
-    public void notifyOut(String sender) {
-    	messageArea.append(sender + "´ÔÀÌ ÅğÀåÇÏ¼Ì½À´Ï´Ù.\n");
-    }
-    
-	//¸Ş¼¼Áö Ãß°¡
-    public void receiveChat(String sender, String content) {
-    	messageArea.append(sender + ": "+ content + "\n");
-    }
-    
-    //¸Ş¼¼Áö º¸³»±â
-    public void sendChat() {
+	// ëˆ„êµ°ê°€ ë“¤ì–´ì™“ì–´ìš” ì•Œë¦¼
+	public void notifyCome(String sender) {
+		messageArea.append(sender + "ë‹˜ì´ ì…ì¥í•˜ì…¨ìŠµë‹ˆë‹¤.\n");
+	}
+
+	// ëˆ„êµ°ê°€ ë‚˜ê°€ìš” ì•Œë¦¼
+	public void notifyOut(String sender) {
+		messageArea.append(sender + "ë‹˜ì´ í‡´ì¥í•˜ì…¨ìŠµë‹ˆë‹¤.\n");
+	}
+
+	// ë©”ì„¸ì§€ ì¶”ê°€
+	public void receiveChat(String sender, String content) {
+		messageArea.append(sender + ": " + content + "\n");
+	}
+
+	// ë©”ì„¸ì§€ ë³´ë‚´ê¸°
+	public void sendChat() {
 		String getTxt = textField.getText();
-		if(getTxt.equals("")) return;
-		Client.sendMCHAT(roomnumber, getTxt); //ÀÌ°Ô ÇÙ½É!
+		if (getTxt.equals(""))
+			return;
+		Client.sendMCHAT(roomnumber, getTxt); // ì´ê²Œ í•µì‹¬!
 		textField.setText("");
-    }
-    
-    //Ã¤ÆÃ Á¾·áÇÏ±â
-    public void exitChat() { 
-    	//Á¾·áÇÒ°Å³Ä°í ÇÑ ¹ø ´õ ¹°¾îº¸±â
-		int reply = JOptionPane.showConfirmDialog(null, "Ã¤ÆÃÀ» Á¾·áÇÏ½Ã°Ú½À´Ï±î?", "Ã¤ÆÃ¾Ë¸²", JOptionPane.YES_NO_OPTION);
+	}
+
+	// ì±„íŒ… ì¢…ë£Œí•˜ê¸°
+	public void exitChat() {
+		// ì¢…ë£Œí• ê±°ëƒê³  í•œ ë²ˆ ë” ë¬¼ì–´ë³´ê¸°
+		int reply = JOptionPane.showConfirmDialog(null, "ì±„íŒ…ì„ ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì±„íŒ…ì•Œë¦¼", JOptionPane.YES_NO_OPTION);
 
 		if (reply == JOptionPane.YES_OPTION) {
 			Client.delMCHAT(roomnumber);
-	        frame.dispose();
-		}	
-    }
-    
-    //Ã¤ÆÃ °­Á¦·ÎÁ¾·áÇÏ±â
-    public void FexitChat() { 
-    	//Á¾·áÇÒ°Å³Ä°í ÇÑ ¹ø ´õ ¹°¾îº¸±â
-    	Client.delMCHAT(roomnumber);
-        frame.dispose();
-    }
-    
-	//premessage Ãß°¡
-    public void PrereceiveChat(int num, String[][] clist) {
-    	for(int i=0;i<num;i++) {
-        	messageArea.append(clist[i][0] + ": "+ clist[i][1] + "\n");
-    	}
-    	messageArea.append("---------------------------------\n");
+			frame.dispose();
+		}
+	}
 
-    }
+	// ì±„íŒ… ê°•ì œë¡œì¢…ë£Œí•˜ê¸°
+	public void FexitChat() {
+		// ì¢…ë£Œí• ê±°ëƒê³  í•œ ë²ˆ ë” ë¬¼ì–´ë³´ê¸°
+		Client.delMCHAT(roomnumber);
+		frame.dispose();
+	}
+
+	// premessage ì¶”ê°€
+	public void PrereceiveChat(int num, String[][] clist) {
+		for (int i = 0; i < num; i++) {
+			messageArea.append(clist[i][0] + ": " + clist[i][1] + "\n");
+		}
+		messageArea.append("---------------------------------\n");
+
+	}
     
  
     public ChattingMulti(int rn, String roomname) {
     	this.roomnumber = rn;
-    	this.room_name = roomname;
     	frame.setTitle(roomname);
     	
     	frame.addWindowListener(new WindowListener() {
@@ -99,7 +96,7 @@ public class ChattingMulti {
     	name.add(label);
     	label.setHorizontalAlignment(JLabel.CENTER);
     	label.setPreferredSize(new Dimension(220, 30));
-        label.setFont(new Font("°íµñ", Font.BOLD, 23));
+        label.setFont(new Font("ê³ ë”•", Font.BOLD, 23));
         label.setForeground(Color.black);
         
     	ImageIcon icon = new ImageIcon("image/add.png");
@@ -116,7 +113,7 @@ public class ChattingMulti {
 	    add.setBounds(10, 6, 28, 28);
 	    add.setIcon(addChangeIcon);
 	      
-	    //Ä£±¸ÃÊ´ë±â´É!! ¾îÄÉ ±¸ÇöÇÒ±î...
+	    //ì¹œêµ¬ì´ˆëŒ€ê¸°ëŠ¥!!
 	    add.addActionListener(new ActionListener() {
 		       @Override
 		       public void actionPerformed(ActionEvent e) {
@@ -128,7 +125,7 @@ public class ChattingMulti {
 	    user.setBounds(304, 6, 28, 28);
 	    user.setIcon(userChangeIcon);
 	    
-	    //ÇöÀç Á¢¼Ó À¯Àú È®ÀÎ ±â´É!
+	    //í˜„ì¬ ì ‘ì† ìœ ì € í™•ì¸ ê¸°ëŠ¥!
 	    user.addActionListener(new ActionListener() {
 		       @Override
 		       public void actionPerformed(ActionEvent e) {
@@ -146,14 +143,14 @@ public class ChattingMulti {
         bottomLine.setPreferredSize(new Dimension(600, 1));
         bottomLine.setBackground(new Color(255, 229, 110));
         textField.setEditable(true);
-        Font font = new Font("°íµñ", Font.PLAIN, 14);
+        Font font = new Font("ê³ ë”•", Font.PLAIN, 14);
         messageArea.setFont(font);
         messageArea.setLineWrap(true);
         messageArea.setBorder(null);
         messageArea.setEditable(false);
         messageArea.setBackground(new Color(0, 54, 78));
         button.setPreferredSize(new Dimension(58, 22));
-        button.setFont(new Font("°íµñ", Font.BOLD, 13));
+        button.setFont(new Font("ê³ ë”•", Font.BOLD, 13));
         button.setBackground(new Color(255, 229, 110));
         button.setBorder(null);
         top.setBackground(new Color(74, 210, 149));
@@ -180,8 +177,8 @@ public class ChattingMulti {
         messageArea.setForeground(Color.white);
 
         
-        //Ã¤ÆÃº¸³»±â!!!
-        //¹öÆ° ´­·¯µµ, ¿£ÅÍ¸¦ ÃÄµµ °°Àº µ¿ÀÛ!
+        //ì±„íŒ…ë³´ë‚´ê¸°!!!
+        //ë²„íŠ¼ ëˆŒëŸ¬ë„, ì—”í„°ë¥¼ ì³ë„ ê°™ì€ ë™ì‘!
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	sendChat();

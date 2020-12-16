@@ -38,53 +38,47 @@ public class Client {
 	private static boolean flag = true;
 	private static AtomicInteger readSocket = new AtomicInteger(1);
 	private static AtomicInteger writeSocket = new AtomicInteger(1);
-	// socket¿¡ °ªÀ» ³Ö°í »©´Â°É Á¦¾îÇÒ Ä£±¸! ÃÊ±â°ªÀº 1 : 1ÀÏ¶§´Â »ç¿ë°¡´É, 0ÀÏ¶§´Â »ç¿ë ºÒ°¡´É!
-	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //´©±¸¶û ÀÏ´îÁßÀÎÁö ÀúÀåÇÏ´Â Ä£±¸. Ä£±¸ÀÇ ID°¡ ÀúÀåµÊ.
-	private static HashMap<Integer, ChattingMulti> MCHAT = new HashMap<Integer, ChattingMulti>(); //´©±¸¶û ÀÏ´îÁßÀÎÁö ÀúÀåÇÏ´Â Ä£±¸. Ä£±¸ÀÇ ID°¡ ÀúÀåµÊ.
-	private static HashMap<String, String> FileMatch = new HashMap<String, String>(); //´©±¸¿¡°Ô ¹ºÆÄÀÏ º¸³¾Áö ÀúÀåÇØµÒ
-	private static HashMap<Integer, TTTGAME> TTTPOCKET = new HashMap<Integer, TTTGAME>(); //´©±¸¶û ÀÏ´îÁßÀÎÁö ÀúÀåÇÏ´Â Ä£±¸. Ä£±¸ÀÇ ID°¡ ÀúÀåµÊ.
+	// socketì— ê°’ì„ ë„£ê³  ë¹¼ëŠ”ê±¸ ì œì–´í•  ì¹œêµ¬! ì´ˆê¸°ê°’ì€ 1 : 1ì¼ë•ŒëŠ” ì‚¬ìš©ê°€ëŠ¥, 0ì¼ë•ŒëŠ” ì‚¬ìš© ë¶ˆê°€ëŠ¥!
+	private static HashMap<String, ChattingOne> PCHAT = new HashMap<String, ChattingOne>(); //ëˆ„êµ¬ë‘ ì¼ëŒˆì¤‘ì¸ì§€ ì €ì¥í•˜ëŠ” ì¹œêµ¬. ì¹œêµ¬ì˜ IDê°€ ì €ì¥ë¨.
+	private static HashMap<Integer, ChattingMulti> MCHAT = new HashMap<Integer, ChattingMulti>(); //ëˆ„êµ¬ë‘ ì¼ëŒˆì¤‘ì¸ì§€ ì €ì¥í•˜ëŠ” ì¹œêµ¬. ì¹œêµ¬ì˜ IDê°€ ì €ì¥ë¨.
+	private static HashMap<String, String> FileMatch = new HashMap<String, String>(); //ëˆ„êµ¬ì—ê²Œ ë­”íŒŒì¼ ë³´ë‚¼ì§€ ì €ì¥í•´ë‘ 
+	private static HashMap<Integer, TTTGAME> TTTPOCKET = new HashMap<Integer, TTTGAME>(); //ëˆ„êµ¬ë‘ ì¼ëŒˆì¤‘ì¸ì§€ ì €ì¥í•˜ëŠ” ì¹œêµ¬. ì¹œêµ¬ì˜ IDê°€ ì €ì¥ë¨.
 
 	private static ExecutorService filepool = Executors.newFixedThreadPool(50);
-	// inputÀÌ¶û Basic¹ŞÀ» ¾ê
-	private static ExecutorService b_pool = Executors.newFixedThreadPool(2);
+	private static ExecutorService b_pool = Executors.newFixedThreadPool(2); // inputì´ë‘ Basicë°›ì„ ì–˜
 
 	
 	public static String getCurrentTime() {
-		Date date_now = new Date(System.currentTimeMillis()); // ÇöÀç½Ã°£À» °¡Á®¿Í DateÇüÀ¸·Î ÀúÀåÇÑ´Ù
-		
-		//HHmmss
+		Date date_now = new Date(System.currentTimeMillis()); // í˜„ì¬ì‹œê°„ì„ ê°€ì ¸ì™€ Dateí˜•ìœ¼ë¡œ ì €ì¥í•œë‹¤
 		SimpleDateFormat date_format = new SimpleDateFormat("yyMMddHHmmssSS");
-
 		return date_format.format(date_now).toString();
 	}
 	
-	
-	// threadµé°ú ¼ÒÅëÇÏ±â À§ÇÑ º¯¼ö ºÎºĞ!!!
-	private static boolean PWck[] = {false, false}; //ÃÊ±â»óÅÂ! {°ª ¾÷µ¥ÀÌÆ® È®ÀÎ, ½ÇÁ¦ °ª}
-	private static boolean NNck[] = {false, false}; //ÃÊ±â»óÅÂ! {°ª ¾÷µ¥ÀÌÆ® È®ÀÎ, ½ÇÁ¦ °ª}
-	private static boolean settingInfock = false; //settingInfoÀÇ °ª ¾÷µ¥ÀÌÆ® È®ÀÎ
+	// threadë“¤ê³¼ ì†Œí†µí•˜ê¸° ìœ„í•œ ë³€ìˆ˜ ë¶€ë¶„!!!
+	private static boolean PWck[] = {false, false}; //ì´ˆê¸°ìƒíƒœ! {ê°’ ì—…ë°ì´íŠ¸ í™•ì¸, ì‹¤ì œ ê°’}
+	private static boolean NNck[] = {false, false}; //ì´ˆê¸°ìƒíƒœ! {ê°’ ì—…ë°ì´íŠ¸ í™•ì¸, ì‹¤ì œ ê°’}
+	private static boolean settingInfock = false; //settingInfoì˜ ê°’ ì—…ë°ì´íŠ¸ í™•ì¸
 	private static String[] settingInfo = new String[8]; // [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]
-	private static boolean fsl[] = {false, false}; //{Ä£±¸³»°Ë»ö ¾÷µ¥ÀÌÆ®, ¿ÜºÎÄ£±¸°Ë»ö ¾÷µ¥ÀÌÆ®)
-	private static String[][] fslInfo = new String[21][4]; //Ä£±¸°Ë»öÇÑ °á°ú¸®½ºÆ® (ID, name, nickname, last_connection)
+	private static boolean fsl[] = {false, false}; //{ì¹œêµ¬ë‚´ê²€ìƒ‰ ì—…ë°ì´íŠ¸, ì™¸ë¶€ì¹œêµ¬ê²€ìƒ‰ ì—…ë°ì´íŠ¸)
+	private static String[][] fslInfo = new String[21][4]; //ì¹œêµ¬ê²€ìƒ‰í•œ ê²°ê³¼ë¦¬ìŠ¤íŠ¸ (ID, name, nickname, last_connection)
 	private static boolean friendInfock = false; 
 	private static String[] friendInfo = new String[7]; // [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
-	private static boolean friend_dbck[] = {false, false}; //¼­¹ö¿¡¼­ Á¤º¸¿Ô´ÂÁö È®ÀÎÇÏ´Â ¾ê (PCK, FCK)
-	private static boolean friend_result[] = {true, true}; //°ªÀÌ ÀÖ´ÂÁö ¾ø´ÂÁö ¾Ë·ÁÁÜ(PCK, FCK)
+	private static boolean friend_dbck[] = {false, false}; //ì„œë²„ì—ì„œ ì •ë³´ì™”ëŠ”ì§€ í™•ì¸í•˜ëŠ” ì–˜ (PCK, FCK)
+	private static boolean friend_result[] = {true, true}; //ê°’ì´ ìˆëŠ”ì§€ ì—†ëŠ”ì§€ ì•Œë ¤ì¤Œ(PCK, FCK)
 	private static String lefsfe;
 	private static int roomNum = 0;
 	private static boolean ckroomNum = false; 
-	//booleanº¯¼öµéÀ» True·Î ÇØ³õÀ¸¸é MainScreen¿¡¼­ Á¤º¸¸¦ »©°¡°í false·Î µ¹·Á³õÀ» °Í.
+	//booleanë³€ìˆ˜ë“¤ì„ Trueë¡œ í•´ë†“ìœ¼ë©´ MainScreenì—ì„œ ì •ë³´ë¥¼ ë¹¼ê°€ê³  falseë¡œ ëŒë ¤ë†“ì„ ê²ƒ.
 
 	
-	
-	// IPÁÖ¼Ò¿Í port number¸¦ ÅëÇØ¼­ ¼­¹ö¿Í ¿¬°áÀ» ½ÃÀÛÇÏ´Â method.
+	// IPì£¼ì†Œì™€ port numberë¥¼ í†µí•´ì„œ ì„œë²„ì™€ ì—°ê²°ì„ ì‹œì‘í•˜ëŠ” method.
 	public static void startConnection(String ip, int port) throws UnknownHostException, IOException {
 		clientSocket = new Socket(ip, port);
 		out = new PrintWriter(clientSocket.getOutputStream(), true);
 		in = new Scanner(new InputStreamReader(clientSocket.getInputStream()));
 	}
 
-	// ¼Ò±İ¸¸µé±â
+	// ì†Œê¸ˆë§Œë“¤ê¸°
 	public static String makeSalt() {
 		SecureRandom random;
 		try {
@@ -100,7 +94,7 @@ public class Client {
 		return null;
 	}
 
-	// ¾ÏÈ£È­ ÇÔ¼ö Â¥±â
+	// ì•”í˜¸í™” í•¨ìˆ˜ ì§œê¸°
 	protected static String encryptionPW(String pw, String salt) {
 		String raw = pw;
 
@@ -117,14 +111,14 @@ public class Client {
 		return null;
 	}
 
-	// loginÃ¼Å© ÇÔ¼ö
+	// loginì²´í¬ í•¨ìˆ˜
 	protected static boolean logincheck(String id, char[] pw) {
-		out.println("REQSALT" + "`|" + id); // ¼Ò±İ¿äÃ»
+		out.println("REQSALT" + "`|" + id); // ì†Œê¸ˆìš”ì²­
 		salt = in.nextLine();
 
 		String spw = String.valueOf(pw);
 		spw = encryptionPW(spw, salt);
-		// ³ªÁß¿¡ ºñ¹Ğ¹øÈ£µµ ¾ÏÈ£È­ÇØ¼­ ³Ñ°ÜÁÖ±â
+		// ë‚˜ì¤‘ì— ë¹„ë°€ë²ˆí˜¸ë„ ì•”í˜¸í™”í•´ì„œ ë„˜ê²¨ì£¼ê¸°
 
 		out.println("LOGIN" + "`|" + id + "`|" + spw);
 		String line = in.nextLine();
@@ -132,7 +126,7 @@ public class Client {
 		if (line.startsWith("LOGIN")) {
 			String info[] = line.split("\\`\\|");
 
-			if (info[1].compareTo("SUCCESS") == 0) { // ·Î±×ÀÎ ¼º°ø ¸Ş¼¼Áö¸¦ ¹Ş¾Ò´Ù¸é
+			if (info[1].compareTo("SUCCESS") == 0) { // ë¡œê·¸ì¸ ì„±ê³µ ë©”ì„¸ì§€ë¥¼ ë°›ì•˜ë‹¤ë©´
 				ID = id;
 				return true;
 			}
@@ -140,16 +134,16 @@ public class Client {
 		return false;
 	}
 
-	// register ÇÔ¼ö
+	// register í•¨ìˆ˜
 	protected static int register(String git, String temp) {
-		// 0 - È¸¿ø°¡ÀÔ ¼º°ø
-		// 1 - ¾ÆÀÌµğ Áßº¹
-		// 2 - ´Ğ³×ÀÓ Áßº¹
-		// 3 - ±×³É ½ÇÆĞ
+		// 0 - íšŒì›ê°€ì… ì„±ê³µ
+		// 1 - ì•„ì´ë”” ì¤‘ë³µ
+		// 2 - ë‹‰ë„¤ì„ ì¤‘ë³µ
+		// 3 - ê·¸ëƒ¥ ì‹¤íŒ¨
 
 		String tp[] = temp.split("\\`\\|");
 
-		// ºñ¹Ğ¹øÈ£ ¾ÏÈ£È­
+		// ë¹„ë°€ë²ˆí˜¸ ì•”í˜¸í™”
 		String salt = makeSalt();
 		tp[2] = encryptionPW(tp[2], salt);
 
@@ -159,7 +153,7 @@ public class Client {
 			temp = temp + "`|" + k;
 		}
 
-		// ¼­¹ö·Î Á¤º¸ º¸³»±â
+		// ì„œë²„ë¡œ ì •ë³´ ë³´ë‚´ê¸°
 		out.println("REGISTER`|" + git + temp);
 
 		String line = in.nextLine();
@@ -167,19 +161,19 @@ public class Client {
 		if (line.startsWith("REGISTER")) {
 			String info[] = line.split("\\`\\|");
 
-			if (info[1].compareTo("OK") == 0) { // ·Î±×ÀÎ ¼º°ø ¸Ş¼¼Áö¸¦ ¹Ş¾Ò´Ù¸é
+			if (info[1].compareTo("OK") == 0) { // ë¡œê·¸ì¸ ì„±ê³µ ë©”ì„¸ì§€ë¥¼ ë°›ì•˜ë‹¤ë©´
 				return 0;
-			} else if (info[1].compareTo("ID") == 0) { // ¾ÆÀÌµğ Áßº¹
+			} else if (info[1].compareTo("ID") == 0) { // ì•„ì´ë”” ì¤‘ë³µ
 				return 1;
-			} else if (info[1].compareTo("NN") == 0) { // ´Ğ³×ÀÓ
+			} else if (info[1].compareTo("NN") == 0) { // ë‹‰ë„¤ì„
 				return 2;
 			}
 		}
-		// ±×³É ½ÇÆĞÇÏ¸é 3À» ¸®ÅÏ
+		// ê·¸ëƒ¥ ì‹¤íŒ¨í•˜ë©´ 3ì„ ë¦¬í„´
 		return 3;
 	}
 
-	// MainScreen¿¡¼­ »ç¿ëÇÑ´Ù - µÎ ÇÔ¼ö¸¦ ºÒ·¯¿Í¼­ ¸ŞÀÎ Á¤º¸¸¦ ²Ù¹Ì°Ô µË´Ï´Ù.
+	// MainScreenì—ì„œ ì‚¬ìš©í•œë‹¤ - ë‘ í•¨ìˆ˜ë¥¼ ë¶ˆëŸ¬ì™€ì„œ ë©”ì¸ ì •ë³´ë¥¼ ê¾¸ë¯¸ê²Œ ë©ë‹ˆë‹¤.
 	protected static String[] basicinfo() {
 		String[] binfo = new String[3];
 		
@@ -208,7 +202,7 @@ public class Client {
 
 	public static String[][] friendList() {
 		String[][] info = new String[20][5];
-		// String[][ID, name, nickname, last_connection, »ó¸Ş]
+		// String[][ID, name, nickname, last_connection, ìƒë©”]
 
 		String line = in.nextLine();
 
@@ -222,7 +216,7 @@ public class Client {
 		while (line.compareTo("BFEND") != 0) {
 			String i[] = line.trim().split("\\`\\|");
 
-			for (int k = 0; k < 5; k++) { // ¾ÆÀÌµğ, ÀÌ¸§, ´Ğ³×ÀÓ, Á¢¼Ó¿©ºÎ, »ó¸Ş´Â?
+			for (int k = 0; k < 5; k++) { // ì•„ì´ë””, ì´ë¦„, ë‹‰ë„¤ì„, ì ‘ì†ì—¬ë¶€, ìƒë©”ëŠ”?
 				info[idx][k] = i[k];
 			}
 			idx++;
@@ -230,7 +224,7 @@ public class Client {
 		}
 		info[0][0] = Integer.toString(idx);
 
-		return info; // Á¤º¸¸¦ º¸¿©ÁÖ´Â Ãø¿¡¼­´Â Ã³À½ []°¡ nullÀÌ¸é °Å±â¼­ ¸ØÃß°Ô ÇØ¾ßÇÒµí. °¡´ÉÇÏ°ÚÁö?
+		return info; // ì •ë³´ë¥¼ ë³´ì—¬ì£¼ëŠ” ì¸¡ì—ì„œëŠ” ì²˜ìŒ []ê°€ nullì´ë©´ ê±°ê¸°ì„œ ë©ˆì¶”ê²Œ í•´ì•¼í• ë“¯. ê°€ëŠ¥í•˜ê² ì§€?
 	}
 
 	public static void freeSocket() {
@@ -238,63 +232,63 @@ public class Client {
 		writeSocket.set(1);
 	}
 
-	// ========================================ÀÌÁ¦ ¿©±â À§´Â °ÇµéÁö¸»ÀÚ!
-	//=================¼³Á¤ °ü·Ã ÇÔ¼ö
-	// Á¤º¸¼öÁ¤ÇÒ¶§ pw¸Â´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	// ========================================ì´ì œ ì—¬ê¸° ìœ„ëŠ” ê±´ë“¤ì§€ë§ì!
+	//=================ì„¤ì • ê´€ë ¨ í•¨ìˆ˜
+	// ì •ë³´ìˆ˜ì •í• ë•Œ pwë§ëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	protected static boolean pwcheck(char[] pw) {
 
 		String spw = String.valueOf(pw);
-		spw = encryptionPW(spw, salt); // ÀÌ¹Ì ¼Ò±İÀÌ ÀÖ´Ù
+		spw = encryptionPW(spw, salt); // ì´ë¯¸ ì†Œê¸ˆì´ ìˆë‹¤
 
-		// ºñ¹Ğ¹øÈ£ Ã¼Å©ÇØ´Ş¶ó°í º¸³»°í,
+		// ë¹„ë°€ë²ˆí˜¸ ì²´í¬í•´ë‹¬ë¼ê³  ë³´ë‚´ê³ ,
 		out.println("SETTING`|PWCK`|" + spw);
 
 
-		// ºñ¹Ğ¹øÈ£ÀÇ Ã¼Å© ¿©ºÎ¸¦ ¿©±â¼­ ¼ö·ÉÇÏ°Ô µË´Ï´Ù. -> »õ·Î Ã¼Å©µÉ ‹š ±îÁö ±â´Ù¸®±â
+		// ë¹„ë°€ë²ˆí˜¸ì˜ ì²´í¬ ì—¬ë¶€ë¥¼ ì—¬ê¸°ì„œ ìˆ˜ë ¹í•˜ê²Œ ë©ë‹ˆë‹¤. -> ìƒˆë¡œ ì²´í¬ë  Â‹Âš ê¹Œì§€ ê¸°ë‹¤ë¦¬ê¸°
 		while(PWck[0] != true){
 			System.out.println(lefsfe);
 		}
 		
-		PWck[0] = false; //ÀçÈ°¿ë °¡´ÉÇÏ°Ô ¹Ù²ãÁØ´Ù
+		PWck[0] = false; //ì¬í™œìš© ê°€ëŠ¥í•˜ê²Œ ë°”ê¿”ì¤€ë‹¤
 		System.out.println(PWck[0] + " " + PWck[1]);
 
 		
-		if (PWck[1] == true) { //ºñ¹Ğ¹øÈ£°¡ ¸Â´Ù¸é true, ¾Æ´Ï¶ó¸é false¸¦ ¸®ÅÏ
+		if (PWck[1] == true) { //ë¹„ë°€ë²ˆí˜¸ê°€ ë§ë‹¤ë©´ true, ì•„ë‹ˆë¼ë©´ falseë¥¼ ë¦¬í„´
 			PWck[1] = false;
 			return true;
 		}
 		return false;
 	}
 
-	//³»Á¤º¸ ¼öÁ¤ ÇÔ¼ö
+	//ë‚´ì •ë³´ ìˆ˜ì • í•¨ìˆ˜
 	protected static int modifyInfo(String temp) {
-		// 0 - ¼öÁ¤ ¼º°ø
-		// 2 - ´Ğ³×ÀÓ Áßº¹
+		// 0 - ìˆ˜ì • ì„±ê³µ
+		// 2 - ë‹‰ë„¤ì„ ì¤‘ë³µ
 
-		// ¼­¹ö·Î Á¤º¸ º¸³»±â
+		// ì„œë²„ë¡œ ì •ë³´ ë³´ë‚´ê¸°
 		out.println("SETTING`|SAVE`|" + temp);
 
-		//´Ğ³×ÀÓ Áßº¹¿©ºÎ È®ÀÎ
+		//ë‹‰ë„¤ì„ ì¤‘ë³µì—¬ë¶€ í™•ì¸
 		while(NNck[0] != true){
 			System.out.println("waiting-modityinfo");
 		}
 		
-		NNck[0] = false; //ÀçÈ°¿ë °¡´ÉÇÏ°Ô ¹Ù²ãÁØ´Ù
+		NNck[0] = false; //ì¬í™œìš© ê°€ëŠ¥í•˜ê²Œ ë°”ê¿”ì¤€ë‹¤
 		System.out.println(NNck[0] + " " + NNck[1]);
 
 		
-		if (NNck[1] == true) { //ºñ¹Ğ¹øÈ£°¡ ¸Â´Ù¸é true, ¾Æ´Ï¶ó¸é false¸¦ ¸®ÅÏ
+		if (NNck[1] == true) { //ë¹„ë°€ë²ˆí˜¸ê°€ ë§ë‹¤ë©´ true, ì•„ë‹ˆë¼ë©´ falseë¥¼ ë¦¬í„´
 			return 0;
 		}
 		return 1;
 	}
 	
-	//³»Á¤º¸ º¸³»ÁÖ´Â ÇÔ¼ö
+	//ë‚´ì •ë³´ ë³´ë‚´ì£¼ëŠ” í•¨ìˆ˜
 	protected static String[] settinginfo() {	
-		//ÀÏ´Ü ¼­¹ö¿¡ Á¤º¸¸¦ ¿äÃ»ÇÕ´Ï´Ù!
+		//ì¼ë‹¨ ì„œë²„ì— ì •ë³´ë¥¼ ìš”ì²­í•©ë‹ˆë‹¤!
 		out.println("SETTING`|REQ");
 		
-		//Á¤º¸°¡ ¿À±æ ±â´Ù¸²
+		//ì •ë³´ê°€ ì˜¤ê¸¸ ê¸°ë‹¤ë¦¼
 		while(settingInfock != true){
 			System.out.println("waiting-settinginfo");
 		}
@@ -303,14 +297,14 @@ public class Client {
 		return settingInfo;
 	}
 
-	//¿ÜºÎ Ä£±¸ °Ë»ö ¸®½ºÆ®¸¦ º¸³»ÁÖ´Â ÇÔ¼ö
+	//ì™¸ë¶€ ì¹œêµ¬ ê²€ìƒ‰ ë¦¬ìŠ¤íŠ¸ë¥¼ ë³´ë‚´ì£¼ëŠ” í•¨ìˆ˜
 	protected static String[][] NotfriendSearchList(String kw) {
 		// String[][name, nickname, last_connection]
 
-		//ÀÏ´Ü ¼­¹ö¿¡ Á¤º¸¸¦ ¿äÃ»ÇÕ´Ï´Ù! (with kw)
+		//ì¼ë‹¨ ì„œë²„ì— ì •ë³´ë¥¼ ìš”ì²­í•©ë‹ˆë‹¤! (with kw)
 		out.println("SEARCH`|OF`|" + kw);
 		
-		//Á¤º¸°¡ ¿À±æ ±â´Ù¸²
+		//ì •ë³´ê°€ ì˜¤ê¸¸ ê¸°ë‹¤ë¦¼
 		while(fsl[1] != true){
 			System.out.println("waiting-NFSL");
 		}
@@ -318,14 +312,14 @@ public class Client {
 		return fslInfo;
 	}
 		
-	//Ä£±¸ ³» °Ë»ö ¸®½ºÆ®¸¦ º¸³»ÁÖ´Â ÇÔ¼ö
+	//ì¹œêµ¬ ë‚´ ê²€ìƒ‰ ë¦¬ìŠ¤íŠ¸ë¥¼ ë³´ë‚´ì£¼ëŠ” í•¨ìˆ˜
 	protected static String[][] FriendSearchList(String kw) {
 		// String[][name, nickname, last_connection]
 
-		//ÀÏ´Ü ¼­¹ö¿¡ Á¤º¸¸¦ ¿äÃ»ÇÕ´Ï´Ù! (with kw)
+		//ì¼ë‹¨ ì„œë²„ì— ì •ë³´ë¥¼ ìš”ì²­í•©ë‹ˆë‹¤! (with kw)
 		out.println("SEARCH`|MF`|" + kw);
 		
-		//Á¤º¸°¡ ¿À±æ ±â´Ù¸²
+		//ì •ë³´ê°€ ì˜¤ê¸¸ ê¸°ë‹¤ë¦¼
 		while(fsl[0] != true){
 			System.out.println("waiting-FSL");
 		}
@@ -334,13 +328,13 @@ public class Client {
 		return fslInfo;
 	}
 	
-	//Ä£±¸ Á¤º¸¸¦ ¹Ş¾Æ¿À´Â ÇÔ¼ö
+	//ì¹œêµ¬ ì •ë³´ë¥¼ ë°›ì•„ì˜¤ëŠ” í•¨ìˆ˜
 	protected static String[] getFriendInfo(String FID) {
 		
-		//ÀÏ´Ü ¼­¹ö¿¡ Á¤º¸¸¦ ¿äÃ»ÇÕ´Ï´Ù!
+		//ì¼ë‹¨ ì„œë²„ì— ì •ë³´ë¥¼ ìš”ì²­í•©ë‹ˆë‹¤!
 		out.println("FRIEND`|INFO`|" + FID);
 		
-		//Á¤º¸°¡ ¿À±æ ±â´Ù¸²
+		//ì •ë³´ê°€ ì˜¤ê¸¸ ê¸°ë‹¤ë¦¼
 		while(friendInfock != true){
 			System.out.println("waiting-FINFO");
 		}
@@ -349,16 +343,16 @@ public class Client {
 		return friendInfo;
 	}
 		
-	//Ä£±¸½ÅÃ»ÇÏ´Â ÇÔ¼ö
+	//ì¹œêµ¬ì‹ ì²­í•˜ëŠ” í•¨ìˆ˜
 	protected static int requsetFriend(String fid) {
-		//1 : Ä£±¸½ÅÃ» ¿Ï·á, 0 : Ä£±¸½ÅÃ» ½ÇÆĞ (ÀÌ¹Ì µÇ¾îÀÖ´Â°ÅÀÓ)
+		//1 : ì¹œêµ¬ì‹ ì²­ ì™„ë£Œ, 0 : ì¹œêµ¬ì‹ ì²­ ì‹¤íŒ¨ (ì´ë¯¸ ë˜ì–´ìˆëŠ”ê±°ì„)
 		
-		//ÀÏ´Ü, Ä£±¸½ÅÃ» Å×ÀÌºí¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎÇÏ±â
+		//ì¼ë‹¨, ì¹œêµ¬ì‹ ì²­ í…Œì´ë¸”ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸í•˜ê¸°
 		out.println("FRIEND`|PCK`|" + fid);
-		//±×¸®°í Ä£±¸ Å×ÀÌºí¿¡µµ Á¸ÀçÇÏ´ÂÁö È®ÀÎÇÏ±â
+		//ê·¸ë¦¬ê³  ì¹œêµ¬ í…Œì´ë¸”ì—ë„ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸í•˜ê¸°
 		out.println("FRIEND`|FCK`|" + fid);
 
-		//¿¬¶ô±â´Ù¸®±â (µÑ Áß ÇÏ³ª¶óµµ ¾ÆÁ÷ false¸é ³Ñ±â¸é ¾ÈµÊ)
+		//ì—°ë½ê¸°ë‹¤ë¦¬ê¸° (ë‘˜ ì¤‘ í•˜ë‚˜ë¼ë„ ì•„ì§ falseë©´ ë„˜ê¸°ë©´ ì•ˆë¨)
 		while(friend_dbck[0] == false || friend_dbck[1] == false) {
 			System.out.println("waiting-RF");
 		}
@@ -366,16 +360,16 @@ public class Client {
 		friend_dbck[1] = false;
 
 
-		//µÑ´Ù false¿©¾ß Ä£±¸µµ ¾Æ´Ï°í Ä£±¸½ÅÃ» Å×ÀÌºí¿¡µµ ¾ø´Â °ÍÀÌ µÈ´Ù => ±×·³ ½ÅÃ»ÇØµµ µÈ´Ù´Â ¶æ!
+		//ë‘˜ë‹¤ falseì—¬ì•¼ ì¹œêµ¬ë„ ì•„ë‹ˆê³  ì¹œêµ¬ì‹ ì²­ í…Œì´ë¸”ì—ë„ ì—†ëŠ” ê²ƒì´ ëœë‹¤ => ê·¸ëŸ¼ ì‹ ì²­í•´ë„ ëœë‹¤ëŠ” ëœ»!
 		if(friend_result[0] == false && friend_result[1] == false) {
-			//Åë°úÇÑ´Ù¸é Ä£±¸½ÅÃ» Å×ÀÌºí¿¡ ³Ö¾îÁÖ¶ó°í ¿äÃ»!
+			//í†µê³¼í•œë‹¤ë©´ ì¹œêµ¬ì‹ ì²­ í…Œì´ë¸”ì— ë„£ì–´ì£¼ë¼ê³  ìš”ì²­!
 			out.println("FRIEND`|APP`|" + fid);
 			return 1;
 		}
 		return 0;
 	}
 	
-	//È¸¿øÅ»Åğ....Àß°¡....
+	//íšŒì›íƒˆí‡´....ì˜ê°€....
 	protected static void byebye() {
 		out.println("SETTING`|BYE");
 		MainScreen.clostMainScreen();
@@ -383,109 +377,109 @@ public class Client {
 	}
 	
 	
-	//==================Ã¤ÆÃ ±â´É °ü·Ã ÇÔ¼ö	
-	// <ÀÏ´ëÀÏ Ã¤ÆÃ>
-	//»ó´ë¹æÀÌ¶û ÀÏ´ëÀÏ Ã¤ÆÃÁßÀÎÁö È®ÀÎ
+	//==================ì±„íŒ… ê¸°ëŠ¥ ê´€ë ¨ í•¨ìˆ˜	
+	// <ì¼ëŒ€ì¼ ì±„íŒ…>
+	//ìƒëŒ€ë°©ì´ë‘ ì¼ëŒ€ì¼ ì±„íŒ…ì¤‘ì¸ì§€ í™•ì¸
 	protected static boolean ckINPCHAT(String FID) {
 		if(PCHAT.containsKey(FID)) return true;
 		else return false;
 	}
 	
-	//ÀÏ´ëÀÏ Ã¤ÆÃÁßÀÎ »ç¶÷µé ¸ğ¾ÆµÎ´Â hashmap¿¡ ³Ö±â
+	//ì¼ëŒ€ì¼ ì±„íŒ…ì¤‘ì¸ ì‚¬ëŒë“¤ ëª¨ì•„ë‘ëŠ” hashmapì— ë„£ê¸°
 	protected static void addPCHAT(String FID, ChattingOne chat) {
 		PCHAT.put(FID, chat);
 	}
 	
-	//ÀÏ´ëÀÏ Ã¤ÆÃÁßÀÎ »ç¶÷µé ¸ğ¾ÆµÎ´Â hashmap¿¡¼­ »èÁ¦ÇÏ°í »ó´ë¹æ¿¡°Ô ³ª°£´Ù°í ¸»ÇÔ
+	//ì¼ëŒ€ì¼ ì±„íŒ…ì¤‘ì¸ ì‚¬ëŒë“¤ ëª¨ì•„ë‘ëŠ” hashmapì—ì„œ ì‚­ì œí•˜ê³  ìƒëŒ€ë°©ì—ê²Œ ë‚˜ê°„ë‹¤ê³  ë§í•¨
 	protected static void delPCHAT(String FID) {
 		PCHAT.remove(FID);
 		out.println("PCHAT`|outCHAT`|" + FID);
 	}
 	
-	//»ó´ë¹æ¿¡°Ô Ã¤ÆÃ ÇÏ°í ½Í´Ù°í ¿äÃ»
+	//ìƒëŒ€ë°©ì—ê²Œ ì±„íŒ… í•˜ê³  ì‹¶ë‹¤ê³  ìš”ì²­
 	protected static void ckANSWER(String FID) {
-		//¼­¹ö¿¡ ³ª ¾ê¶û Ã¤ÆÃÇÏ°í ½Í´Ù°í ¿äÃ»ÇÏ±â!
+		//ì„œë²„ì— ë‚˜ ì–˜ë‘ ì±„íŒ…í•˜ê³  ì‹¶ë‹¤ê³  ìš”ì²­í•˜ê¸°!
 		out.println("PCHAT`|REQCHAT`|" + FID);
 	}
 	
-	//»ó´ë¹æ¿¡°Ô Ã¤ÆÃÀ» ¼ö¶ôÇÑ´Ù°í Y/N º¸³»±â (ÀÏ´î¹öÀü)
+	//ìƒëŒ€ë°©ì—ê²Œ ì±„íŒ…ì„ ìˆ˜ë½í•œë‹¤ê³  Y/N ë³´ë‚´ê¸° (ì¼ëŒˆë²„ì „)
 	protected static void CHATANSWER(String FID, boolean ans) {
-		//PCHAT`|PESPONCHAT`|" + Ã¤ÆÃ¿äÃ»ÀÚID + Y/N : Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾î”fÀ»¶§ Ã¤ÆÃ ÇÒ°ÇÁö ¸»°ÇÁö ´äº¯
+		//PCHAT`|PESPONCHAT`|" + ì±„íŒ…ìš”ì²­ìID + Y/N : ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´Â”fì„ë•Œ ì±„íŒ… í• ê±´ì§€ ë§ê±´ì§€ ë‹µë³€
 		System.out.println("2 =>" + ans);
 		
-		//±×·¡ ³ª ³Ê¶û Ã¤ÆÃÇÒ°Ô!
+		//ê·¸ë˜ ë‚˜ ë„ˆë‘ ì±„íŒ…í• ê²Œ!
 		if(ans) out.println("PCHAT`|PESPONCHAT`|" + FID + "`|Y");
 		else out.println("PCHAT`|PESPONCHAT`|" + FID+ "`|N");
 	}
 
-	//»ç¿ëÀÚ°¡ º¸³»´Â Ã¤ÆÃÀ» ¹Ş¾Æ¼­ ¼­¹ö·Î Àü¼ÛÇÏ´Â ¿ªÇÒ. (¹Ş´Â»ç¶÷°ú º¸³»´Â ³»¿ë)
-	//PCHAT`|sendCHAT`|" + Ã¤ÆÃ¹Ş´ÂÀÚID + Content : Ã¤ÆÃ³»¿ë Àü¼Û (³»°¡¾´°ÅÀÓ)
+	//ì‚¬ìš©ìê°€ ë³´ë‚´ëŠ” ì±„íŒ…ì„ ë°›ì•„ì„œ ì„œë²„ë¡œ ì „ì†¡í•˜ëŠ” ì—­í• . (ë°›ëŠ”ì‚¬ëŒê³¼ ë³´ë‚´ëŠ” ë‚´ìš©)
+	//PCHAT`|sendCHAT`|" + ì±„íŒ…ë°›ëŠ”ìID + Content : ì±„íŒ…ë‚´ìš© ì „ì†¡ (ë‚´ê°€ì“´ê±°ì„)
 	protected static void sendPCHAT(String FID, String chat) {
 		out.println("PCHAT`|sendCHAT`|" + FID + "`|" + chat);
 	}
 		
 	
-	// <¸ÖÆ¼Ãª>==========================================
-	//¼­¹ö¿¡°Ô ·ë¸¸µç´Ù°í ¿äÃ»
+	// <ë©€í‹°ì±—>==========================================
+	//ì„œë²„ì—ê²Œ ë£¸ë§Œë“ ë‹¤ê³  ìš”ì²­
 	protected static void makeMultiRoom(String roomname, String showpre, String flist) {
-		//"MCHAT`|REQROOM`|" + ¹æÀÌ¸§ + ³»¿ë º¸ÀÓ ¿©ºÎ +  ¹æ¸¸µé±â ¿äÃ»ÀÚ ID + flist      //¹æ¸¸µé±â ¿äÃ» 
+		//"MCHAT`|REQROOM`|" + ë°©ì´ë¦„ + ë‚´ìš© ë³´ì„ ì—¬ë¶€ +  ë°©ë§Œë“¤ê¸° ìš”ì²­ì ID + flist      //ë°©ë§Œë“¤ê¸° ìš”ì²­ 
 		out.println("MCHAT`|REQROOM`|" + roomname + "`|" + showpre + "`|" + ID + "`|" + flist);
 		
-		// room number¸¦ ¹Ş±â¸¦ ±â´Ù¸²
+		// room numberë¥¼ ë°›ê¸°ë¥¼ ê¸°ë‹¤ë¦¼
 		while(ckroomNum != true){
 			System.out.println("wait roomNum");
 		}
-		ckroomNum = false; //ÀçÈ°¿ë °¡´ÉÇÏ°Ô ¹Ù²ãÁØ´Ù
+		ckroomNum = false; //ì¬í™œìš© ê°€ëŠ¥í•˜ê²Œ ë°”ê¿”ì¤€ë‹¤
 		
 		int rn = roomNum;
-		//¸ÖÆ¼ ÃªÀ» À§ÇÑ Ã¤ÆÃÃ¢À» ¶ç¿öÁİ´Ï´Ù
+		//ë©€í‹° ì±—ì„ ìœ„í•œ ì±„íŒ…ì°½ì„ ë„ì›Œì¤ë‹ˆë‹¤
 		ChattingMulti nchat = new ChattingMulti(rn, roomname);
 		
-		//Ã¤ÆÃÃ¢À» °ü¸® hashMap¿¡ ³Ö¾îÁİ´Ï´Ù
+		//ì±„íŒ…ì°½ì„ ê´€ë¦¬ hashMapì— ë„£ì–´ì¤ë‹ˆë‹¤
 		MCHAT.put(rn, nchat);
 	}
 
-	//»ó´ë¹æ¿¡°Ô Ã¤ÆÃÀ» ¼ö¶ôÇÑ´Ù°í Y/N º¸³»±â (¸ÖÆ¼¹öÀü)
+	//ìƒëŒ€ë°©ì—ê²Œ ì±„íŒ…ì„ ìˆ˜ë½í•œë‹¤ê³  Y/N ë³´ë‚´ê¸° (ë©€í‹°ë²„ì „)
 	protected static void MCHATANSWER(int roomid, String roomname, boolean ans) {
-		//±×·¡ ³ª ³Ê¶û Ã¤ÆÃÇÒ°Ô!
+		//ê·¸ë˜ ë‚˜ ë„ˆë‘ ì±„íŒ…í• ê²Œ!
 		if(ans) {
 			out.println("MCHAT`|RESPONCHAT`|" + roomid + "`|" + ID + "`|Y");
 			ChattingMulti nchat = new ChattingMulti(roomid, roomname);
-			//Ã¤ÆÃÃ¢À» °ü¸® hashMap¿¡ ³Ö¾îÁİ´Ï´Ù
+			//ì±„íŒ…ì°½ì„ ê´€ë¦¬ hashMapì— ë„£ì–´ì¤ë‹ˆë‹¤
 			MCHAT.put(roomid, nchat);
-			System.out.println(roomid + "ÇÑ´Ù±¸");
+			System.out.println(roomid + "í•œë‹¤êµ¬");
 		}
-		//¾Æ´Ï¸é ¾Æ¿¹ ¹«½Ã! 
+		//ì•„ë‹ˆë©´ ì•„ì˜ˆ ë¬´ì‹œ! 
 	}
 	
-	//»ç¿ëÀÚ°¡ º¸³»´Â Ã¤ÆÃÀ» ¹Ş¾Æ¼­ ¼­¹ö·Î Àü¼ÛÇÏ´Â ¿ªÇÒ. (¹Ş´Â»ç¶÷°ú º¸³»´Â ³»¿ë)
-	//"MCHAT`|sendCHAT`|" + ¹æ¹øÈ£ + Ã¤ÆÃ º¸³½ÀÚID + ½Ã°£ + content // Ã¤ÆÃ Àü¼Û
+	//ì‚¬ìš©ìê°€ ë³´ë‚´ëŠ” ì±„íŒ…ì„ ë°›ì•„ì„œ ì„œë²„ë¡œ ì „ì†¡í•˜ëŠ” ì—­í• . (ë°›ëŠ”ì‚¬ëŒê³¼ ë³´ë‚´ëŠ” ë‚´ìš©)
+	//"MCHAT`|sendCHAT`|" + ë°©ë²ˆí˜¸ + ì±„íŒ… ë³´ë‚¸ìID + ì‹œê°„ + content // ì±„íŒ… ì „ì†¡
 	protected static void sendMCHAT(int rn, String chat) {
 		out.println("MCHAT`|sendCHAT`|"+ Integer.toString(rn) + "`|" + ID + "`|" + getCurrentTime() + "`|" + chat);
 	}
 	
-	//³ª ³ª°¡¿ë
-	//"MCHAT`|OUTCHAT`|" + ¹æ¹øÈ£ + ³ª°¡´ÂID //Ã¤ÆÃ¿¡¼­ ³ª°©´Ï´Ù
+	//ë‚˜ ë‚˜ê°€ìš©
+	//"MCHAT`|OUTCHAT`|" + ë°©ë²ˆí˜¸ + ë‚˜ê°€ëŠ”ID //ì±„íŒ…ì—ì„œ ë‚˜ê°‘ë‹ˆë‹¤
 	protected static void delMCHAT(int rn) {
 		MCHAT.remove(rn);
 		out.println("MCHAT`|OUTCHAT`|" + rn + "`|" + ID);
 	}
 	
-	//µé¾î¿Â »ç¶÷ ¸®½ºÆ®Á» ÁÖ¼¼¿ä
-	//"MCHAT`|REQuLIST`|" + ¹æ¹øÈ£ //Ã¤ÆÃ¿¡¼­ ³ª°©´Ï´Ù
+	//ë“¤ì–´ì˜¨ ì‚¬ëŒ ë¦¬ìŠ¤íŠ¸ì¢€ ì£¼ì„¸ìš”
+	//"MCHAT`|REQuLIST`|" + ë°©ë²ˆí˜¸ //ì±„íŒ…ì—ì„œ ë‚˜ê°‘ë‹ˆë‹¤
 	protected static void reqULIST(int rn) {
 		out.println("MCHAT`|REQuLIST`|" + rn);
 	}
 		
-	//Ä£±¸ ÃÊ´ëÇÒ°Å¿¡¿ä!
-	//"MCHAT`|InviteFriend`|" + Ä£±¸ ¾ÆÀÌµğ(µé)
+	//ì¹œêµ¬ ì´ˆëŒ€í• ê±°ì—ìš”!
+	//"MCHAT`|InviteFriend`|" + ì¹œêµ¬ ì•„ì´ë””(ë“¤)
 	protected static void InviteFriend(int rn, String list) {
 		out.println("MCHAT`|InviteFriend`|" + rn + "`|" + list);
 	}
 	
 
-	//ÆÄÀÏ Àü¼Û=========================
-	//¼­¹ö¿¡ ³ª ÆÄÀÏ Àü¼ÛÇÏ°í ½Í´Ù°í ¾Ë·ÁÁÖ´Â ºÎºĞ
+	//íŒŒì¼ ì „ì†¡=========================
+	//ì„œë²„ì— ë‚˜ íŒŒì¼ ì „ì†¡í•˜ê³  ì‹¶ë‹¤ê³  ì•Œë ¤ì£¼ëŠ” ë¶€ë¶„
 	protected static void FileSendWant(String FID) {
 		out.println("FILES`|ASK`|" + FID);
 	}
@@ -493,23 +487,21 @@ public class Client {
 	protected static void setFilematch(String FID, String path) {
 		FileMatch.put(FID, path);
 	}
-	
-	
-	
-	//Æ½ÅÃÅä °ÔÀÓ==============================
-	//°ÔÀÓ ½ÅÃ»
+
+		
+	//í‹±íƒí†  ê²Œì„==============================
+	//ê²Œì„ ì‹ ì²­
 	protected static void startTTT(String FID) {
 		out.println("TTT`|ASK`|" + FID);
 	}
 	
-	//°ÔÀÓ ½ÅÃ»¿¡ ´ëÇÑ ´äÀå => FILES ANS »ó´ëID, Y/N
+	//ê²Œì„ ì‹ ì²­ì— ëŒ€í•œ ë‹µì¥ => FILES ANS ìƒëŒ€ID, Y/N
 	protected static void ANSTTT(String FID, String ANS) {
 		//ANS => "Y" or "N"
 		out.println("TTT`|ANS`|" + FID + "`|" + ANS);
 	}
 	
-	
-	//°ÔÀÓ µµÁß ³»°¡ ¼±ÅÃÇÑ ¸» ³Ñ±â±â=> FILES ANS »ó´ëID, Y/N
+	//ê²Œì„ ë„ì¤‘ ë‚´ê°€ ì„ íƒí•œ ë§ ë„˜ê¸°ê¸°=> FILES ANS ìƒëŒ€ID, Y/N
 	protected static void MYSELECTinTTT(int rn, int x, int y) {
 		//(TTT ING RoonNumber X Y)
 		out.println("TTT`|ING`|"+ rn + "`|" + x + "`|" + y);
@@ -518,13 +510,12 @@ public class Client {
 	protected static void stopclient() {
 		flag = false;
 	}
-
 	
 	public static void main(String[] args) {
 		String file = "serverinfo.dat";
 		int port = 0;
 
-		// server¿¡ ´ëÇÑ È¯°æ ¼³Á¤À» À§ÇÑ ÆÄÀÏ ÀĞ¾î¿À±â
+		// serverì— ëŒ€í•œ í™˜ê²½ ì„¤ì •ì„ ìœ„í•œ íŒŒì¼ ì½ì–´ì˜¤ê¸°
 		try {
 			BufferedReader fileIn = new BufferedReader(new FileReader(file));
 			ip = fileIn.readLine();
@@ -538,91 +529,90 @@ public class Client {
 			e.printStackTrace();
 		}
 
-		// streamÀÌ ¿¬°áµÇ¾ú½À´Ï´Ù!
+		// streamì´ ì—°ê²°ë˜ì—ˆìŠµë‹ˆë‹¤!
 
-		// main screenÀ» ±¸ÃàÇÏ´Â µ¿¾È, ´Ù¸¥°÷¿¡¼­´Â socket»ç¿ë ¸øÇÏ°Ô ¸·¾Æ³õ±â!
-		// mainScreen±¸Ãà±îÁöÀÇ login¾ÈÀÇ ·ÎÁ÷Àº atomicÀÌ º¸ÀåµÊ (¼ø¼­´ë·Î °¡±â ¶§¹®)
+		// main screenì„ êµ¬ì¶•í•˜ëŠ” ë™ì•ˆ, ë‹¤ë¥¸ê³³ì—ì„œëŠ” socketì‚¬ìš© ëª»í•˜ê²Œ ë§‰ì•„ë†“ê¸°!
+		// mainScreenêµ¬ì¶•ê¹Œì§€ì˜ loginì•ˆì˜ ë¡œì§ì€ atomicì´ ë³´ì¥ë¨ (ìˆœì„œëŒ€ë¡œ ê°€ê¸° ë•Œë¬¸)
 		readSocket.set(0);
 		writeSocket.set(0);
 
-		// ±×·³ ·Î±×ÀÎ or È¸¿ø°¡ÀÔ È­¸éÀÌ ¶á´Ù
+		// ê·¸ëŸ¼ ë¡œê·¸ì¸ or íšŒì›ê°€ì… í™”ë©´ì´ ëœ¬ë‹¤
 		new LogIn();
 
-		// main±¸ÃàÀÌ ³¡³ª¸é MainScreen¿¡¼­ ÇÔ¼ö¸¦ ºÒ·¯¼­ socketÀÇ Á¦ÇÑÀ» Ç®¾îÁÙ °Í.
-		// => ÀÌ¶§ºÎÅÍ thread¿¡¼­ ÀÔÃâ·Â°¡´É
-		// ÀÌÁ¦ºÎÅÍ´Â µ¿Àû ÀÌº¥Æ® »Ó! Áï, server¿¡¼­ ¿¬¶ôÀÌ ¿À´øÁö, client°¡ ¸ÕÀú ÀÛµ¿ÇÏ´øÁö µÑ Áß ÇÏ³ª´Ù.
+		// mainêµ¬ì¶•ì´ ëë‚˜ë©´ MainScreenì—ì„œ í•¨ìˆ˜ë¥¼ ë¶ˆëŸ¬ì„œ socketì˜ ì œí•œì„ í’€ì–´ì¤„ ê²ƒ.
+		// => ì´ë•Œë¶€í„° threadì—ì„œ ì…ì¶œë ¥ê°€ëŠ¥
+		// ì´ì œë¶€í„°ëŠ” ë™ì  ì´ë²¤íŠ¸ ë¿! ì¦‰, serverì—ì„œ ì—°ë½ì´ ì˜¤ë˜ì§€, clientê°€ ë¨¼ì € ì‘ë™í•˜ë˜ì§€ ë‘˜ ì¤‘ í•˜ë‚˜ë‹¤.
 
 
 
 		b_pool.execute(new input());
 
-		//ÀÌÁ¦ºÎÅÍ ¼­¹ö¿¡¼­ ¿À´Â ¸ğµç ÀÔ·ÂÀº input thread¸¦ ÅëÇØ¼­ Ã³¸®µÊ
+		//ì´ì œë¶€í„° ì„œë²„ì—ì„œ ì˜¤ëŠ” ëª¨ë“  ì…ë ¥ì€ input threadë¥¼ í†µí•´ì„œ ì²˜ë¦¬ë¨
 	}
 	
-	// ¿À·ÎÁö ÀÔ·Â¸¸ ¹Ş´Â ¾²·¹µå (ÀÔ·Â µé¾î¿À¸é Á¤¸®ÇØ¼­ ÇÊ¿äÇÑ °÷¿¡ ³Ö¾îÁØ´Ù!!)
+	// ì˜¤ë¡œì§€ ì…ë ¥ë§Œ ë°›ëŠ” ì“°ë ˆë“œ (ì…ë ¥ ë“¤ì–´ì˜¤ë©´ ì •ë¦¬í•´ì„œ í•„ìš”í•œ ê³³ì— ë„£ì–´ì¤€ë‹¤!!)
 	public static class input implements Runnable {
-		// Áï, ÀÔ·ÂÀÇ °æ¿ìÀÇ ¼ö°¡ ÀüºÎ Á¸ÀçÇØ¾ßÇÔ!
+		// ì¦‰, ì…ë ¥ì˜ ê²½ìš°ì˜ ìˆ˜ê°€ ì „ë¶€ ì¡´ì¬í•´ì•¼í•¨!
 
 		@Override
 		public void run() {
-			while (readSocket.get() == 0) {}; // 1µÇ¸é Ç®·Á³²
-			// ¿¬¶ô ¹Ş´Â°Ç ¹«Á¶°Ç ÀÌ thread¿¡¼­ Ã³¸®!
+			while (readSocket.get() == 0) {}; // 1ë˜ë©´ í’€ë ¤ë‚¨
+			// ì—°ë½ ë°›ëŠ”ê±´ ë¬´ì¡°ê±´ ì´ threadì—ì„œ ì²˜ë¦¬!
 
 			try {
 			while (flag) {
-				System.out.println("¹ğ¹ğ");
+				System.out.println("ë±…ë±…");
 				String line = in.nextLine();
 				System.out.println(line);
-
 				
-				//»õ·Î¿î Á¤º¸°¡ ¾÷µ¥ÀÌÆ®µÇ´Â ºÎºĞ
+				//ìƒˆë¡œìš´ ì •ë³´ê°€ ì—…ë°ì´íŠ¸ë˜ëŠ” ë¶€ë¶„
 				if(line.startsWith("UPDATE")) {
 					String info[] = line.split("\\`\\|");
 					
-					//Ä£±¸¿äÃ»ÀÌ µé¾î¿Ô¾î¿ä => UPDATE FRIREQ NN name FID
+					//ì¹œêµ¬ìš”ì²­ì´ ë“¤ì–´ì™”ì–´ìš” => UPDATE FRIREQ NN name FID
 					if(info[1].compareTo("FRIREQ") == 0) {
 						int result = MainScreen.showFriendPlus(info[2], info[3]);
 						
-						if(result == 1) { //Ä£±¸¸¦ ¼ö¶ôÇŞ´Ù¸é
+						if(result == 1) { //ì¹œêµ¬ë¥¼ ìˆ˜ë½í–‡ë‹¤ë©´
 							out.println("FRIEND`|OK`|" + info[4]);	
 						}
-						else if(result == 0) {//Ä£±¸¸¦ °ÅÀıÇß´Ù¸é
+						else if(result == 0) {//ì¹œêµ¬ë¥¼ ê±°ì ˆí–ˆë‹¤ë©´
 							out.println("FRIEND`|NO`|" + info[4]);	
 						}
 					}
 
-					//³» Á¤º¸¸¦ ¾÷µ¥ÀÌÆ® ÇÏ¶ó³×? Çü½Ä ; UPDATE MYINFO name nn state_m
+					//ë‚´ ì •ë³´ë¥¼ ì—…ë°ì´íŠ¸ í•˜ë¼ë„¤? í˜•ì‹ ; UPDATE MYINFO name nn state_m
 					else if(info[1].compareTo("MYINFO") == 0) {
 						MainScreen.changeMyInfo(info[2], info[3], info[4]);
 					}
 					
-					//Ä£±¸ Á¤º¸¸¦ ¾÷µ¥ÀÌÆ® ÇØÁÖÀÚ! Çü½Ä ; UPDATE FINFO ID name nn state_m
+					//ì¹œêµ¬ ì •ë³´ë¥¼ ì—…ë°ì´íŠ¸ í•´ì£¼ì! í˜•ì‹ ; UPDATE FINFO ID name nn state_m
 					else if(info[1].compareTo("FINFO") == 0) {
 						String[] finfo = {info[2], info[3], info[4], info[5]};
 						MainScreen.changeFriendInfo(finfo);
 					}
 					
 					
-					//Ä£±¸°¡ µé¾î¿Ô´Ù/³ª°¬´Ù? Çü½Ä ; UPDATE F_state F_ID »óÅÂ(0ÀÌ¸é ¿Â¶óÀÎ)
+					//ì¹œêµ¬ê°€ ë“¤ì–´ì™”ë‹¤/ë‚˜ê°”ë‹¤? í˜•ì‹ ; UPDATE F_state F_ID ìƒíƒœ(0ì´ë©´ ì˜¨ë¼ì¸)
 					else if(info[1].compareTo("F_state") == 0) {
 						MainScreen.changeFriendstate(info[2], info[3]);
 					}
 					
 					
-					//Ä£±¸°¡ Å»ÅğÇŞ´ë¿ä ; UPDATE FBYE F_ID
+					//ì¹œêµ¬ê°€ íƒˆí‡´í–‡ëŒ€ìš” ; UPDATE FBYE F_ID
 					else if(info[1].compareTo("FBYE") == 0) {
 						MainScreen.changeFriendOUT(info[2]);
 					}
 				}
 				
-				// Ä£±¸ °ü·Ã
+				// ì¹œêµ¬ ê´€ë ¨
 				else if(line.startsWith("FRIEND")) {
 					String info[] = line.split("\\`\\|");
 
 					
-					//Ä£±¸ Á¤º¸¸¦ ¹Ş¾Ò´Ù 	=> FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+					//ì¹œêµ¬ ì •ë³´ë¥¼ ë°›ì•˜ë‹¤ 	=> FRIEND INFO [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 					if(info[1].compareTo("INFO") == 0) {
-						//Á¤º¸¸¦ ÀúÀåÇØÁØ´Ù [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
+						//ì •ë³´ë¥¼ ì €ì¥í•´ì¤€ë‹¤ [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 						friendInfo[0] = info[2];
 						friendInfo[1] = info[3];
 						friendInfo[2] = info[4];
@@ -630,44 +620,36 @@ public class Client {
 						friendInfo[4] = info[6];
 						friendInfo[5] = info[7];
 						friendInfo[6] = info[8];
-						
 						friendInfock = true;
 					}
 					
-					// Ä£±¸ Ãß°¡ Å×ÀÌºí¿¡ ´ëÇØ È®ÀÎÇÑ Á¤º¸ => FRIEND`|PCK`|" + T/F
+					// ì¹œêµ¬ ì¶”ê°€ í…Œì´ë¸”ì— ëŒ€í•´ í™•ì¸í•œ ì •ë³´ => FRIEND`|PCK`|" + T/F
 					else if(info[1].compareTo("PCK") == 0) {
-						if(info[2].compareTo("T") == 0) {
-							friend_result[0] = true;
-						}
+						if(info[2].compareTo("T") == 0) friend_result[0] = true;
 						else friend_result[0] = false;
-
 						friend_dbck[0] = true;
 					}
 					
-					// Ä£±¸ Å×ÀÌºí¿¡ ´ëÇØ È®ÀÎÇÑ Á¤º¸ => FRIEND`|FCK`|" + T/F
+					// ì¹œêµ¬ í…Œì´ë¸”ì— ëŒ€í•´ í™•ì¸í•œ ì •ë³´ => FRIEND`|FCK`|" + T/F
 					else if(info[1].compareTo("FCK") == 0) {
-						if(info[2].compareTo("T") == 0) {
-							friend_result[1] = true;
-						}
+						if(info[2].compareTo("T") == 0) friend_result[1] = true;
 						else friend_result[1] = false;
-
 						friend_dbck[1] = true;
 					}
 					
-					// »õ Ä£±¸¸¦ list¿¡ ¾÷µ¥ÀÌÆ® ÇØÁÖ¼¼¿ä~~ => FRIEND`|APND`|" + ID, name, nickname, last_connection, »ó¸Ş
+					// ìƒˆ ì¹œêµ¬ë¥¼ listì— ì—…ë°ì´íŠ¸ í•´ì£¼ì„¸ìš”~~ => FRIEND`|APND`|" + ID, name, nickname, last_connection, ìƒë©”
 					else if(info[1].compareTo("APND") == 0) {
 						String[] finfo = {info[2], info[3], info[4], info[5], info[6]};
 						MainScreen.changeFriend(finfo);
 					}
 				}
 
-				// °Ë»ö
+				// ê²€ìƒ‰
 				else if (line.startsWith("SEARCH")) {
 					String info[] = line.split("\\`\\|");
 
-					// °Ë»ö °á°ú°¡ µ¹¾Æ¿Ô´Ù => SEARCH REQ MF/OF [°Ë»öµÈ Ä£±¸ ¼ö] [Ä£±¸ ¸®½ºÆ®...  ¾î¶»°Ô ³Ñ°ÜÁÙ°ÍÀÎ°¡.... ÀÌ¸§, º°¸í, À½... ´Ù¸¥Á¤º¸µé? ÀÏ´Ü Áö¹ÎÀÌ°¡ GUI¸¸µç°Åº¸°í »ı°¢ÇÏÀÚ]
+					// ê²€ìƒ‰ ê²°ê³¼ê°€ ëŒì•„ì™”ë‹¤ => SEARCH REQ MF/OF [ê²€ìƒ‰ëœ ì¹œêµ¬ ìˆ˜] [ì¹œêµ¬ ë¦¬ìŠ¤íŠ¸...  ì–´ë–»ê²Œ ë„˜ê²¨ì¤„ê²ƒì¸ê°€.... ì´ë¦„, ë³„ëª…, ìŒ... ë‹¤ë¥¸ì •ë³´ë“¤? ì¼ë‹¨ ì§€ë¯¼ì´ê°€ GUIë§Œë“ ê±°ë³´ê³  ìƒê°í•˜ì]
 					if(info[1].compareTo("REQ") == 0) {
-
 						int num = Integer.parseInt(info[3]);
 						
 						for(int i = 1 ; i<=num ; i++) {
@@ -684,11 +666,11 @@ public class Client {
 					}
 				}
 				
-				//¼³Á¤
+				//ì„¤ì •
 				else if (line.startsWith("SETTING")) {
 					String info[] = line.split("\\`\\|");
 
-					// ³» Á¤º¸¸¦ ¹Ş´Â´Ù => SETTING INFO [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]			
+					// ë‚´ ì •ë³´ë¥¼ ë°›ëŠ”ë‹¤ => SETTING INFO [ID NICKNAME NAME PHONE EMAIL BIRTH GITHUB STATE_MESSAGE]			
 					if(info[1].compareTo("INFO") == 0) {
 						int idx = 2;
 
@@ -698,76 +680,73 @@ public class Client {
 						settingInfock = true;
 					}
 
-					// ºñ¹Ğ¹øÈ£ Ã¼Å© ¿äÃ»ÇÑ°Å ÀÀ´ä=> SETTING PWCK OK/NO
+					// ë¹„ë°€ë²ˆí˜¸ ì²´í¬ ìš”ì²­í•œê±° ì‘ë‹µ=> SETTING PWCK OK/NO
 					else if(info[1].compareTo("PWCK") == 0) {
 						if(info[2].compareTo("OK") == 0) PWck[1] = true;
 						else PWck[1] = false;
-						
 						PWck[0] = true;
 					}
 					 
-					// ¼ÂÆÃ ÀúÀå¿¡¼­ ´Ğ³×ÀÓ °ãÄ¡´Â °æ¿ì Ã¼Å© => SETTING NN
+					// ì…‹íŒ… ì €ì¥ì—ì„œ ë‹‰ë„¤ì„ ê²¹ì¹˜ëŠ” ê²½ìš° ì²´í¬ => SETTING NN
 					else if(info[1].compareTo("NN") == 0) {
 						if(info[2].compareTo("OK") == 0) NNck[1] = true;
 						else NNck[1] = false;
-						
 						NNck[0] = true;
-						System.out.println("=>" + NNck[0] + " " + NNck[1]);
 					}
 				}
 
-				//Ã¤ÆÃ¹æ °ü·Ã (1ˆ±)
+				//ì±„íŒ…ë°© ê´€ë ¨ (ì¼ëŒ€ì¼)
 				else if (line.startsWith("PCHAT")) {
 					String info[] = line.split("\\`\\|");
 
-					//PCHAT`|QUSCHAT`|" + Ã¤ÆÃ¿äÃ»ÀÚID + º°¸í + ÀÌ¸§ : 
-					//»ó´ë¹æ ¾Ë·ÁÁÖ¸é¼­ Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾îº¸±â   =>¹Ş´ÂÂÊ : ÀÌ¶§ º°¸í(ÀÌ¸§), ID ÀúÀåÇÏ±â
+					//PCHAT`|QUSCHAT`|" + ì±„íŒ…ìš”ì²­ìID + ë³„ëª… + ì´ë¦„ : 
+					//ìƒëŒ€ë°© ì•Œë ¤ì£¼ë©´ì„œ ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´ë³´ê¸°   =>ë°›ëŠ”ìª½ : ì´ë•Œ ë³„ëª…(ì´ë¦„), ID ì €ì¥í•˜ê¸°
 					if(info[1].compareTo("QUSCHAT") == 0) {
-						//Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾îº¸±â -> ¸ŞÀÎ ÆäÀÌÁö¿¡¼­ ÆË¾÷ ¶ç¿ö¼­ ¹°¾îº¸ÀÚ!
+						//ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´ë³´ê¸° -> ë©”ì¸ í˜ì´ì§€ì—ì„œ íŒì—… ë„ì›Œì„œ ë¬¼ì–´ë³´ì!
 						MainScreen.showPCHAT(info[2], info[3], info[4]);		
 					}
 
-					//»ó´ë¹æÀÌ Ã¤ÆÃÀ» ¼ö¶ôÇŞ´ÂÁö °ÅÀıÇŞ´ÂÁö Ã¼Å©
+					//ìƒëŒ€ë°©ì´ ì±„íŒ…ì„ ìˆ˜ë½í–‡ëŠ”ì§€ ê±°ì ˆí–‡ëŠ”ì§€ ì²´í¬
 					//"PCHAT`|ANSCHAT`|" + ID +"`|" + map.get("NICKNAME")+ "`|" + map.get("NAME")
 					else if(info[1].compareTo("ANSCHAT") == 0) {
-						//»ó´ë¹æÀÇ ¼ö¶ô¿©ºÎ¸¦ Ã¼Å© info[5]& ÀÌ¸§°ú ´Ğ³×ÀÓ ÀúÀå
+						//ìƒëŒ€ë°©ì˜ ìˆ˜ë½ì—¬ë¶€ë¥¼ ì²´í¬ info[5]& ì´ë¦„ê³¼ ë‹‰ë„¤ì„ ì €ì¥
 						PCHAT.get(info[2]).checkAnswer(info[5], info[3], info[4]);
 					}
 					
-					//PCHAT`|receivedCHAT`|" + Ã¤ÆÃº¸³½ÀÚID + Content : Ã¤ÆÃ³»¿ë Àü¼Û (³»°¡ ¹ŞÀº°Å)
+					//PCHAT`|receivedCHAT`|" + ì±„íŒ…ë³´ë‚¸ìID + Content : ì±„íŒ…ë‚´ìš© ì „ì†¡ (ë‚´ê°€ ë°›ì€ê±°)
 					else if(info[1].compareTo("receivedCHAT") == 0) {
-						//¹ŞÀº Ã¤ÆÃ ³»¿ë º¸³»ÁÖ±â!
+						//ë°›ì€ ì±„íŒ… ë‚´ìš© ë³´ë‚´ì£¼ê¸°!
 						PCHAT.get(info[2]).receiveChat(info[3]);
 					}
 					
-					//PCHAT`|OUTCHAT`|" + Ã¤ÆÃº¸³½ÀÚID
+					//PCHAT`|OUTCHAT`|" + ì±„íŒ…ë³´ë‚¸ìID
 					else if(info[1].compareTo("OUTCHAT") == 0) {
-						//¹ŞÀº Ã¤ÆÃ ³»¿ë º¸³»ÁÖ±â!
+						//ë°›ì€ ì±„íŒ… ë‚´ìš© ë³´ë‚´ì£¼ê¸°!
 						if(PCHAT.containsKey(info[2]))
 							PCHAT.get(info[2]).endchat();
 					}
 				}
 
-				//Ã¤ÆÃ¹æ °ü·Ã (¸ÖÆ¼)
+				//ì±„íŒ…ë°© ê´€ë ¨ (ë©€í‹°)
 				else if (line.startsWith("MCHAT")) {
 					String info[] = line.split("\\`\\|");
 
-					//»ó´ë¹æ ¾Ë·ÁÁÖ¸é¼­ Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾îº¸±â  
+					//ìƒëŒ€ë°© ì•Œë ¤ì£¼ë©´ì„œ ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´ë³´ê¸°  
 					//client.get(id).println("MCHAT`|INVCHAT`|" + room_num + "`|" + room_name + "`|" + makerInfo);
 					if(info[1].compareTo("INVCHAT") == 0) {
-						//Ã¤ÆÃÇÒ°Å³Ä°í ¹°¾îº¸±â -> ¸ŞÀÎ ÆäÀÌÁö¿¡¼­ ÆË¾÷ ¶ç¿ö¼­ ¹°¾îº¸ÀÚ!
+						//ì±„íŒ…í• ê±°ëƒê³  ë¬¼ì–´ë³´ê¸° -> ë©”ì¸ í˜ì´ì§€ì—ì„œ íŒì—… ë„ì›Œì„œ ë¬¼ì–´ë³´ì!
 						MainScreen.showMCHAT(Integer.parseInt(info[2]), info[3], info[4]);		
 					}
 					
-					//¹ã ¹øÈ£ ¾Ë·ÁÁÖ´Â ºÎºĞ
-					//"MCHAT`|RoomNumber`|" + ¹æ¹øÈ£
+					//ë°¤ ë²ˆí˜¸ ì•Œë ¤ì£¼ëŠ” ë¶€ë¶„
+					//"MCHAT`|RoomNumber`|" + ë°©ë²ˆí˜¸
 					else if(info[1].compareTo("RoomNumber") == 0) {
 						roomNum = Integer.parseInt(info[2]);
 						ckroomNum = true;
 					}
 					
 					//client.get(id).println("MCHAT`|ANSCHAT`|" + room_num + "`|" + m.getSender_id());
-					//´©±¸ µé¾î¿Ô´Ù°í ¾Ë¸®´Â ºÎºĞ
+					//ëˆ„êµ¬ ë“¤ì–´ì™”ë‹¤ê³  ì•Œë¦¬ëŠ” ë¶€ë¶„
 					else if(info[1].compareTo("ANSCHAT") == 0) {
 						System.out.println(MCHAT.keySet());
 						MCHAT.get(Integer.parseInt(info[2])).notifyCome(info[3]);
@@ -775,28 +754,29 @@ public class Client {
 					
 					//client.get(id).println("MCHAT`|receivedCHAT`|" + room_num 
 					//		+ "`|" + m.getSender_id() + "`|" + senderInfo + "`|" + m.getMessage());
-					//¸Ş¼¼Áö¸¦ ¹Ş¾Ò½À´Ï´Ù
+					//ë©”ì„¸ì§€ë¥¼ ë°›ì•˜ìŠµë‹ˆë‹¤
 					else if(info[1].compareTo("receivedCHAT") == 0) {
-						if(info[3].equals(ID)) 	MCHAT.get(Integer.parseInt(info[2])).receiveChat("³ª", info[5]);
+						if(info[3].equals(ID)) 	MCHAT.get(Integer.parseInt(info[2])).receiveChat("ë‚˜", info[5]);
 						else MCHAT.get(Integer.parseInt(info[2])).receiveChat(info[4], info[5]);
 
 					}
 					
 					//client.get(id).println("MCHAT`|outCHAT`|" + room_num + "`|" + m.getSender_id() + "`|" + senderInfo);
-					//´©±¸ ³ª°£´Ù°í ¾Ë¸®´Â ºÎºĞ
+					//ëˆ„êµ¬ ë‚˜ê°„ë‹¤ê³  ì•Œë¦¬ëŠ” ë¶€ë¶„
 					else if(info[1].compareTo("outCHAT") == 0) {
 						MCHAT.get(Integer.parseInt(info[2])).notifyOut(info[4]);
 					}
 					
-					//"MCHAT`|ulist`|" + ¹æ¹øÈ£ + ¸®½ºÆ® Ã¤¿ï ¼ö ÀÖ´Â Á¤º¸ 
-					//¹æ¿¡ ÀÖ´Â »ç¶÷µé ¸®½ºÆ®
+					//"MCHAT`|ulist`|" + ë°©ë²ˆí˜¸ + ë¦¬ìŠ¤íŠ¸ ì±„ìš¸ ìˆ˜ ìˆëŠ” ì •ë³´ 
+					//ë°©ì— ìˆëŠ” ì‚¬ëŒë“¤ ë¦¬ìŠ¤íŠ¸
 					else if(info[1].compareTo("ulist") == 0) {
 						String userList[] = info[3].split("\\^");
+						@SuppressWarnings("unused")
 						ChattingOnlinePeople people = new ChattingOnlinePeople(userList);
 					}
 					
 					//"MCHAT`|PRECHAT`|" + room_num +  "`|" + cnum + "`|" + messagelist
-					//ÀÔÀåÀü Ã¤ÆÃ º¸¿©ÁÖ´Â ¾ê!
+					//ì…ì¥ì „ ì±„íŒ… ë³´ì—¬ì£¼ëŠ” ì–˜!
 					else if(info[1].compareTo("PRECHAT") == 0) {
 						String ulist[][] = new String[100][2];
 						
@@ -806,29 +786,28 @@ public class Client {
 							ulist[i-4][0] = userList[0];
 							ulist[i-4][1] = userList[1];
 						}
-
 						MCHAT.get(Integer.parseInt(info[2])).PrereceiveChat(Integer.parseInt(info[3]), ulist); ;
 					}
 				}
 
-				//ÆÄÀÏ Àü¼Û °ü·Ã
+				//íŒŒì¼ ì „ì†¡ ê´€ë ¨
 				else if (line.startsWith("FILES")) {
 					String info[] = line.split("\\`\\|");
 
-					//»ó´ë°¡ ³ª¿¡°Ô ÆÄÀÏ º¸³»°í ½Í¾î Çß´Ù°í ¿äÃ» => FILES`|ASK`|" + ID + "`|" + senderInfo
+					//ìƒëŒ€ê°€ ë‚˜ì—ê²Œ íŒŒì¼ ë³´ë‚´ê³  ì‹¶ì–´ í–ˆë‹¤ê³  ìš”ì²­ => FILES`|ASK`|" + ID + "`|" + senderInfo
 					if(info[1].compareTo("ASK") == 0) {
 						int result = MainScreen.confirmFileSend(info[3]);	
 						if(result == 1) out.println("FILES`|ANS`|" + info[2] + "`|" + "Y" );
 						else out.println("FILES`|ANS`|" + info[2] + "`|" + "N" );
 					}
 
-					//»õ socket¸¸µé¶ó±¸ portnumÁÖ¸é ¹Ş¾Æ¼­ thread·Î ³Ñ±ä´Ù => "FILES`|PNUM`|" + fileportnum )
+					//ìƒˆ socketë§Œë“¤ë¼êµ¬ portnumì£¼ë©´ ë°›ì•„ì„œ threadë¡œ ë„˜ê¸´ë‹¤ => "FILES`|PNUM`|" + fileportnum )
 					else if(info[1].compareTo("PNUM") == 0) {
-						//»õ·Î¿î thread°¡ ÀÖ¾î¾ß ÇÏ·Á³ª??
+						//ìƒˆë¡œìš´ threadê°€ ìˆì–´ì•¼ í•˜ë ¤ë‚˜??
 						filepool.execute(new filereceiverThread(Integer.parseInt(info[2]))); 
 					}
 					
-					//»ó´ëÀÇ ÀÀ´äÀ» È®ÀÎÇÑ´Ù! => "FILES`|ANS`|" + ID + "`|" + "Y" + "`|" + fileportnum+1
+					//ìƒëŒ€ì˜ ì‘ë‹µì„ í™•ì¸í•œë‹¤! => "FILES`|ANS`|" + ID + "`|" + "Y" + "`|" + fileportnum+1
 					else if(info[1].compareTo("ANS") == 0) {
 						if(info[3].equals("Y")) {
 							filepool.execute(new filesenderThread(Integer.parseInt(info[4]), info[2])); 							
@@ -836,35 +815,35 @@ public class Client {
 					}
 				}
 				
-				//TTT Àü¼Û °ü·Ã
+				//TTT ì „ì†¡ ê´€ë ¨
 				else if (line.startsWith("TTT")) {
 					String info[] = line.split("\\`\\|");
 
-					//´©±º°¡ °ÔÀÓ¿äÃ»À» º¸³»¿Ô´Ù
+					//ëˆ„êµ°ê°€ ê²Œì„ìš”ì²­ì„ ë³´ë‚´ì™”ë‹¤
 					if(info[1].compareTo("ASK") == 0) {
-						//(TTT ASK A¾ÆÀÌµğ ÀÌ¸§(º°¸í)
+						//(TTT ASK Aì•„ì´ë”” ì´ë¦„(ë³„ëª…)
 						MainScreen.TTTrequset(info[2], info[3]);
 					}
 					
-					//»ó´ë°¡ ¾ÈÇÑ´Ù°í ÇÏ¸é?
+					//ìƒëŒ€ê°€ ì•ˆí•œë‹¤ê³  í•˜ë©´?
 					else if(info[1].compareTo("ANS") == 0) {
 						MainScreen.RejectTTT();
 					}
 					
-					//°ÔÀÓ ÇÒ²¨´Ï±î ÁØºñÇÏ¶ó´Â ½ÅÈ£ => TTT INFO MNN FNN ROOMNUMBER ORDER)
+					//ê²Œì„ í• êº¼ë‹ˆê¹Œ ì¤€ë¹„í•˜ë¼ëŠ” ì‹ í˜¸ => TTT INFO MNN FNN ROOMNUMBER ORDER)
 					else if(info[1].compareTo("INFO") == 0) {
 						TTTGAME t = new TTTGAME(Integer.parseInt(info[4]), Integer.parseInt(info[5]), info[2], info[3]);
 						TTTPOCKET.put(Integer.parseInt(info[4]), t);
 					}
 					
-					//»ó´ë°¡ µĞ ¼ö¸¦ Ç¥½ÃÇÏ¶ó´Â ½ÅÈ£ => TTT NOTI rn x y
+					//ìƒëŒ€ê°€ ë‘” ìˆ˜ë¥¼ í‘œì‹œí•˜ë¼ëŠ” ì‹ í˜¸ => TTT NOTI rn x y
 					else if(info[1].compareTo("NOTI") == 0) {
 						int x = Integer.parseInt(info[3]);
 						int y = Integer.parseInt(info[4]);
 						TTTPOCKET.get(Integer.parseInt(info[2])).checkOPPNblock(x, y);
 					}
 					
-					//°á°ú¸¦ È®ÀÎÇÏ´Â ºÎºĞ => TTT RESULT rn °á°ú
+					//ê²°ê³¼ë¥¼ í™•ì¸í•˜ëŠ” ë¶€ë¶„ => TTT RESULT rn ê²°ê³¼
 					else if(info[1].compareTo("RESULT") == 0) {
 						if(info[3].equals("WIN")) {
 							TTTPOCKET.get(Integer.parseInt(info[2])).Winner(1);
@@ -876,21 +855,20 @@ public class Client {
 							TTTPOCKET.get(Integer.parseInt(info[2])).Winner(-1);
 						}
 						
-						//°á°ú¸¦ º» µÚ¿¡´Â ´õÀÌ»óÀÇ Åë½ÅÀº ¾øÀ½
+						//ê²°ê³¼ë¥¼ ë³¸ ë’¤ì—ëŠ” ë”ì´ìƒì˜ í†µì‹ ì€ ì—†ìŒ
 						TTTPOCKET.remove(Integer.parseInt(info[2]));
-
 					}
 				}
 			}
 
 		} finally {
-			// °³ÀÎÃ¤ÆÃµé ´Ù ³ª°¡±â
+			// ê°œì¸ì±„íŒ…ë“¤ ë‹¤ ë‚˜ê°€ê¸°
 			for (ChattingOne a : PCHAT.values()) {
 				a.FexitChat();
 			}
 			PCHAT.clear();
 
-			// ¸ÖÆ¼Ã¤ÆÃµéµµ ´Ù ³ª°¡±â
+			// ë©€í‹°ì±„íŒ…ë“¤ë„ ë‹¤ ë‚˜ê°€ê¸°
 			for (ChattingMulti a : MCHAT.values()) {
 				int rnum = a.roomnumber;
 				MCHAT.remove(rnum);
@@ -902,7 +880,7 @@ public class Client {
 }
 	
 	
-	//fileÀ» Ã³¸®ÇØÁÖ´Â ¾²·¹µå (º¸³»´Â°Å µû·Î, ¹Ş´Â°Å µû·Î)
+	//fileì„ ì²˜ë¦¬í•´ì£¼ëŠ” ì“°ë ˆë“œ (ë³´ë‚´ëŠ”ê±° ë”°ë¡œ, ë°›ëŠ”ê±° ë”°ë¡œ)
 	public static class filesenderThread implements Runnable{
 
 		int pnum;
@@ -913,43 +891,41 @@ public class Client {
 			this.FID = FID;
 		}
 		
+		@SuppressWarnings("resource")
 		@Override
 		public void run() {
 			try {
 				Socket sendersoc = new Socket(ip, pnum);
 				
-	            OutputStream out =sendersoc.getOutputStream();   //¼­¹ö¿¡ ¹ÙÀÌÆ®´ÜÀ§·Î µ¥ÀÌÅÍ¸¦ º¸³»´Â ½ºÆ®¸²À» °³ÅëÇÕ´Ï´Ù.
-	            DataOutputStream dout = new DataOutputStream(out); //OutputStreamÀ» ÀÌ¿ëÇØ µ¥ÀÌÅÍ ´ÜÀ§·Î º¸³»´Â ½ºÆ®¸²À» °³ÅëÇÕ´Ï´Ù.            
+	            OutputStream out =sendersoc.getOutputStream();   //ì„œë²„ì— ë°”ì´íŠ¸ë‹¨ìœ„ë¡œ ë°ì´í„°ë¥¼ ë³´ë‚´ëŠ” ìŠ¤íŠ¸ë¦¼ì„ ê°œí†µí•©ë‹ˆë‹¤.
+	            DataOutputStream dout = new DataOutputStream(out); //OutputStreamì„ ì´ìš©í•´ ë°ì´í„° ë‹¨ìœ„ë¡œ ë³´ë‚´ëŠ” ìŠ¤íŠ¸ë¦¼ì„ ê°œí†µí•©ë‹ˆë‹¤.            
 	            
-	            /* º¸³»´Â Client ÀÔÀåÀÇ ÄÚµå */
+	            /* ë³´ë‚´ëŠ” Client ì…ì¥ì˜ ì½”ë“œ */
             	String filename = FileMatch.get(FID);
             	FileMatch.remove(FID, filename);            	
             	
-                FileInputStream fin = new FileInputStream(new File(filename)); //FileInputStream - ÆÄÀÏ¿¡¼­ ÀÔ·Â¹Ş´Â ½ºÆ®¸²À» °³ÅëÇÕ´Ï´Ù.
-                byte[] buffer = new byte[1024];        //¹ÙÀÌÆ®´ÜÀ§·Î ÀÓ½ÃÀúÀåÇÏ´Â ¹öÆÛ¸¦ »ı¼ºÇÕ´Ï´Ù.        
-                int len;                               //Àü¼ÛÇÒ µ¥ÀÌÅÍÀÇ ±æÀÌ¸¦ ÃøÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù. 
-                int data=0;                            //Àü¼ÛÈ½¼ö, ¿ë·®À» ÃøÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù.
-                while((len = fin.read(buffer))>0){     //FileInputStreamÀ» ÅëÇØ ÆÄÀÏ¿¡¼­ ÀÔ·Â¹ŞÀº µ¥ÀÌÅÍ¸¦ ¹öÆÛ¿¡ ÀÓ½ÃÀúÀåÇÏ°í ±× ±æÀÌ¸¦ ÃøÁ¤ÇÕ´Ï´Ù.
-                   data++;                        //µ¥ÀÌÅÍÀÇ ¾çÀ» ÃøÁ¤ÇÕ´Ï´Ù.
+                FileInputStream fin = new FileInputStream(new File(filename)); //FileInputStream - íŒŒì¼ì—ì„œ ì…ë ¥ë°›ëŠ” ìŠ¤íŠ¸ë¦¼ì„ ê°œí†µí•©ë‹ˆë‹¤.
+                byte[] buffer = new byte[1024];        //ë°”ì´íŠ¸ë‹¨ìœ„ë¡œ ì„ì‹œì €ì¥í•˜ëŠ” ë²„í¼ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.        
+                int len;                               //ì „ì†¡í•  ë°ì´í„°ì˜ ê¸¸ì´ë¥¼ ì¸¡ì •í•˜ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤. 
+                int data=0;                            //ì „ì†¡íšŸìˆ˜, ìš©ëŸ‰ì„ ì¸¡ì •í•˜ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤.
+                while((len = fin.read(buffer))>0){     //FileInputStreamì„ í†µí•´ íŒŒì¼ì—ì„œ ì…ë ¥ë°›ì€ ë°ì´í„°ë¥¼ ë²„í¼ì— ì„ì‹œì €ì¥í•˜ê³  ê·¸ ê¸¸ì´ë¥¼ ì¸¡ì •í•©ë‹ˆë‹¤.
+                   data++;                        //ë°ì´í„°ì˜ ì–‘ì„ ì¸¡ì •í•©ë‹ˆë‹¤.
                 }        
-                int datas = data;                      //¾Æ·¡ for¹®À» ÅëÇØ data°¡ 0ÀÌµÇ±â¶§¹®¿¡ ÀÓ½ÃÀúÀåÇÑ´Ù.
+
                 fin.close();
-                fin = new FileInputStream(filename);   //FileInputStreamÀÌ ¸¸·áµÇ¾úÀ¸´Ï »õ·Ó°Ô °³ÅëÇÕ´Ï´Ù.
+                fin = new FileInputStream(filename);   //FileInputStreamì´ ë§Œë£Œë˜ì—ˆìœ¼ë‹ˆ ìƒˆë¡­ê²Œ ê°œí†µí•©ë‹ˆë‹¤.
        
-                dout.writeInt(data);                   //µ¥ÀÌÅÍ Àü¼ÛÈ½¼ö¸¦ ¼­¹ö¿¡ Àü¼ÛÇÏ°í, 
-                dout.writeUTF("c_"+filename);               //"c_ÆÄÀÏÀÇ ÀÌ¸§"À» ¼­¹ö¿¡ Àü¼ÛÇÕ´Ï´Ù.
+                dout.writeInt(data);                   //ë°ì´í„° ì „ì†¡íšŸìˆ˜ë¥¼ ì„œë²„ì— ì „ì†¡í•˜ê³ , 
+                dout.writeUTF("c_"+filename);               //"c_íŒŒì¼ì˜ ì´ë¦„"ì„ ì„œë²„ì— ì „ì†¡í•©ë‹ˆë‹¤.
         
                 len = 0;      
-                for(;data>0;data--){              //µ¥ÀÌÅÍ¸¦ ÀĞ¾î¿Ã È½¼ö¸¸Å­ FileInputStream¿¡¼­ ÆÄÀÏÀÇ ³»¿ëÀ» ÀĞ¾î¿É´Ï´Ù.
-                   len = fin.read(buffer);        //FileInputStreamÀ» ÅëÇØ ÆÄÀÏ¿¡¼­ ÀÔ·Â¹ŞÀº µ¥ÀÌÅÍ¸¦ ¹öÆÛ¿¡ ÀÓ½ÃÀúÀåÇÏ°í ±× ±æÀÌ¸¦ ÃøÁ¤ÇÕ´Ï´Ù.
-                   out.write(buffer,0,len);       //¼­¹ö¿¡°Ô ÆÄÀÏÀÇ Á¤º¸(1kbyte¸¸Å­º¸³»°í, ±× ±æÀÌ¸¦ º¸³À´Ï´Ù.
+                for(;data>0;data--){              //ë°ì´í„°ë¥¼ ì½ì–´ì˜¬ íšŸìˆ˜ë§Œí¼ FileInputStreamì—ì„œ íŒŒì¼ì˜ ë‚´ìš©ì„ ì½ì–´ì˜µë‹ˆë‹¤.
+                   len = fin.read(buffer);        //FileInputStreamì„ í†µí•´ íŒŒì¼ì—ì„œ ì…ë ¥ë°›ì€ ë°ì´í„°ë¥¼ ë²„í¼ì— ì„ì‹œì €ì¥í•˜ê³  ê·¸ ê¸¸ì´ë¥¼ ì¸¡ì •í•©ë‹ˆë‹¤.
+                   out.write(buffer,0,len);       //ì„œë²„ì—ê²Œ íŒŒì¼ì˜ ì •ë³´(1kbyteë§Œí¼ë³´ë‚´ê³ , ê·¸ ê¸¸ì´ë¥¼ ë³´ëƒ…ë‹ˆë‹¤.
                 }
-                
-                
-                System.out.println("º¸³»±â ¿Ï·á!");
-				
+
+                System.out.println("ë³´ë‚´ê¸° ì™„ë£Œ!");				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}		
 		}
@@ -962,6 +938,7 @@ public class Client {
 			pnum = portnum;
 		}
 		
+		@SuppressWarnings("resource")
 		@Override
 		public void run() {
 
@@ -970,24 +947,21 @@ public class Client {
 
 				InputStream in = null;
 				FileOutputStream outt = null;
-				in = sendersoc.getInputStream(); // Å¬¶óÀÌ¾ğÆ®·Î ºÎÅÍ ¹ÙÀÌÆ® ´ÜÀ§·Î ÀÔ·ÂÀ» ¹Ş´Â InputStreamÀ» ¾ò¾î¿Í °³ÅëÇÕ´Ï´Ù.
-				DataInputStream din = new DataInputStream(in); // InputStreamÀ» ÀÌ¿ëÇØ µ¥ÀÌÅÍ ´ÜÀ§·Î ÀÔ·ÂÀ» ¹Ş´Â DataInputStreamÀ»
-																// °³ÅëÇÕ´Ï´Ù.
+				in = sendersoc.getInputStream(); // í´ë¼ì´ì–¸íŠ¸ë¡œ ë¶€í„° ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ ì…ë ¥ì„ ë°›ëŠ” InputStreamì„ ì–»ì–´ì™€ ê°œí†µí•©ë‹ˆë‹¤.
+				DataInputStream din = new DataInputStream(in); // InputStreamì„ ì´ìš©í•´ ë°ì´í„° ë‹¨ìœ„ë¡œ ì…ë ¥ì„ ë°›ëŠ” DataInputStreamì„ ê°œí†µí•©ë‹ˆë‹¤.
+				int data = din.readInt(); // Intí˜• ë°ì´í„°ë¥¼ ì „ì†¡ë°›ìŠµë‹ˆë‹¤.
+				String filename = din.readUTF();            //Stringí˜• ë°ì´í„°ë¥¼ ì „ì†¡ë°›ì•„ filename(íŒŒì¼ì˜ ì´ë¦„ìœ¼ë¡œ ì“°ì¼)ì— ì €ì¥í•©ë‹ˆë‹¤.  
 
-				int data = din.readInt(); // IntÇü µ¥ÀÌÅÍ¸¦ Àü¼Û¹Ş½À´Ï´Ù.
-				String filename = din.readUTF();            //StringÇü µ¥ÀÌÅÍ¸¦ Àü¼Û¹Ş¾Æ filename(ÆÄÀÏÀÇ ÀÌ¸§À¸·Î ¾²ÀÏ)¿¡ ÀúÀåÇÕ´Ï´Ù.      
-
-
-				//ÆÄÀÏ °æ·Î¸¦ ¼³Á¤ÇÕ´Ï´Ù.
+				//íŒŒì¼ ê²½ë¡œë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
 				filename = MainScreen.returnPath() + filename;
 				
 
-				File file = new File(filename); // ÀÔ·Â¹ŞÀº FileÀÇ ÀÌ¸§À¸·Î º¹»çÇÏ¿© »ı¼ºÇÕ´Ï´Ù.
-				outt = new FileOutputStream(file); // »ı¼ºÇÑ ÆÄÀÏÀ» Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ Àü¼Û¹Ş¾Æ ¿Ï¼º½ÃÅ°´Â FileOutputStreamÀ» °³ÅëÇÕ´Ï´Ù.
-				byte[] buffer = new byte[1024]; // ¹ÙÀÌÆ®´ÜÀ§·Î ÀÓ½ÃÀúÀåÇÏ´Â ¹öÆÛ¸¦ »ı¼ºÇÕ´Ï´Ù.
+				File file = new File(filename); // ì…ë ¥ë°›ì€ Fileì˜ ì´ë¦„ìœ¼ë¡œ ë³µì‚¬í•˜ì—¬ ìƒì„±í•©ë‹ˆë‹¤.
+				outt = new FileOutputStream(file); // ìƒì„±í•œ íŒŒì¼ì„ í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ì „ì†¡ë°›ì•„ ì™„ì„±ì‹œí‚¤ëŠ” FileOutputStreamì„ ê°œí†µí•©ë‹ˆë‹¤.
+				byte[] buffer = new byte[1024]; // ë°”ì´íŠ¸ë‹¨ìœ„ë¡œ ì„ì‹œì €ì¥í•˜ëŠ” ë²„í¼ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.
 
-				int len = 0; // Àü¼ÛÇÒ µ¥ÀÌÅÍÀÇ ±æÀÌ¸¦ ÃøÁ¤ÇÏ´Â º¯¼öÀÔ´Ï´Ù.
-				for (; data > 0; data--) { // Àü¼Û¹ŞÀº dataÀÇ È½¼ö¸¸Å­ Àü¼Û¹Ş¾Æ¼­ FileOutputStreamÀ» ÀÌ¿ëÇÏ¿© FileÀ» ¿Ï¼º½ÃÅµ´Ï´Ù.
+				int len = 0; // ì „ì†¡í•  ë°ì´í„°ì˜ ê¸¸ì´ë¥¼ ì¸¡ì •í•˜ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤.
+				for (; data > 0; data--) { // ì „ì†¡ë°›ì€ dataì˜ íšŸìˆ˜ë§Œí¼ ì „ì†¡ë°›ì•„ì„œ FileOutputStreamì„ ì´ìš©í•˜ì—¬ Fileì„ ì™„ì„±ì‹œí‚µë‹ˆë‹¤.
 					len = in.read(buffer);
 					outt.write(buffer, 0, len);
 				}
@@ -997,11 +971,8 @@ public class Client {
 				MainScreen.successFileReceive();
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
-		
 	}
 }

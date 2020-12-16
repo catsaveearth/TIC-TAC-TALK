@@ -2,26 +2,17 @@ package client;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
 import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import javax.swing.table.*;
-import com.google.gson.*;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import java.net.*;
 import java.text.*;
 
-import client.Client;
-
+@SuppressWarnings("serial")
 public class MainScreen extends JFrame implements MouseListener, ActionListener {
 
     private String path;
@@ -34,13 +25,13 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
     static JPanel panel = new JPanel();
     
 	static JTable jTable;
-	static String columnNames[] = { "ID", "´Ğ³×ÀÓ(ÀÌ¸§)", "ÇÑÁÙ¸Ş½ÃÁö", "status" };
-	static Object rowData[][] = {}; // Ä£±¸¸ñ·Ï µé¾î°¡¾ß µÉ ÀÚ¸®!
+	static String columnNames[] = { "ID", "ë‹‰ë„¤ì„(ì´ë¦„)", "í•œì¤„ë©”ì‹œì§€", "status" };
+	static Object rowData[][] = {}; // ì¹œêµ¬ëª©ë¡ ë“¤ì–´ê°€ì•¼ ë  ìë¦¬!
 	static DefaultTableModel model = new DefaultTableModel(rowData, columnNames) {
 		public boolean isCellEditable(int i, int c) {
 			return false;
 		}
-
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Class getColumnClass(int column) {
 			try {
 				return getValueAt(0, column).getClass();
@@ -52,10 +43,9 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	};
 	
 	int flag = 0;
-	private JMenuItem menuItemAdd;
 	int searchingFlag = 0;
 	
-	//¿ÜºÎ¿¡¼­ Á¢±ÙÇØ¼­ ¼öÁ¤ÀÌ °¡´ÉÇØ¾ß ÇÒ elementµé
+	//ì™¸ë¶€ì—ì„œ ì ‘ê·¼í•´ì„œ ìˆ˜ì •ì´ ê°€ëŠ¥í•´ì•¼ í•  elementë“¤
 	static JLabel myName;
 	static JLabel message;
 	static int friendnum;
@@ -72,8 +62,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	private static ImageIcon waterImgIcon;
 	
 	public static void setCurrentTime() {
-	      Date date_now = new Date(System.currentTimeMillis()); // ÇöÀç½Ã°£À» °¡Á®¿Í DateÇüÀ¸·Î ÀúÀåÇÑ´Ù
-	      
+	      Date date_now = new Date(System.currentTimeMillis()); // í˜„ì¬ì‹œê°„ì„ ê°€ì ¸ì™€ Dateí˜•ìœ¼ë¡œ ì €ì¥í•œë‹¤
 	      SimpleDateFormat date_format = new SimpleDateFormat("yyyyMMdd");
 	      SimpleDateFormat time_format = new SimpleDateFormat("HH");
 
@@ -86,43 +75,39 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	      time = time + "00";
 	   }
 	
-	//³»Á¤º¸ ¼öÁ¤!!
-	public static void changeMyInfo(String name, String nn, String state_M) { // ¹Û¿¡¼­ ºÎ¸£¸é ³» Á¤º¸¸¦ ¼öÁ¤
+	//ë‚´ì •ë³´ ìˆ˜ì •!!
+	public static void changeMyInfo(String name, String nn, String state_M) { // ë°–ì—ì„œ ë¶€ë¥´ë©´ ë‚´ ì •ë³´ë¥¼ ìˆ˜ì •
 		if (state_M.compareTo("null") == 0)
 			state_M = null;
 
-		// ÀÌ¸§ÀÌ¶û »ó¸Ş¸¦ ¹Ù²Ù¸é µÈ´Ù
+		// ì´ë¦„ì´ë‘ ìƒë©”ë¥¼ ë°”ê¾¸ë©´ ëœë‹¤
 		myName.setText("   " + nn + "(" + name + ")");
 		message.setText(state_M);
 	}
 	
-	//Ä£±¸ Á¤º¸ ¼öÁ¤ - ID name nn state_m
-	public static void changeFriendInfo(String[] info) { //¹Û¿¡¼­ ºÎ¸£¸é Ä£±¸ Á¤º¸ ¼öÁ¤
+	//ì¹œêµ¬ ì •ë³´ ìˆ˜ì • - ID name nn state_m
+	public static void changeFriendInfo(String[] info) { //ë°–ì—ì„œ ë¶€ë¥´ë©´ ì¹œêµ¬ ì •ë³´ ìˆ˜ì •
 		int row = -1;
 
-		//¸ÕÀú Ä£±¸¸¦ Ã£½À´Ï´Ù
+		//ë¨¼ì € ì¹œêµ¬ë¥¼ ì°¾ìŠµë‹ˆë‹¤
   	  	for(int i=0;i<friendnum;i++) {
   			Object line = model.getValueAt(i, 0);
   			if(line.toString().compareTo(info[0]) == 0) row = i;
   	  	}
 
   	  	if(row == -1) return;
-  	  	
 		if (info[3].compareTo("null") == 0) info[3]  = " ";;
   	  	
 	  	model.setValueAt(info[2] + "(" + info[1] + ")", row, 1);
 	  	model.setValueAt(info[3], row, 2);
-
 	}
 	
-	//Á¢¼Ó»óÅÂ ¼öÁ¤
-	public static void changeFriendstate(String ID, String state) { //¹Û¿¡¼­ ºÎ¸£¸é Ä£±¸ Á¢¼Ó»óÅÂ ¼öÁ¤
+	//ì ‘ì†ìƒíƒœ ìˆ˜ì •
+	public static void changeFriendstate(String ID, String state) { //ë°–ì—ì„œ ë¶€ë¥´ë©´ ì¹œêµ¬ ì ‘ì†ìƒíƒœ ìˆ˜ì •
 		int row = -1;
-		String columnNames[] = { "ID", "´Ğ³×ÀÓ(ÀÌ¸§)", "ÇÑÁÙ¸Ş½ÃÁö", "status" };
 
   	  	for(int i=0;i<friendnum;i++) {
   			Object line = model.getValueAt(i, 0);
-  			  			
   			if(line.toString().compareTo(ID) == 0) row = i;
   	  	}
 
@@ -134,9 +119,9 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
   	  		model.setValueAt(offlineIcon, row, 3);
 	}
 	
-	//Ä£±¸ Ãß°¡½Ã ¸®½ºÆ® ¾÷µ¥ÀÌÆ®
-	public static void changeFriend(String[] flist) { // Ä£±¸°¡ Ãß°¡µÉ ½Ã list update
-		// ID, name, nickname, last_connection, »ó¸Ş
+	//ì¹œêµ¬ ì¶”ê°€ì‹œ ë¦¬ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸
+	public static void changeFriend(String[] flist) { // ì¹œêµ¬ê°€ ì¶”ê°€ë  ì‹œ list update
+		// ID, name, nickname, last_connection, ìƒë©”
 		String nn_name = flist[2] + "(" + flist[1] + ")";
 		
 		if (flist[4].compareTo("null") == 0) flist[4]  = " ";
@@ -151,13 +136,12 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		friendnum++;
 	}
 	
-	//Ä£±¸ Å»Åğ½Ã ¸®½ºÆ® ¾÷µ¥ÀÌÆ®
-	public static void changeFriendOUT(String FID) { // Ä£±¸°¡ Ãß°¡µÉ ½Ã list update
+	//ì¹œêµ¬ íƒˆí‡´ì‹œ ë¦¬ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸
+	public static void changeFriendOUT(String FID) { // ì¹œêµ¬ê°€ ì¶”ê°€ë  ì‹œ list update
 		// ID
-		
 		int row = -1;
 
-		//¸ÕÀú Ä£±¸¸¦ Ã£½À´Ï´Ù
+		//ë¨¼ì € ì¹œêµ¬ë¥¼ ì°¾ìŠµë‹ˆë‹¤
   	  	for(int i=0;i<friendnum;i++) {
   			Object line = model.getValueAt(i, 0);
   			if(line.toString().compareTo(FID) == 0) row = i;
@@ -167,31 +151,27 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		
 		model.removeRow(row);
 		friendnum++;
-
 	}
 	
-	
-	//Ä£±¸½ÅÃ» ÆË¾÷ º¸¿©ÁÖ±â
+	//ì¹œêµ¬ì‹ ì²­ íŒì—… ë³´ì—¬ì£¼ê¸°
 	public static int showFriendPlus(String nn, String name) {
 		String[] buttons = {"Yes", "No"};
-		String windowName = "Ä£±¸ ½ÅÃ»";
-		String showMessage = nn + "(" + name + ") ´ÔÀÇ Ä£±¸½ÅÃ»À» ¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?";
-		
-		
-	      int result = JOptionPane.showOptionDialog(null, showMessage, windowName, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
+		String windowName = "ì¹œêµ¬ ì‹ ì²­";
+		String showMessage = nn + "(" + name + ") ë‹˜ì˜ ì¹œêµ¬ì‹ ì²­ì„ ìˆ˜ë½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?";
+
+	      int result = JOptionPane.showOptionDialog(null, showMessage, windowName, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "ë‘ë²ˆì§¸ê°’");
 	      if (result == 0) {
-	    	  return 1; //Ä£±¸¼ö¶ô
+	    	  return 1; //ì¹œêµ¬ìˆ˜ë½
 	      } else if (result == 1) {
-	    	  return 0; //Ä£±¸°ÅÀı
+	    	  return 0; //ì¹œêµ¬ê±°ì ˆ
 	      }
-    	  return 0; //Ä£±¸°ÅÀı
+    	  return 0; //ì¹œêµ¬ê±°ì ˆ
 	}
 	
-	
-	//ÀÏ´îÃ¤ÆÃ½ÅÃ» ÆË¾÷ º¸¿©ÁÖ±â
+	//ì¼ëŒˆì±„íŒ…ì‹ ì²­ íŒì—… ë³´ì—¬ì£¼ê¸°
 	public static void showPCHAT(String fid, String nn, String name) {
-		String windowName = "Ã¤ÆÃ ½ÅÃ»";
-		String showMessage = nn + "(" + name + ") ´ÔÀÇ 1´ë 1 Ã¤ÆÃÀ» ¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?";
+		String windowName = "ì±„íŒ… ì‹ ì²­";
+		String showMessage = nn + "(" + name + ") ë‹˜ì˜ 1ëŒ€ 1 ì±„íŒ…ì„ ìˆ˜ë½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?";
 			
 		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
 
@@ -206,13 +186,13 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 			Client.CHATANSWER(fid, false);
 		}
 	}
-	//¸ÖÆ¼Ã¤ÆÃ½ÅÃ» ÆË¾÷ º¸¿©ÁÖ±â
+	
+	//ë©€í‹°ì±„íŒ…ì‹ ì²­ íŒì—… ë³´ì—¬ì£¼ê¸°
 	public static void showMCHAT(int roomnumber, String roomname, String makerinfo) {
-		String windowName = "Ã¤ÆÃ ½ÅÃ»";
-		String showMessage = roomname + "(by " + makerinfo + ")¹æÀÇ ¸ÖÆ¼ Ã¤ÆÃÀ» ¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?";
+		String windowName = "ì±„íŒ… ì‹ ì²­";
+		String showMessage = roomname + "(by " + makerinfo + ")ë°©ì˜ ë©€í‹° ì±„íŒ…ì„ ìˆ˜ë½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?";
 			
 		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
-
 		if (reply == JOptionPane.YES_OPTION) {
 			Client.MCHATANSWER(roomnumber, roomname, true);
 		} else {
@@ -220,32 +200,33 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		}
 	}
 
-	//¸ÖÆ¼Ã¤ÆÃ ÃÊ´ë
+	//ë©€í‹°ì±„íŒ… ì´ˆëŒ€
 	public static void showInviteInOriginRoom(int rn) {
+		@SuppressWarnings("unused")
 		InviteFriendInOriginRoom IFO = new InviteFriendInOriginRoom(model, rn);
 	}
 
-	// ÆÄÀÏÀü¼Û¿¡¼­ »ó´ë¹æ¿¡°Ô ¹°¾îº¸´Â ºÎºĞ
+	// íŒŒì¼ì „ì†¡ì—ì„œ ìƒëŒ€ë°©ì—ê²Œ ë¬¼ì–´ë³´ëŠ” ë¶€ë¶„
 	public static int confirmFileSend(String nme) {
 		String[] buttons = { "Yes", "No" };
-		String windowName = "file Àü¼Û";
-		String showMessage = nme + "ÀÌ º¸³»´Â ÆÄÀÏÀ» ¹ŞÀ¸½Ã°Ú½À´Ï±î?";
+		String windowName = "file ì „ì†¡";
+		String showMessage = nme + "ì´ ë³´ë‚´ëŠ” íŒŒì¼ì„ ë°›ìœ¼ì‹œê² ìŠµë‹ˆê¹Œ?";
 		int result = JOptionPane.showOptionDialog(null, showMessage, windowName, JOptionPane.YES_NO_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
+				JOptionPane.QUESTION_MESSAGE, null, buttons, "ë‘ë²ˆì§¸ê°’");
 
 		if (result == 0) {
-			return 1; // ¼ö¶ô
+			return 1; // ìˆ˜ë½
 		} else if (result == 1) {
-			return 0; // °ÅÀı
+			return 0; // ê±°ì ˆ
 		}
-		return 0; // °ÅÀı
+		return 0; // ê±°ì ˆ
 	}
 
-	// ÀúÀå °æ·Î¸¦ ¼±ÅÃÇÏÀÚ
+	// ì €ì¥ ê²½ë¡œë¥¼ ì„ íƒí•˜ì
 	public static String returnPath() {
 		JFileChooser h = new JFileChooser();
 		h.setCurrentDirectory(new File("C:\\"));
-		h.setFileSelectionMode(h.DIRECTORIES_ONLY);
+		h.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		File savepath = null;
 
 		int re = h.showSaveDialog(null);
@@ -257,21 +238,20 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		return fname;
 	}
 
-	// ÆÄÀÏÀúÀå ¼º°øÇß´Ù°í ¸Ş¼¼Áö
+	// íŒŒì¼ì €ì¥ ì„±ê³µí–ˆë‹¤ê³  ë©”ì„¸ì§€
 	public static void successFileReceive() {
-		String windowName = "file ÀúÀå";
-		String showMessage = "ÆÄÀÏ ÀúÀå ¼º°ø";
+		String windowName = "file ì €ì¥";
+		String showMessage = "íŒŒì¼ ì €ì¥ ì„±ê³µ";
 		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	
-	//TTT½ÅÃ» ¿äÃ» ¸Ş¼¼Áö
+	//TTTì‹ ì²­ ìš”ì²­ ë©”ì„¸ì§€
 	public static void TTTrequset(String FID, String info) {
-		String windowName = "TTT ½ÅÃ»";
-		String showMessage = info + "ÀÇ °ÔÀÓ ½ÅÃ»À» ¼ö¶ôÇÏ½Ã°Ú½À´Ï±î?";
+		String windowName = "TTT ì‹ ì²­";
+		String showMessage = info + "ì˜ ê²Œì„ ì‹ ì²­ì„ ìˆ˜ë½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?";
 			
 		int reply = JOptionPane.showConfirmDialog(null, showMessage, windowName, JOptionPane.YES_NO_OPTION);
-
 		if (reply == JOptionPane.YES_OPTION) {
 			Client.ANSTTT(FID, "Y");
 		} else {
@@ -279,10 +259,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		}
 	}
 	
-	// TTT °ÅÀı´çÇß´Ù°í ¸Ş¼¼Áö
+	// TTT ê±°ì ˆë‹¹í–ˆë‹¤ê³  ë©”ì„¸ì§€
 	public static void RejectTTT() {
-		String windowName = "TTT °ÅÀı";
-		String showMessage = "°ÔÀÓ ½ÅÃ»À» °ÅÀı´çÇß½À´Ï´Ù.";
+		String windowName = "TTT ê±°ì ˆ";
+		String showMessage = "ê²Œì„ ì‹ ì²­ì„ ê±°ì ˆë‹¹í–ˆìŠµë‹ˆë‹¤.";
 		JOptionPane.showMessageDialog(null, showMessage, windowName, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
@@ -305,14 +285,14 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 			flag += 2;
 			if (flag == 3) {
 				JPopupMenu pm = new JPopupMenu();
-				JMenuItem pm_item1 = new JMenuItem("Á¤º¸");
+				JMenuItem pm_item1 = new JMenuItem("ì •ë³´");
 				pm_item1.addActionListener(this);
 				System.out.println(this);
-				JMenuItem pm_item2 = new JMenuItem("1:1 Ã¤ÆÃ");
+				JMenuItem pm_item2 = new JMenuItem("1:1 ì±„íŒ…");
 				pm_item2.addActionListener(this);
-				JMenuItem pm_item3 = new JMenuItem("ÆÄÀÏÀü¼Û");
+				JMenuItem pm_item3 = new JMenuItem("íŒŒì¼ì „ì†¡");
 				pm_item3.addActionListener(this);
-				JMenuItem pm_item4 = new JMenuItem("°ÔÀÓÇÏ±â");
+				JMenuItem pm_item4 = new JMenuItem("ê²Œì„í•˜ê¸°");
 				pm_item4.addActionListener(this);
 				pm.add(pm_item1);
 				pm.add(pm_item2);
@@ -321,6 +301,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				pm.show(me.getComponent(), me.getX(), me.getY());
 
 				pm_item1.addActionListener(new ActionListener() {
+					@SuppressWarnings("unused")
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						FriendInfo info = new FriendInfo(FID, 1);
@@ -330,12 +311,12 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				pm_item2.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						//ÀÏ´îÃª
+						//ì¼ëŒˆì±—
 						if (Client.ckINPCHAT(FID) || !line2.equals(onlineIcon)) {
-							JOptionPane.showMessageDialog(null, "ÀÌ¹Ì Ã¤ÆÃÁßÀÌ°Å³ª »ó´ë°¡ ¿ÀÇÁ¶óÀÎÀÔ´Ï´Ù.");
+							JOptionPane.showMessageDialog(null, "ì´ë¯¸ ì±„íŒ…ì¤‘ì´ê±°ë‚˜ ìƒëŒ€ê°€ ì˜¤í”„ë¼ì¸ì…ë‹ˆë‹¤.");
 						} else {
-							ChattingOne chatting = new ChattingOne(FID); // Ã¤ÆÃ¹æ Å°°í
-							Client.addPCHAT(FID, chatting); // Ã¤ÆÃÁßÀÎ »ó´ë¿¡ »ó´ë¹æÀ» ´õÇØÁÖ°í
+							ChattingOne chatting = new ChattingOne(FID); // ì±„íŒ…ë°© í‚¤ê³ 
+							Client.addPCHAT(FID, chatting); // ì±„íŒ…ì¤‘ì¸ ìƒëŒ€ì— ìƒëŒ€ë°©ì„ ë”í•´ì£¼ê³ 
 							Client.ckANSWER(FID);
 						}
 					}
@@ -344,12 +325,12 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				pm_item3.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						// ÆÄÀÏ Àü¼Û!
+						// íŒŒì¼ ì „ì†¡!
 						if (!line2.equals(onlineIcon)) {
-							JOptionPane.showMessageDialog(null, "»ó´ë°¡ ¿ÀÇÁ¶óÀÎÀÔ´Ï´Ù.");
+							JOptionPane.showMessageDialog(null, "ìƒëŒ€ê°€ ì˜¤í”„ë¼ì¸ì…ë‹ˆë‹¤.");
 						} else {
 							int rVal = c.showOpenDialog(null);
-							if (rVal == c.APPROVE_OPTION) {
+							if (rVal == JFileChooser.APPROVE_OPTION) {
 								path = c.getSelectedFile().getAbsolutePath();
 								Client.setFilematch(FID, path);
 								Client.FileSendWant(FID);
@@ -360,47 +341,40 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				pm_item4.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						// Æ½ÅÃÅä
+						// í‹±íƒí† 
 						if (!line2.equals(onlineIcon)) {
-							JOptionPane.showMessageDialog(null, "»ó´ë°¡ ¿ÀÇÁ¶óÀÎÀÔ´Ï´Ù.");
+							JOptionPane.showMessageDialog(null, "ìƒëŒ€ê°€ ì˜¤í”„ë¼ì¸ì…ë‹ˆë‹¤.");
 						} else {
-							//Æ½ÅÃÅä ½ÅÃ»
+							//í‹±íƒí†  ì‹ ì²­
 							Client.startTTT(FID);
 						}
 					}
-
 				});
 			}
 			flag = 0;
 		}
 	}
 
-	public void mouseEntered(MouseEvent e) {
-	}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {}
 
-	public void mouseExited(MouseEvent e) {
-	}
-
-	public void mousePressed(MouseEvent e) {
-	}
-
-	public void mouseReleased(MouseEvent e) {
-	}
-
+	@SuppressWarnings("deprecation")
 	public MainScreen() {
       panel.setBackground(new Color(0, 176, 80));
 
-      // ¹öÆ° ÀÖ´Â ºÎºĞ
+      // ë²„íŠ¼ ìˆëŠ” ë¶€ë¶„
       JPanel top = new JPanel();
       top.setPreferredSize(new Dimension(430, 40));
       JLabel topTitle = new JLabel("TIC TAC _ TALK");
       topTitle.setForeground(new Color(0, 54, 78));
-      topTitle.setFont(new Font("°íµñ", Font.BOLD, 24));
+      topTitle.setFont(new Font("ê³ ë”•", Font.BOLD, 24));
       top.add(topTitle);
       top.setBorder(null);
       top.setBackground(new Color(74, 210, 149));
       
-      // ¹öÆ°¿¡ ÀÌ¹ÌÁö ³Ö°í ¹öÆ° Å©±â¿¡ ¸Â°Ô ÀÌ¹ÌÁö ³Ö±â
+      // ë²„íŠ¼ì— ì´ë¯¸ì§€ ë„£ê³  ë²„íŠ¼ í¬ê¸°ì— ë§ê²Œ ì´ë¯¸ì§€ ë„£ê¸°
       ImageIcon icon = new ImageIcon("image/searching.png");
       Image searchImage = icon.getImage();
       Image searchChangingImg = searchImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
@@ -423,13 +397,13 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       top.add(searching);
 
       
-      //searching ¹öÆ° -> ³¡! °ÇµéÁö ¸¶¼¼¿ä
+      //searching ë²„íŠ¼ -> ë! ê±´ë“¤ì§€ ë§ˆì„¸ìš”
       searching.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent event) {
                if (event.getButton() == MouseEvent.BUTTON1) {
                    JPopupMenu pm = new JPopupMenu();
-                   JMenuItem pm_item1 = new JMenuItem("³» Ä£±¸ Ã£±â");
-                   JMenuItem pm_item2 = new JMenuItem("»õ Ä£±¸ Ã£±â");
+                   JMenuItem pm_item1 = new JMenuItem("ë‚´ ì¹œêµ¬ ì°¾ê¸°");
+                   JMenuItem pm_item2 = new JMenuItem("ìƒˆ ì¹œêµ¬ ì°¾ê¸°");
                    
                    pm.add(pm_item1);
                    pm.add(pm_item2);
@@ -437,18 +411,19 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 
 
                    pm_item1.addActionListener(new ActionListener() {
-                	   @Override
+                	   @SuppressWarnings("unused")
+					@Override
                 	   public void actionPerformed(ActionEvent e) {
-                		   //³» Ä£±¸ Ã£±â
+                		   //ë‚´ ì¹œêµ¬ ì°¾ê¸°
                 		   FindMyFriend finder = new FindMyFriend();
                 	   }
-                	   
                    });
                    
                    pm_item2.addActionListener(new ActionListener() {
-                	   @Override
+                	   @SuppressWarnings("unused")
+					@Override
                 	   public void actionPerformed(ActionEvent e) {
-                		   //»õ Ä£±¸ Ã£±â
+                		   //ìƒˆ ì¹œêµ¬ ì°¾ê¸°
                 		   FindAllFriend finder = new FindAllFriend();
                 	   }
                    });                   
@@ -463,10 +438,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       chatting.setIcon(chatChangingIcon);
       top.add(chatting);
       
-      
-      //¸ÖÆ¼·ë ÃÊ´ë ¹öÆ° ¾×¼Ç
+      //ë©€í‹°ë£¸ ì´ˆëŒ€ ë²„íŠ¼ ì•¡ì…˜
       chatting.addActionListener(new ActionListener() {
-         @Override
+         @SuppressWarnings("unused")
+		@Override
          public void actionPerformed(ActionEvent e) {
             InviteFriend invite = new InviteFriend(model);
          }
@@ -478,50 +453,40 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       setting.setBounds(400, 10, 30, 30);
       setting.setIcon(settingChangeIcon);
       
-      //³»Á¤º¸ ¼öÁ¤ ¹öÆ° ¾×¼Ç -> ³¡! °ÇµéÁö ¸¶¼¼¿ä
+      //ë‚´ì •ë³´ ìˆ˜ì • ë²„íŠ¼ ì•¡ì…˜ -> ë! ê±´ë“¤ì§€ ë§ˆì„¸ìš”
       setting.addActionListener(new ActionListener() {
-         @Override
+         @SuppressWarnings("unused")
+		@Override
          public void actionPerformed(ActionEvent e) {
             PWCheck check = new PWCheck();
          }
       });
       
       
-      //±âº» Á¤º¸ °¡Á®¿À±â!=========================================
+      //ê¸°ë³¸ ì •ë³´ ê°€ì ¸ì˜¤ê¸°!=========================================
       String[] binfo = Client.basicinfo();
       
-      // ³» Á¤º¸ ºÎºĞ
+      // ë‚´ ì •ë³´ ë¶€ë¶„
       JPanel myInfo = new JPanel();
       GridLayout layout = new GridLayout(2, 2);
       JPanel blank = new JPanel();
-      JPanel blank2 = new JPanel();
       myInfo.setLayout(layout);
-      JLabel myInfo2 = new JLabel("   ³» Á¤º¸");
-      myInfo2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 11));
+      JLabel myInfo2 = new JLabel("   ë‚´ ì •ë³´");
+      myInfo2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 11));
       myInfo2.setPreferredSize(new Dimension(430, 13));
-
-      ImageIcon addIcon = new ImageIcon("image\\add.png");
-      Image addImage = addIcon.getImage();
-	  Image addChangingImg = addImage.getScaledInstance(27, 27, Image.SCALE_SMOOTH);
-	  ImageIcon addChangeIcon = new ImageIcon(addChangingImg);
-
-      
-	  myInfo.setPreferredSize(new Dimension(430, 60));
+      myInfo.setPreferredSize(new Dimension(430, 60));
       myInfo.setBorder(null);
       myInfo.setBackground(new Color(255, 229, 110));
       blank.setBackground(new Color(255, 229, 110));
       
 	  myName = new JLabel("   " + binfo[0] + "(" + binfo[1] + ")");
-      myName.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 13));
+      myName.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 13));
       message = new JLabel(binfo[2]);
-      message.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 13));
-      JLabel text1 = new JLabel("Ä£±¸¸ñ·Ï");
-      
-
-      // Ä£±¸¸ñ·Ï ºÎºĞ
+      message.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 13));
+      // ì¹œêµ¬ëª©ë¡ ë¶€ë¶„
       JPanel friend = new JPanel();
-      JLabel friend2 = new JLabel("   Ä£±¸¸ñ·Ï");
-      friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 11));
+      JLabel friend2 = new JLabel("   ì¹œêµ¬ëª©ë¡");
+      friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 11));
       friend2.setPreferredSize(new Dimension(430, 13));
       friend2.setForeground(Color.white);
       friend.setPreferredSize(new Dimension(430, 380));
@@ -537,20 +502,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       Image offline = offlineImgIcon.getImage();
       Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
       offlineIcon = new ImageIcon(offlineImg);
-
-      String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-      Icon status = new ImageIcon();
       
-      if (statusStr == "online") {
-         status = new ImageIcon("image\\online.png");
-      } else if (statusStr == "offline") {
-         status = new ImageIcon("image\\offline.png");
-      }
-
-      
-      //Ä£±¸¸ñ·Ï ºÒ·¯¿À±â!=========================================
+      //ì¹œêµ¬ëª©ë¡ ë¶ˆëŸ¬ì˜¤ê¸°!=========================================
       String[][] friendlist = Client.friendList();
-      // String[][ID, name, nickname, last_connection, »ó¸Ş]
+      // String[][ID, name, nickname, last_connection, ìƒë©”]
 
       if(friendlist != null) {
     	  int idx = 0;
@@ -567,7 +522,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 				
 				String line = fl[1] + "(" + fl[0] + ")";
 
-				// »ó¸Ş°¡ nullÀÏ °æ¿ì Ã³¸®ÇØÁÖ±â
+				// ìƒë©”ê°€ nullì¼ ê²½ìš° ì²˜ë¦¬í•´ì£¼ê¸°
 				if (fl[3].compareTo("null") == 0) fl[3] = " ";
 
 				if (fl[2].compareTo("0") == 0) {
@@ -581,29 +536,25 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 		}
     
       
-      //¿Ö ÀÌ°Å ¼±ÅÃÀÌ ¾È¸ÔÁö?? ³ªÁß¿¡¹°¾îº¸±â
+      //ì™œ ì´ê±° ì„ íƒì´ ì•ˆë¨¹ì§€?? ë‚˜ì¤‘ì—ë¬¼ì–´ë³´ê¸°
       jTable = new JTable(model);
-      jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
+      jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
       jTable.addMouseListener(this);
       jTable.setGridColor(new Color(0,128,0));
       jTable.setBackground(Color.white);
       jTable.setFillsViewportHeight(true);
-      JTableHeader header = jTable.getTableHeader();
-      jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
-      jTable.getColumn("ÇÑÁÙ¸Ş½ÃÁö").setPreferredWidth(250);
+      jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
+      jTable.getColumn("í•œì¤„ë©”ì‹œì§€").setPreferredWidth(250);
       jTable.getColumn("status").setPreferredWidth(50);
       JScrollPane jScollPane = new JScrollPane(jTable);
       jScollPane.setPreferredSize(new Dimension(425, 350));
       jTable.getTableHeader().setReorderingAllowed(false);
       jTable.getTableHeader().setResizingAllowed(false);
-   
-      
       jTable.setRowHeight(30);
-
       jTable.setGridColor(new Color(0, 54, 78));
 	  jTable.setShowVerticalLines(false);
       
-      // °ø°øµ¥ÀÌÅÍ ºÎºĞ
+      // ê³µê³µë°ì´í„° ë¶€ë¶„
 	  try {
 	      String serviceKey = "fYdY4%2Byu3dmw0JWGdeMYIZwa2DYeLyJ7SKJINiF2j6%2BNLVvLQc11vBK0LS7k%2FNWyaTap78EXXRJd%2FZRUH6aLCA%3D%3D";
 	      String dataType = "JSON";
@@ -612,21 +563,19 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	      
 	       StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService/getUltraSrtFcst"); /*URL*/
 	       urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey); /*Service Key*/
-	       urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*ÆäÀÌÁö¹øÈ£*/
+	       urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*í˜ì´ì§€ë²ˆí˜¸*/
 	       try {
 			urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("50", "UTF-8"));
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	       urlBuilder.append("&" + URLEncoder.encode("dataType","UTF-8") + "=" + URLEncoder.encode(dataType, "UTF-8")); /*¿äÃ»ÀÚ·áÇü½Ä(XML/JSON)Default: XML*/
+	       urlBuilder.append("&" + URLEncoder.encode("dataType","UTF-8") + "=" + URLEncoder.encode(dataType, "UTF-8")); /*ìš”ì²­ìë£Œí˜•ì‹(XML/JSON)Default: XML*/
 	       urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(date, "UTF-8"));
 	       urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(time, "UTF-8"));
-	       urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("62", "UTF-8")); /*¿¹º¸ÁöÁ¡ÀÇ X ÁÂÇ¥°ª*/
-	       urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("124", "UTF-8")); /*¿¹º¸ÁöÁ¡ Y ÁÂÇ¥*/
-	       //¼öÁ¤±¸ º¹Á¤µ¿ÀÇ ÁÂÇ¥ (62, 124)
-	      
-	       
+	       urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("62", "UTF-8")); /*ì˜ˆë³´ì§€ì ì˜ X ì¢Œí‘œê°’*/
+	       urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("124", "UTF-8")); /*ì˜ˆë³´ì§€ì  Y ì¢Œí‘œ*/
+	       //ìˆ˜ì •êµ¬ ë³µì •ë™ì˜ ì¢Œí‘œ (62, 124)
+
 	       URL url = new URL(urlBuilder.toString());
 	       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	       conn.setRequestMethod("GET");
@@ -683,19 +632,19 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 	
 	     }
 	
-	     SKYcode.put("1", "¸¼À½");
-	     SKYcode.put("2", "±¸¸§Á¶±İ"); //»èÁ¦ (2019.06.4)
-	     SKYcode.put("3", "±¸¸§¸¹À½");
-	     SKYcode.put("4", "Èå¸²");
+	     SKYcode.put("1", "ë§‘ìŒ");
+	     SKYcode.put("2", "êµ¬ë¦„ì¡°ê¸ˆ"); //ì‚­ì œ (2019.06.4)
+	     SKYcode.put("3", "êµ¬ë¦„ë§ìŒ");
+	     SKYcode.put("4", "íë¦¼");
 	
-         PTYcode.put("0", "°­¼ö·® ¾øÀ½");
-         PTYcode.put("1", "ºñ");
-         PTYcode.put("2", "ºñ/´«"); //»èÁ¦ (2019.06.4)
-         PTYcode.put("3", "´«");
-         PTYcode.put("4", "¼Ò³ª±â");
-         PTYcode.put("5", "ºø¹æ¿ï");
-         PTYcode.put("6", "ºø¹æ¿ï/´«³¯¸²");
-         PTYcode.put("7", "´«³¯¸²");
+         PTYcode.put("0", "ê°•ìˆ˜ëŸ‰ ì—†ìŒ");
+         PTYcode.put("1", "ë¹„");
+         PTYcode.put("2", "ë¹„/ëˆˆ"); //ì‚­ì œ (2019.06.4)
+         PTYcode.put("3", "ëˆˆ");
+         PTYcode.put("4", "ì†Œë‚˜ê¸°");
+         PTYcode.put("5", "ë¹—ë°©ìš¸");
+         PTYcode.put("6", "ë¹—ë°©ìš¸/ëˆˆë‚ ë¦¼");
+         PTYcode.put("7", "ëˆˆë‚ ë¦¼");
       } catch (Exception e) {
     	  System.out.println("Exception");
     	  e.printStackTrace();
@@ -711,14 +660,14 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       //datePanel.setBorder(new TitledBorder(new LineBorder(Color.yellow,2)));
       JLabel yearLabel = new JLabel(date.substring(0, 4) + "/" + date.substring(4, 6) + "/" + date.substring(6));
       yearLabel.setForeground(Color.white);
-      yearLabel.setFont(new Font("°íµñ", Font.BOLD, 12));
+      yearLabel.setFont(new Font("ê³ ë”•", Font.BOLD, 12));
       //yearLabel.setPreferredSize(new Dimension(60, 38));
       yearLabel.setHorizontalAlignment(JLabel.CENTER);
       yearLabel.setPreferredSize(new Dimension(70, 20));
       
       JLabel timeLabel = new JLabel(time.substring(0, 2) + ":" + time.substring(2));
       timeLabel.setForeground(Color.white);
-      timeLabel.setFont(new Font("°íµñ", Font.BOLD, 27));
+      timeLabel.setFont(new Font("ê³ ë”•", Font.BOLD, 27));
       //timeLabel.setPreferredSize(new Dimension(55, 35));
       timeLabel.setHorizontalAlignment(JLabel.CENTER);
       timeLabel.setPreferredSize(new Dimension(70, 38));
@@ -748,11 +697,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       //temp.setBorder(new TitledBorder(new LineBorder(Color.yellow,2)));
       temp.setPreferredSize(new Dimension(40, 93));
       
-      //////////////// ÀÌ¹ÌÁö //////////////////
+      //////////////// ì´ë¯¸ì§€ //////////////////
       //temp.setBackground(Color.white);
-      JLabel tempTextLabel = new JLabel(data[0] + "¡É");
+      JLabel tempTextLabel = new JLabel(data[0] + "â„ƒ");
       tempTextLabel.setForeground(Color.white);
-      tempTextLabel.setFont(new Font("°íµñ", Font.BOLD, 25));
+      tempTextLabel.setFont(new Font("ê³ ë”•", Font.BOLD, 25));
       tempTextLabel.setPreferredSize(new Dimension(80, 35));
       tempTextLabel.setHorizontalAlignment(JLabel.CENTER);
       
@@ -763,14 +712,14 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       String SKYstr = SKYcode.get(data[1]);
       
-      if (SKYstr.contentEquals("¸¼À½")) {
-    	  skyImgIcon = new ImageIcon("image/¸¼À½.png");
-      } else if (SKYstr.contentEquals("±¸¸§Á¶±İ")) {
-    	  skyImgIcon = new ImageIcon("image/±¸¸§Á¶±İ.png");
-      } else if (SKYstr.contentEquals("±¸¸§¸¹À½")) {
-    	  skyImgIcon = new ImageIcon("image/±¸¸§¸¹À½.png");
-      } else if (SKYstr.contentEquals("Èå¸²")) {
-    	  skyImgIcon = new ImageIcon("image/Èå¸².png");
+      if (SKYstr.contentEquals("ë§‘ìŒ")) {
+    	  skyImgIcon = new ImageIcon("image/ë§‘ìŒ.png");
+      } else if (SKYstr.contentEquals("êµ¬ë¦„ì¡°ê¸ˆ")) {
+    	  skyImgIcon = new ImageIcon("image/êµ¬ë¦„ì¡°ê¸ˆ.png");
+      } else if (SKYstr.contentEquals("êµ¬ë¦„ë§ìŒ")) {
+    	  skyImgIcon = new ImageIcon("image/êµ¬ë¦„ë§ìŒ.png");
+      } else if (SKYstr.contentEquals("íë¦¼")) {
+    	  skyImgIcon = new ImageIcon("image/íë¦¼.png");
       }
       
       Image skyimg = skyImgIcon.getImage();
@@ -780,10 +729,10 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       //temp.setBorder(new TitledBorder(new LineBorder(Color.yellow,2)));
       //sky.setPreferredSize(new Dimension(40, 93));
       
-      //////////////////////// ÀÌ¹ÌÁö //////////////////////////
+      //////////////////////// ì´ë¯¸ì§€ //////////////////////////
       JLabel skyTextLabel = new JLabel(SKYcode.get(data[1]));
       skyTextLabel.setForeground(Color.white);
-      skyTextLabel.setFont(new Font("°íµñ", Font.BOLD, 11));
+      skyTextLabel.setFont(new Font("ê³ ë”•", Font.BOLD, 11));
       skyTextLabel.setPreferredSize(new Dimension(55, 30));
       skyTextLabel.setHorizontalAlignment(JLabel.CENTER);
       
@@ -794,22 +743,22 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       
       String PTYstr = PTYcode.get(data[1]);
       System.out.println(PTYstr);
-      if (PTYstr.contentEquals("°­¼ö·® ¾øÀ½")) {
-    	  waterImgIcon = new ImageIcon("image/°­¼ö·®¾øÀ½.png");
-      } else if (PTYstr.contentEquals("ºñ")) {
-    	  waterImgIcon = new ImageIcon("image/ºñ.png");
-      } else if (PTYstr.contentEquals("ºñ/´«")) {
-    	  waterImgIcon = new ImageIcon("image/ºñ´«.png");
-      } else if (PTYstr.contentEquals("´«")) {
-    	  waterImgIcon = new ImageIcon("image/´«.png");
-      } else if (PTYstr.contentEquals("¼Ò³ª±â")) {
-    	  waterImgIcon = new ImageIcon("image/¼Ò³ª±â.png");
-      } else if (PTYstr.contentEquals("ºø¹æ¿ï")) {
-    	  waterImgIcon = new ImageIcon("image/ºø¹æ¿ï.png");
-      } else if (PTYstr.contentEquals("ºø¹æ¿ï/´«³¯¸²")) {
-    	  waterImgIcon = new ImageIcon("image/ºø¹æ¿ï´«³¯¸².png");
-      } else if (PTYstr.contentEquals("´«³¯¸²")) {
-    	  waterImgIcon = new ImageIcon("image/´«³¯¸².png");
+      if (PTYstr.contentEquals("ê°•ìˆ˜ëŸ‰ ì—†ìŒ")) {
+    	  waterImgIcon = new ImageIcon("image/ê°•ìˆ˜ëŸ‰ì—†ìŒ.png");
+      } else if (PTYstr.contentEquals("ë¹„")) {
+    	  waterImgIcon = new ImageIcon("image/ë¹„.png");
+      } else if (PTYstr.contentEquals("ë¹„/ëˆˆ")) {
+    	  waterImgIcon = new ImageIcon("image/ë¹„ëˆˆ.png");
+      } else if (PTYstr.contentEquals("ëˆˆ")) {
+    	  waterImgIcon = new ImageIcon("image/ëˆˆ.png");
+      } else if (PTYstr.contentEquals("ì†Œë‚˜ê¸°")) {
+    	  waterImgIcon = new ImageIcon("image/ì†Œë‚˜ê¸°.png");
+      } else if (PTYstr.contentEquals("ë¹—ë°©ìš¸")) {
+    	  waterImgIcon = new ImageIcon("image/ë¹—ë°©ìš¸.png");
+      } else if (PTYstr.contentEquals("ë¹—ë°©ìš¸/ëˆˆë‚ ë¦¼")) {
+    	  waterImgIcon = new ImageIcon("image/ë¹—ë°©ìš¸ëˆˆë‚ ë¦¼.png");
+      } else if (PTYstr.contentEquals("ëˆˆë‚ ë¦¼")) {
+    	  waterImgIcon = new ImageIcon("image/ëˆˆë‚ ë¦¼.png");
       }
       
       Image waterimg = waterImgIcon.getImage();
@@ -819,7 +768,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
 
       JLabel waterTextLabel = new JLabel(" " + PTYcode.get(data[1]));
       waterTextLabel.setForeground(Color.white);
-      waterTextLabel.setFont(new Font("°íµñ", Font.BOLD, 13));
+      waterTextLabel.setFont(new Font("ê³ ë”•", Font.BOLD, 13));
       waterTextLabel.setPreferredSize(new Dimension(55, 30));
       waterTextLabel.setHorizontalAlignment(JLabel.CENTER);
 
@@ -845,7 +794,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
       myInfo.add(message);
       
       friend.add(friend2);
-      friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
+      friend.add(jScollPane, "Left"); //JScrooPaneì— ë‹´ì€ JListë¥¼ ë‚˜íƒ€ë‚´ê¸° ìœ„í•´ ë°°ì¹˜í•œë‹¤.
 
       panel.add(top);
       panel.add(myInfo);
@@ -870,7 +819,7 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
           public void windowClosing(WindowEvent e) {
         	  System.out.println(e);
           	String[] buttons = {"YES", "NO"};
-    		int result = JOptionPane.showOptionDialog(null, "Á¾·áÇÏ½Ã°Ú½À´Ï±î?", "Á¾·á", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
+    		int result = JOptionPane.showOptionDialog(null, "ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì¢…ë£Œ", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "ë‘ë²ˆì§¸ê°’");
     		if (result == 0) {
     			Client.stopclient();
     			System.exit(0);
@@ -884,13 +833,11 @@ public class MainScreen extends JFrame implements MouseListener, ActionListener 
           public void windowActivated(WindowEvent e) {}
       });
       
-      //¸ğµç ±¸ÃàÀÌ ³¡³ª¸é socketÇ®¾îÁÜ
+      //ëª¨ë“  êµ¬ì¶•ì´ ëë‚˜ë©´ socketí’€ì–´ì¤Œ
       Client.freeSocket();
    }
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 }

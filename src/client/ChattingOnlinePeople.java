@@ -1,10 +1,9 @@
 package client;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class ChattingOnlinePeople extends JFrame {
 	JTable jTable;
 	DefaultTableModel model;
@@ -13,13 +12,13 @@ public class ChattingOnlinePeople extends JFrame {
 		JFrame frame = new JFrame();
 		JPanel friend = new JPanel();
 		
-	    JLabel friend2 = new JLabel("Âü¿©ÀÚ¸ñ·Ï");
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
+	    JLabel friend2 = new JLabel("ì°¸ì—¬ìëª©ë¡");
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
 	    //friend2.setPreferredSize(new Dimension(430, 13));
 	    friend.setPreferredSize(new Dimension(200, 30));
 	    friend.setBackground(new Color(74, 210, 149));
 
-	    String columnNames[] = { "´Ğ³×ÀÓ(ÀÌ¸§)" };
+	    String columnNames[] = { "ë‹‰ë„¤ì„(ì´ë¦„)" };
 	    Object rowData[][] = { };    
 	    model = new DefaultTableModel(rowData, columnNames) {
 	       public boolean isCellEditable(int i, int c) {
@@ -33,8 +32,8 @@ public class ChattingOnlinePeople extends JFrame {
 	    }
 	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 227));
 	    JPanel table = new JPanel();
@@ -46,7 +45,7 @@ public class ChattingOnlinePeople extends JFrame {
 	    
 	    friend.add(friend2);
 	    table.add(jScollPane);
-	    //friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
+	    //friend.add(jScollPane, "Left"); //JScrooPaneì— ë‹´ì€ JListë¥¼ ë‚˜íƒ€ë‚´ê¸° ìœ„í•´ ë°°ì¹˜í•œë‹¤.
 	    //frame.add(friend2);
 	    frame.add(friend, BorderLayout.NORTH);
 	    frame.add(table);

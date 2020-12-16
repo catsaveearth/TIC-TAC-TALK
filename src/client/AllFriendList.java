@@ -8,11 +8,10 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 /**
- * ¿Ï·á
+ * ì™„ë£Œ
  * */
 
-
-
+@SuppressWarnings("serial")
 public class AllFriendList extends JFrame implements MouseListener {
 	JTable jTable;
 	DefaultTableModel model;
@@ -23,24 +22,25 @@ public class AllFriendList extends JFrame implements MouseListener {
 		Object line = model.getValueAt(row, 0);
 		String FID = idmatch.get(line.toString());
 
-		String[] buttons = {"Ä£±¸½ÅÃ»", "Á¤º¸º¸±â"};
-		int result = JOptionPane.showOptionDialog(null, "Ä£±¸½ÅÃ»ÇÏ½Ã°Ú½À´Ï±î?", "Ä£±¸½ÅÃ»", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
+		String[] buttons = {"ì¹œêµ¬ì‹ ì²­", "ì •ë³´ë³´ê¸°"};
+		int result = JOptionPane.showOptionDialog(null, "ì¹œêµ¬ì‹ ì²­í•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì¹œêµ¬ì‹ ì²­", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "ë‘ë²ˆì§¸ê°’");
 		if (result == 0) {
 		
 			int requsetResult = Client.requsetFriend(FID);			
-			//1 : Ä£±¸½ÅÃ» ¿Ï·á, 0 : Ä£±¸½ÅÃ» ½ÇÆĞ (ÀÌ¹Ì µÇ¾îÀÖ´Â°ÅÀÓ)
+			//1 : ì¹œêµ¬ì‹ ì²­ ì™„ë£Œ, 0 : ì¹œêµ¬ì‹ ì²­ ì‹¤íŒ¨ (ì´ë¯¸ ë˜ì–´ìˆëŠ”ê±°ì„)
 
 			if(requsetResult == 1) {
-				JOptionPane.showMessageDialog(null,  "Ä£±¸½ÅÃ»ÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù.");
+				JOptionPane.showMessageDialog(null,  "ì¹œêµ¬ì‹ ì²­ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
 			}
 			else {
-				JOptionPane.showMessageDialog(null,  "ÀÌ¹Ì Ä£±¸½ÅÃ»À» ÇÑ »óÅÂÀÔ´Ï´Ù");
+				JOptionPane.showMessageDialog(null,  "ì´ë¯¸ ì¹œêµ¬ì‹ ì²­ì„ í•œ ìƒíƒœì…ë‹ˆë‹¤");
 			}
 			
 		} else if (result == 1) {
 			System.out.println(FID);
+			@SuppressWarnings("unused")
 			FriendInfo info = new FriendInfo(FID.toString(), 0);
-			//Á¤º¸È®ÀÎÇÒ¶© ±»ÀÌ Ã¢ ¾È´İ¾ÆµµµÊ
+			//ì •ë³´í™•ì¸í• ë• êµ³ì´ ì°½ ì•ˆë‹«ì•„ë„ë¨
 		}
 	}
 	
@@ -59,23 +59,14 @@ public class AllFriendList extends JFrame implements MouseListener {
 	    Image offline = offlineImgIcon.getImage();
 	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
 	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-	    Icon status = new ImageIcon();
+
 	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
-	    
-	    //¿ÜºÎ Ä£±¸ °Ë»öÇÑ ¸ñ·Ï ºÒ·¯¿À±â!!!
+	    //ì™¸ë¶€ ì¹œêµ¬ ê²€ìƒ‰í•œ ëª©ë¡ ë¶ˆëŸ¬ì˜¤ê¸°!!!
 	    String[][] friendlist = Client.NotfriendSearchList(keyword);
-	    //Ä£±¸°Ë»öÇÑ °á°ú¸®½ºÆ® (ID, name, nickname, last_connection)
+	    //ì¹œêµ¬ê²€ìƒ‰í•œ ê²°ê³¼ë¦¬ìŠ¤íŠ¸ (ID, name, nickname, last_connection)
 	    
-	    String columnNames[] = { "´Ğ³×ÀÓ(ÀÌ¸§)", "status" };
-	    Object rowData[][] = // Ä£±¸¸ñ·Ï µé¾î°¡¾ß µÉ ÀÚ¸®!
+	    String columnNames[] = { "ë‹‰ë„¤ì„(ì´ë¦„)", "status" };
+	    Object rowData[][] = // ì¹œêµ¬ëª©ë¡ ë“¤ì–´ê°€ì•¼ ë  ìë¦¬!
 	       { };
 	    
 	    model = new DefaultTableModel(rowData, columnNames) {
@@ -100,10 +91,10 @@ public class AllFriendList extends JFrame implements MouseListener {
 	    		  
 	        	  String line = fl[2] + "(" + fl[1] + ")";
 	        	  
-	    		  idmatch.put(line, fl[0]); //line - ¾ÆÀÌµğ ÀúÀå
+	    		  idmatch.put(line, fl[0]); //line - ì•„ì´ë”” ì €ì¥
 	    		  
 	        	  if(fl[3].compareTo("0") == 0) {
-	        		  //ID´Â ¼û°Ü¼­ ÀúÀå
+	        		  //IDëŠ” ìˆ¨ê²¨ì„œ ì €ì¥
 	            	  Object inData[] = {line, onlineIcon};
 	        		  model.addRow(inData);	
 	        	  }
@@ -115,12 +106,12 @@ public class AllFriendList extends JFrame implements MouseListener {
 	    }
 	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
 	    jTable.setBackground(Color.white);
 	    jTable.setFillsViewportHeight(true);
 	    jTable.addMouseListener(this);
 	    jTable.setGridColor(new Color(0,128,0));
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 210));
@@ -136,12 +127,12 @@ public class AllFriendList extends JFrame implements MouseListener {
 	    friend.setBackground(new Color(0, 54, 78));
 	    
 	    frame.setBackground(Color.black);
-	    JLabel friend2 = new JLabel("ÀüÃ¼ À¯Àú¸®½ºÆ®");
+	    JLabel friend2 = new JLabel("ì „ì²´ ìœ ì €ë¦¬ìŠ¤íŠ¸");
 	    panel.add(friend2);
 	    panel.setBackground(new Color(74, 210, 149));
 	    panel.setPreferredSize(new Dimension(200, 35));
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
-	    friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
+	    friend.add(jScollPane, "Left"); //JScrooPaneì— ë‹´ì€ JListë¥¼ ë‚˜íƒ€ë‚´ê¸° ìœ„í•´ ë°°ì¹˜í•œë‹¤.
 	    frame.getContentPane().add(friend);
 	    
 	    frame.setVisible(true);

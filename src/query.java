@@ -35,7 +35,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String password = rs.getString(2);
 
 				if (Qpassword.equals(password)) {
@@ -83,10 +82,8 @@ public class query {
 			String sql = "SELECT salt" + " FROM USER" + " WHERE id = '" + Qid + "';";
 			rs = stmt.executeQuery(sql);
 
-			int i = 0;
 			while (rs.next()) {
 				salt = rs.getString(1);
-				i++;
 			}
 			return salt;
 		} catch (ClassNotFoundException e) {
@@ -131,7 +128,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String id = rs.getString(1);
-;
 				if (id.equals(Qid)) {
 					return -1;
 				}
@@ -266,7 +262,7 @@ public class query {
 	// 6. 본인의 이름, nickname, 한줄메세지 받아오기
 	// 매개변수: String id
 	// return HashMap<String,String>map=(name, nickname, state_message)
-	public static HashMap selectNAME_NICKNAME_STATE(String Qid) {
+	public static HashMap<String, String> selectNAME_NICKNAME_STATE(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -281,7 +277,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String name = rs.getString(2);
 				String nickname = rs.getString(3);
 				String state_message = rs.getString(4);
@@ -464,7 +459,7 @@ public class query {
 	// 매개변수: String id
 	// return HashMap<String,String>map=(phone, email, birth, github, state_message,
 	// last_connection)
-	public static HashMap bringINFO(String Qid) {
+	public static HashMap<String, String> bringINFO(String Qid) {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -883,10 +878,7 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
 				String password = rs.getString(2);
-
-
 				if (Qpassword.equals(password)) {
 					return 1;
 				}
@@ -957,6 +949,7 @@ public class query {
 	}
 
 	// 13. 친구 수락 시, 친구 테이블에 넣어주기
+	@SuppressWarnings("resource")
 	public static void insertFRIEND(String Sid, String Rid) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -980,7 +973,6 @@ public class query {
 			}
 
 			pstmt = conn.prepareStatement(sql);
-
 			pstmt.setString(1, Rid);
 			pstmt.setString(2, Sid);
 
@@ -1323,8 +1315,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
-
 				str = "true";
 			}
 			System.out.println();
@@ -1372,8 +1362,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
-
 				str = "true";
 			}
 			return str;
@@ -1418,8 +1406,6 @@ public class query {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				String id = rs.getString(1);
-
 				return 1;
 			}
 			return 0;
@@ -1500,5 +1486,4 @@ public class query {
 				}  
 			}
 		}
-
 }

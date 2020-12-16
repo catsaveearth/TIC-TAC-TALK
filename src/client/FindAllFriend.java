@@ -2,26 +2,22 @@ package client;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
 
 /**
- * ¿Ï·á
+ * ì™„ë£Œ
  * */
 
 //findAllFriend
 
-
+@SuppressWarnings("serial")
 public class FindAllFriend extends JFrame {
 	String searchFriend = "";
 	
 	public FindAllFriend() {
 		JFrame frame = new JFrame();
 		frame.setLayout(new GridLayout(6, 1));
-
-		JPanel panel = new JPanel();
 		JPanel blank = new JPanel();
 		blank.setBackground(new Color(74, 210, 149));
 		blank.setBorder(null);
@@ -45,8 +41,8 @@ public class FindAllFriend extends JFrame {
 	    name.addActionListener(new ActionListener() {
 	     @Override
 	     	public void actionPerformed(ActionEvent e) {
-	          // ¸¸¾à ºñ¹Ğ¹øÈ£°¡ ¸ÂÀ¸¸é Setting setting = new Setting();
-	          // Æ²¸®¸é JOptionPane.showMessageDialog(null,  "Wrong!!");
+	          // ë§Œì•½ ë¹„ë°€ë²ˆí˜¸ê°€ ë§ìœ¼ë©´ Setting setting = new Setting();
+	          // í‹€ë¦¬ë©´ JOptionPane.showMessageDialog(null,  "Wrong!!");
 	        }
 	    });
 
@@ -62,9 +58,10 @@ public class FindAllFriend extends JFrame {
 		search.setPreferredSize(new Dimension(90, 20));
 		
 		search.addActionListener(new ActionListener() {
-	         @Override
+	         @SuppressWarnings("unused")
+			@Override
 		     public void actionPerformed(ActionEvent e) {
-	        	 searchFriend = find.getText(); // Ã£À» Ä£±¸ÀÇ ÀÌ¸§À» stringÀ¸·Î ÀúÀå
+	        	 searchFriend = find.getText(); // ì°¾ì„ ì¹œêµ¬ì˜ ì´ë¦„ì„ stringìœ¼ë¡œ ì €ì¥
 	        	 frame.dispose();
 
 	        	 AllFriendList list = new AllFriendList(searchFriend);

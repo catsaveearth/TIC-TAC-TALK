@@ -4,7 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class Setting extends JFrame {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Setting() {
 		JFrame frame = new JFrame();
 		frame.setLayout(new GridLayout(16, 2));
@@ -53,8 +55,6 @@ public class Setting extends JFrame {
 	    label.addActionListener(new ActionListener() {
 	     @Override
 	     	public void actionPerformed(ActionEvent e) {
-	          // 만약 비밀번호가 맞으면 Setting setting = new Setting();
-	          // 틀리면 JOptionPane.showMessageDialog(null,  "Wrong!!");
 	        }
 	    });
 		
@@ -83,7 +83,6 @@ public class Setting extends JFrame {
 		
 		
 		String[] year = new String[71];
-		String yearSelect = "";
 		int yearStart = 1950;
 		for (int i = 0; i <= 70; i++) {
 			year[i] = "  " + Integer.toString(yearStart);
@@ -199,13 +198,10 @@ public class Setting extends JFrame {
 			smessage.setText(infoo[7]);
 
 		
-		
 		//setting save 버튼 액션!
 		SettingBtn.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				String git = "0";
-				
+			public void actionPerformed(ActionEvent e) {			
 				if(NickName.getText().equals("")) {
 					JOptionPane.showMessageDialog(null, "NickName을 입력하세요");
 					return;
@@ -258,9 +254,6 @@ public class Setting extends JFrame {
 				
 				message = message + year + m + d + "`|" + Git + "`|" + state_m + "`|" ;
 
-
-				//pw입력榮쩝 확인
-				//+ " " + String.valueOf(txtPass.getPassword())
 				if(String.valueOf(txtPass.getPassword()).equals("")) {
 					System.out.println("pw가 현재 null입니다.");
 					message = "0`|" + message;
@@ -310,5 +303,4 @@ public class Setting extends JFrame {
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
 	}
-	
 }

@@ -1,30 +1,23 @@
 package client;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 
 /**
- * ∞¯ªÁ ≥°
+ * Í≥µÏÇ¨ ÎÅù
  * */
 
 
+@SuppressWarnings("serial")
 public class PWCheck extends JFrame {
 	
 	public PWCheck() {
@@ -39,9 +32,6 @@ public class PWCheck extends JFrame {
 		blank1.setBorder(null);
 		
 		
-		JPanel panel = new JPanel();
-		
-
 		ImageIcon icon = new ImageIcon("image/passwardcheck.png");
 	    Image titleImage = icon.getImage();
 	    Image titleChangeImg = titleImage.getScaledInstance(300, 50, Image.SCALE_SMOOTH);
@@ -50,13 +40,10 @@ public class PWCheck extends JFrame {
 	    label.setPreferredSize(new Dimension(100, 30));
 	    label.setBounds(5, 5, 15, 15);
 	    label.setIcon(titleChangeIcon);
-	    //setting.setForeground(Color.red);
 	    label.setBorder(null);
 	    label.addActionListener(new ActionListener() {
 	     @Override
 	     	public void actionPerformed(ActionEvent e) {
-	          // ∏∏æ‡ ∫Òπ–π¯»£∞° ∏¬¿∏∏È Setting setting = new Setting();
-	          // ∆≤∏Æ∏È JOptionPane.showMessageDialog(null,  "Wrong!!");
 	        }
 	    });
 		
@@ -68,12 +55,13 @@ public class PWCheck extends JFrame {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setBackground(new Color(74, 210, 149));
 		
-		JButton checkBtn = new JButton("»Æ¿Œ");
+		JButton checkBtn = new JButton("ÌôïÏù∏");
 		checkBtn.setBounds(10, 10, 10, 10);
 		checkBtn.setBackground(new Color(0, 54, 78));
 		checkBtn.setForeground(Color.white);
 
 		checkBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unused")
 			public void actionPerformed(ActionEvent e) {
 				if (Client.pwcheck(passward.getPassword())) {
 					frame.dispose();
@@ -91,7 +79,6 @@ public class PWCheck extends JFrame {
 		frame.add(pwPanel);
 		frame.add(btnPanel);
 		frame.add(blank1);
-		
 		frame.setVisible(true);
 		frame.setSize(300, 200);
 		frame.setLocationRelativeTo(null);

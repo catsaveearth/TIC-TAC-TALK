@@ -3,10 +3,10 @@ package client;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
-
 import javax.swing.*;
 import javax.swing.table.*;
 
+@SuppressWarnings("serial")
 public class MyFriendList extends JFrame implements MouseListener {
 	JFrame frame = new JFrame();
 	JPanel friend = new JPanel();
@@ -16,44 +16,39 @@ public class MyFriendList extends JFrame implements MouseListener {
 	HashMap<String, String> statematch = new HashMap<String, String>();
 
 	
+	@SuppressWarnings("unused")
 	public void mouseClicked(MouseEvent me) {
 		int row = jTable.getSelectedRow();
 		Object line = model.getValueAt(row, 0);
-		Object stateline = model.getValueAt(row, 1);
 		String FID = idmatch.get(line.toString());
 		String state = statematch.get(line.toString());
 
-
-		String[] buttons = {"1:1Ã¤ÆÃ", "Á¤º¸º¸±â"};
-		int result = JOptionPane.showOptionDialog(null, "¿É¼ÇÀ» ¼±ÅÃÇÏ¼¼¿ä", "¿É¼Ç", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "µÎ¹øÂ°°ª");
+		String[] buttons = {"1:1ì±„íŒ…", "ì •ë³´ë³´ê¸°"};
+		int result = JOptionPane.showOptionDialog(null, "ì˜µì…˜ì„ ì„ íƒí•˜ì„¸ìš”", "ì˜µì…˜", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, "ë‘ë²ˆì§¸ê°’");
 		if (result == 0) {
 	
-			// ÀÏ´ëÀÏÃ¤ÆÃ ½ºÅ¸¶Ç! - Ã¤ÆÃÁßÀÌ¸é ÀÌ¹Ì Ã¤ÆÃÁßÀÔ´Ï´Ù
+			// ì¼ëŒ€ì¼ì±„íŒ… ìŠ¤íƒ€ë˜! - ì±„íŒ…ì¤‘ì´ë©´ ì´ë¯¸ ì±„íŒ…ì¤‘ì…ë‹ˆë‹¤
 			if(Client.ckINPCHAT(FID) || !state.equals("0")) {
-				JOptionPane.showMessageDialog(null, "ÀÌ¹Ì Ã¤ÆÃÁßÀÌ°Å³ª »ó´ë°¡ ¿ÀÇÁ¶óÀÎÀÔ´Ï´Ù.");
+				JOptionPane.showMessageDialog(null, "ì´ë¯¸ ì±„íŒ…ì¤‘ì´ê±°ë‚˜ ìƒëŒ€ê°€ ì˜¤í”„ë¼ì¸ì…ë‹ˆë‹¤.");
 			}
 			else {
 				frame.dispose();
-				ChattingOne chatting = new ChattingOne(FID); //Ã¤ÆÃ¹æ Å°°í
-				Client.addPCHAT(FID, chatting); //Ã¤ÆÃÁßÀÎ »ó´ë¿¡ »ó´ë¹æÀ» ´õÇØÁÖ°í
+				ChattingOne chatting = new ChattingOne(FID); //ì±„íŒ…ë°© í‚¤ê³ 
+				Client.addPCHAT(FID, chatting); //ì±„íŒ…ì¤‘ì¸ ìƒëŒ€ì— ìƒëŒ€ë°©ì„ ë”í•´ì£¼ê³ 
 		        Client.ckANSWER(FID);
 			}
-
-			
-			
 		} else if (result == 1) {
 			FriendInfo info = new FriendInfo(FID.toString(), 1);
-			//Á¤º¸È®ÀÎÇÒ¶© ±»ÀÌ Ã¢ ¾È´İ¾ÆµµµÊ
+			//ì •ë³´í™•ì¸í• ë• êµ³ì´ ì°½ ì•ˆë‹«ì•„ë„ë¨
 		}
 	}
 	
 	
 	public MyFriendList(String keyword) {
-
 		JPanel friend = new JPanel();
 		friend.setPreferredSize(new Dimension());
-	    JLabel friend2 = new JLabel("Ä£±¸¸®½ºÆ®");
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
+	    JLabel friend2 = new JLabel("ì¹œêµ¬ë¦¬ìŠ¤íŠ¸");
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
 	    //friend2.setPreferredSize(new Dimension(430, 13));
 	    friend.setPreferredSize(new Dimension(430, 380));
 	    
@@ -66,35 +61,25 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    Image offline = offlineImgIcon.getImage();
 	    Image offlineImg = offline.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
 	    ImageIcon offlineIcon = new ImageIcon(offlineImg);
-	
-	    String statusStr = ""; // onlineÀÎÁö offlineÀÎÁö Á¤ÇÏ´Â ºÎºĞ
-	    Icon status = new ImageIcon();
 	    
-	    if (statusStr == "online") {
-	       status = new ImageIcon("image/online.png");
-	    } else if (statusStr == "offline") {
-	       status = new ImageIcon("image/offline.png");
-	    }
-	    
-	    
-	    //Ä£±¸ °Ë»öÇÑ ¸ñ·Ï ºÒ·¯¿À±â!!!
+	    //ì¹œêµ¬ ê²€ìƒ‰í•œ ëª©ë¡ ë¶ˆëŸ¬ì˜¤ê¸°!!!
 	    String[][] friendlist = Client.FriendSearchList(keyword);
-	    //Ä£±¸°Ë»öÇÑ °á°ú¸®½ºÆ® (ID, name, nickname, last_connection)
+	    //ì¹œêµ¬ê²€ìƒ‰í•œ ê²°ê³¼ë¦¬ìŠ¤íŠ¸ (ID, name, nickname, last_connection)
 	    
-	    String columnNames[] = { "´Ğ³×ÀÓ(ÀÌ¸§)", "status" };
-	    Object rowData[][] = // Ä£±¸¸ñ·Ï µé¾î°¡¾ß µÉ ÀÚ¸®!
-	       { };
-	    
-	    model = new DefaultTableModel(rowData, columnNames) {
-	       public boolean isCellEditable(int i, int c) {
-	          return false;
-	       }
-	       
-	       public Class getColumnClass(int column) {
-	          return getValueAt(0, column).getClass();
-	       }
-	    };
+	    String columnNames[] = { "ë‹‰ë„¤ì„(ì´ë¦„)", "status" };
+	    Object rowData[][] =  { };// ì¹œêµ¬ëª©ë¡ ë“¤ì–´ê°€ì•¼ ë  ìë¦¬!
 	      
+	    model = new DefaultTableModel(rowData, columnNames) {
+			public boolean isCellEditable(int i, int c) {
+				return false;
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public Class getColumnClass(int column) {
+				return getValueAt(0, column).getClass();
+			}
+		};
+
 	    if(friendlist != null) {
 	    	  int idx = 0;
 	    	  int ck = Integer.parseInt(friendlist[0][0]) + 1;
@@ -106,12 +91,11 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    		  idx++;
 	    		  
 	        	  String line = fl[2] + "(" + fl[1] + ")";
-	        	  
-	    		  idmatch.put(line, fl[0]); //line - ¾ÆÀÌµğ ÀúÀå
+	    		  idmatch.put(line, fl[0]); //line - ì•„ì´ë”” ì €ì¥
 	    		  statematch.put(line, fl[3]);
 	    		  
 	        	  if(fl[3].compareTo("0") == 0) {
-	        		  //ID´Â ¼û°Ü¼­ ÀúÀå
+	        		  //IDëŠ” ìˆ¨ê²¨ì„œ ì €ì¥
 	            	  Object inData[] = {line, onlineIcon};
 	        		  model.addRow(inData);	
 	        	  }
@@ -124,12 +108,12 @@ public class MyFriendList extends JFrame implements MouseListener {
 	     
 	    
 	    jTable = new JTable(model);
-	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ´ÜÀÏ¼±ÅÃ
+	    jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// ë‹¨ì¼ì„ íƒ
 	    jTable.setBackground(Color.white);
 	    jTable.setFillsViewportHeight(true);
 	    jTable.addMouseListener(this);
 	    jTable.setGridColor(new Color(0,128,0));
-	    jTable.getColumn("´Ğ³×ÀÓ(ÀÌ¸§)").setPreferredWidth(100);
+	    jTable.getColumn("ë‹‰ë„¤ì„(ì´ë¦„)").setPreferredWidth(100);
 	    jTable.getColumn("status").setPreferredWidth(50);
 	    JScrollPane jScollPane = new JScrollPane(jTable);
 	    jScollPane.setPreferredSize(new Dimension(180, 210));
@@ -147,10 +131,9 @@ public class MyFriendList extends JFrame implements MouseListener {
 	    panel.add(friend2);
 	    panel.setBackground(new Color(74, 210, 149));
 	    panel.setPreferredSize(new Dimension(200, 35));
-	    friend2.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.PLAIN, 15));
-	    friend.add(jScollPane, "Left"); //JScrooPane¿¡ ´ãÀº JList¸¦ ³ªÅ¸³»±â À§ÇØ ¹èÄ¡ÇÑ´Ù.
+	    friend2.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.PLAIN, 15));
+	    friend.add(jScollPane, "Left"); //JScrooPaneì— ë‹´ì€ JListë¥¼ ë‚˜íƒ€ë‚´ê¸° ìœ„í•´ ë°°ì¹˜í•œë‹¤.
 	    frame.add(friend);
-	    
 	    frame.setVisible(true);
         frame.setSize(200, 300);
         frame.setLocationRelativeTo(null);
@@ -165,6 +148,4 @@ public class MyFriendList extends JFrame implements MouseListener {
 	public void mousePressed(MouseEvent arg0) {}
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
-
-
 }

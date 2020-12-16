@@ -2,12 +2,11 @@ package client;
 import java.awt.*;
 import javax.swing.*;
 
-
 /**
- * ¿Ï·á
+ * ì™„ë£Œ
  * */
 
-
+@SuppressWarnings("serial")
 public class FriendInfo extends JFrame{
 
 	//type : 0 - NF, 1 - F
@@ -16,10 +15,9 @@ public class FriendInfo extends JFrame{
 		JPanel namePanel = new JPanel();
 		namePanel.setPreferredSize(new Dimension(500, 60));
 		namePanel.setBackground(new Color(0, 54, 78));
-		JLabel nameLabel = new JLabel("ÀÌ¸§µé¾î°©´Ï´Ù");
-		nameLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 40));
+		JLabel nameLabel = new JLabel("ì´ë¦„ë“¤ì–´ê°‘ë‹ˆë‹¤");
+		nameLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 40));
 		nameLabel.setForeground(Color.white);
-		
 		namePanel.add(nameLabel);
 
 		JPanel infoPanel = new JPanel();
@@ -38,8 +36,8 @@ public class FriendInfo extends JFrame{
 		JPanel messageLabelPanel = new JPanel();
 		messageLabelPanel.setPreferredSize(new Dimension(330, 50));
 		messageLabelPanel.setBackground(Color.white);
-		JLabel messageLabel = new JLabel("ÇÑÁÙ¸Ş½ÃÁöµé¾î°©´Ï´Ù");
-		messageLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		JLabel messageLabel = new JLabel("í•œì¤„ë©”ì‹œì§€ë“¤ì–´ê°‘ë‹ˆë‹¤");
+		messageLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 20));
 		messageLabel.setForeground(Color.black);
 		JPanel messageIcon = new JPanel();
 		messageIcon.setPreferredSize(new Dimension(150, 50));
@@ -64,8 +62,8 @@ public class FriendInfo extends JFrame{
 		JPanel emailLabelPanel = new JPanel();
 		emailLabelPanel.setPreferredSize(new Dimension(330, 50));
 		emailLabelPanel.setBackground(Color.white);
-		JLabel emailLabel = new JLabel("ÀÌ¸ŞÀÏµé¾î°©´Ï´Ù");
-		emailLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		JLabel emailLabel = new JLabel("ì´ë©”ì¼ë“¤ì–´ê°‘ë‹ˆë‹¤");
+		emailLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 20));
 		emailLabel.setForeground(Color.black);
 		JPanel emailIcon = new JPanel();
 		emailIcon.setPreferredSize(new Dimension(150, 50));
@@ -74,10 +72,6 @@ public class FriendInfo extends JFrame{
 		emailLabelPanel.add(emailLabel);
 		emailPanel.add(emailIcon);
 		emailPanel.add(emailLabelPanel);
-		
-		
-		
-		
 		
 		JPanel phonePanel = new JPanel();
 		phonePanel.setPreferredSize(new Dimension(500, 50));
@@ -94,8 +88,8 @@ public class FriendInfo extends JFrame{
 		JPanel phoneLabelPanel = new JPanel();
 		phoneLabelPanel.setPreferredSize(new Dimension(330, 50));
 		phoneLabelPanel.setBackground(Color.white);
-		JLabel phoneLabel = new JLabel("ÀüÈ­¹øÈ£µé¾î°©´Ï´Ù");
-		phoneLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		JLabel phoneLabel = new JLabel("ì „í™”ë²ˆí˜¸ë“¤ì–´ê°‘ë‹ˆë‹¤");
+		phoneLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 20));
 		phoneLabel.setForeground(Color.black);
 		JPanel phoneIcon = new JPanel();
 		phoneIcon.setPreferredSize(new Dimension(150, 50));
@@ -104,10 +98,6 @@ public class FriendInfo extends JFrame{
 		phoneLabelPanel.add(phoneLabel);
 		phonePanel.add(phoneIcon);
 		phonePanel.add(phoneLabelPanel);
-		
-		
-		
-		
 		
 		JPanel birthPanel = new JPanel();
 		birthPanel.setPreferredSize(new Dimension(500, 50));
@@ -124,8 +114,8 @@ public class FriendInfo extends JFrame{
 		JPanel birthLabelPanel = new JPanel();
 		birthLabelPanel.setPreferredSize(new Dimension(330, 50));
 		birthLabelPanel.setBackground(Color.white);
-		JLabel birthLabel = new JLabel("»ı³â¿ùÀÏµé¾î°©´Ï´Ù");
-		birthLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		JLabel birthLabel = new JLabel("ìƒë…„ì›”ì¼ë“¤ì–´ê°‘ë‹ˆë‹¤");
+		birthLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 20));
 		birthLabel.setForeground(Color.black);
 		JPanel birthIcon = new JPanel();
 		birthIcon.setPreferredSize(new Dimension(150, 50));
@@ -134,10 +124,6 @@ public class FriendInfo extends JFrame{
 		birthLabelPanel.add(birthLabel);
 		birthPanel.add(birthIcon);
 		birthPanel.add(birthLabelPanel);
-		
-		
-		
-
 		
 		JPanel githubPanel = new JPanel();
 		githubPanel.setPreferredSize(new Dimension(500, 50));
@@ -154,8 +140,8 @@ public class FriendInfo extends JFrame{
 		JPanel githubLabelPanel = new JPanel();
 		githubLabelPanel.setPreferredSize(new Dimension(330, 50));
 		githubLabelPanel.setBackground(Color.white);
-		JLabel githubLabel = new JLabel("githubµé¾î°©´Ï´Ù");
-		githubLabel.setFont(new Font("³ª´®¹Ù¸¥Ææ", Font.BOLD, 20));
+		JLabel githubLabel = new JLabel("githubë“¤ì–´ê°‘ë‹ˆë‹¤");
+		githubLabel.setFont(new Font("ë‚˜ëˆ”ë°”ë¥¸íœ", Font.BOLD, 20));
 		githubLabel.setForeground(Color.black);
 		JPanel githubIcon = new JPanel();
 		githubIcon.setPreferredSize(new Dimension(150, 50));
@@ -165,11 +151,7 @@ public class FriendInfo extends JFrame{
 		githubPanel.add(githubIcon);
 		githubPanel.add(githubLabelPanel);
 
-		
-		
-		
-		
-		//Á¤º¸ ¹Ş¾Æ¿À±â
+		//ì •ë³´ ë°›ì•„ì˜¤ê¸°
 		String info[] = Client.getFriendInfo(ID);
 		// [NICKNAME NAME STATE_MESSAGE EMAIL PHONE BIRTH GITHUB]
 		
@@ -187,11 +169,11 @@ public class FriendInfo extends JFrame{
 		githubLabel.setText(info[6]);
 
 		
-		//Ä£±¸¶ó¸é Á¤º¸ Á» ´õ º¸¿©ÁÜ
+		//ì¹œêµ¬ë¼ë©´ ì •ë³´ ì¢€ ë” ë³´ì—¬ì¤Œ
 		if(type == 0) {
-			phoneLabel.setText("ºñ°ø°³");
-			birthLabel.setText("ºñ°ø°³");
-			githubLabel.setText("ºñ°ø°³");
+			phoneLabel.setText("ë¹„ê³µê°œ");
+			birthLabel.setText("ë¹„ê³µê°œ");
+			githubLabel.setText("ë¹„ê³µê°œ");
 			
 			/*add(phonePanel);
 			add(birthPanel);
