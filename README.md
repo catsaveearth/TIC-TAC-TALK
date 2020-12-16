@@ -1,5 +1,7 @@
 # Network TermProject : TIC TAC TALK
 
+![title](image/LogInTitle.png)
+
 ## introduction
 2020-2학기 네트워크 과목의 텀 프로젝트로 제작한 채팅 프로그램입니다.
 <br><br>
@@ -7,7 +9,7 @@
 ## Built With
 * [kim su hyeon](@catsaveearth) : design overall program schema, make and implement overall server-client protocol&code.
 * [ko jimin](@) : make overall GUI using Swing, wether service using open data.
-* [Sin hyeon ho](@) : design DB schema, make DB&query using JDBC, provide tictactoe backborn code 
+* [Sin hyeon ho](@) : design DB schema, make DB&query using JDBC, provide tictactoe backborn code, design file send basic code.
 <br><br>
 
 ## Prerequisites / 선행 조건
