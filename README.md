@@ -24,4 +24,5 @@ and you freely run `CLient.java`
 <br><br>
 
 ## YOUTUBE LINK
-https://youtu.be/ltfnhGI6j1s
+[발표영상](https://youtu.be/ltfnhGI6j1s)
+[시연영상](https://youtu.be/FOgFBn9ShdA)
