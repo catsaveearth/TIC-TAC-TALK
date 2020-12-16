@@ -1,5 +1,7 @@
 # Network TermProject : TIC TAC TALK
 
+![title](image/LogInTitle.png)
+
 ## introduction
 2020-2학기 네트워크 과목의 텀 프로젝트로 제작한 채팅 프로그램입니다.
 <br><br>
